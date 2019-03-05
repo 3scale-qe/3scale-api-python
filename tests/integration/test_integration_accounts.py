@@ -1,23 +1,4 @@
-import secrets
-
-import pytest
-
-from threescale import resources
-
-
-@pytest.fixture(scope='module')
-def resource_params() -> dict:
-    suffix = secrets.token_urlsafe(8)
-    name = f"test-{suffix}"
-    return dict(name=name, org_name=name, username=name)
-
-
-@pytest.fixture(scope='module')
-def resource(api, resource_params) -> resources.Account:
-    resource = api.accounts.create(params=resource_params)
-    yield resource
-    resource.delete()
-    assert not resource.exists()
+from tests.integration import asserts
 
 
 def test_accounts_list(api):
@@ -25,8 +6,6 @@ def test_accounts_list(api):
     assert len(services) > 1
 
 
-def test_service_can_be_created(api, resource_params, resource):
-    assert resource is not None
-    assert resource.entity is not None
-    assert resource.entity_id is not None
-    assert resource['name'] == resource_params['name']
+def test_service_can_be_created(api, account, account_params):
+    asserts.assert_resource(account)
+    asserts.assert_resource_params(account, account_params)

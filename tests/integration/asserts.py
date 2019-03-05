@@ -1,5 +1,4 @@
 import threescale.defaults
-from threescale import resources
 
 
 def assert_resource(resource: threescale.defaults.DefaultResource):

@@ -10,6 +10,13 @@ log = logging.getLogger(__name__)
 
 class ThreeScaleClient:
     def __init__(self, url: str, token: str, throws: bool = True, ssl_verify: bool = True):
+        """Creates instance of the 3scale client
+        Args:
+            url: 3scale instance url
+            token: Access token
+            throws: Whether it should throw an error
+            ssl_verify: Whether to verify ssl
+        """
         self._rest = RestApiClient(url=url, token=token, throws=throws, ssl_verify=ssl_verify)
 
         self._services = resources.Services(self, instance_klass=resources.Service)
