@@ -65,7 +65,7 @@ class DefaultClient:
             **kwargs: Optional parameters
         Returns(List['DefaultResource]): List of resources
         """
-        log.info(f"[LIST] List {self._instance_klass.__name__}: {kwargs}")
+        log.info(self._log_message("[LIST] List", args=kwargs))
         instance = self._list(**kwargs)
         return instance
 
@@ -78,7 +78,7 @@ class DefaultClient:
         Returns:
 
         """
-        log.info(f"[CREATE] Create new {self._instance_klass.__name__}: {kwargs}")
+        log.info(self._log_message("[CREATE] Create new ", body=params, args=kwargs))
         url = self._entity_url()
         response = self.rest.post(url=url, json=params, **kwargs)
         instance = self._create_instance(response=response)
@@ -92,7 +92,7 @@ class DefaultClient:
 
         Returns(bool): True if the resource has been successfully deleted
         """
-        log.info(f"[DELETE] Delete {self._instance_klass.__name__}({entity_id}): {kwargs}")
+        log.info(self._log_message("[DELETE] Delete ", entity_id=entity_id, args=kwargs))
         url = self._entity_url(entity_id=entity_id)
         response = self.rest.delete(url=url, **kwargs)
         return response.ok
@@ -105,7 +105,7 @@ class DefaultClient:
 
         Returns(bool): True if the resource exists
         """
-        log.debug(f"[EXIST] Resource exist {self._instance_klass.__name__}({entity_id})): {kwargs}")
+        log.info(self._log_message("[EXIST] Resource exist ", entity_id=entity_id, args=kwargs))
         url = self._entity_url(entity_id=entity_id)
         response = self.rest.get(url=url, throws=False, **kwargs)
         return response.ok
@@ -119,7 +119,8 @@ class DefaultClient:
 
         Returns(DefaultResource): Resource instance
         """
-        log.info(f"[UPDATE] Update {self._instance_klass.__name__}({entity_id}): {kwargs}")
+        log.info(self._log_message("[UPDATE] Update ", body=params,
+                                   entity_id=entity_id, args=kwargs))
         url = self._entity_url(entity_id=entity_id)
         response = self.rest.put(url=url, json=params, **kwargs)
         instance = self._create_instance(response=response)
@@ -133,10 +134,10 @@ class DefaultClient:
 
         Returns(dict): Resource dict from the 3scale
         """
-        log.debug(f"[FETCH] Fetch {self._instance_klass.__name__}({entity_id})")
+        log.debug(self._log_message("[FETCH] Fetch ", entity_id=entity_id, args=kwargs))
         url = self._entity_url(entity_id=entity_id)
         response = self.rest.get(url=url, **kwargs)
-        return utils.extract_response(response=response)
+        return utils.extract_response(response=response, entity=self._entity_name)
 
     def __getitem__(self, selector: Union[int, 'str']) -> 'DefaultResource':
         """Gets the item
@@ -154,10 +155,10 @@ class DefaultClient:
             entity_id(int): Entity id
         Returns(DefaultResource): Default resource
         """
-        log.debug(f"[READ] Read {self._instance_klass.__name__}({entity_id})")
+        log.debug(self._log_message("[READ] Read ", entity_id=entity_id))
         return self._instance_klass(client=self, entity_id=entity_id)
 
-    def read_by_name(self, name: str, **kwargs):
+    def read_by_name(self, name: str, **kwargs) -> 'DefaultResource':
         """Read resource by name
         Args:
             name: Name of the resource (either system name, name, org_name ...)
@@ -203,6 +204,16 @@ class DefaultClient:
         """
         result = self.select_by(**params)
         return result[0] if result else None
+
+    def _log_message(self, message, entity_id=None, body=None, args=None) -> str:
+        msg = f"{message} {self._instance_klass.__name__}"
+        if entity_id:
+            msg += f"({entity_id}))"
+        if body:
+            msg += f" {body}"
+        if args:
+            msg += f" args={args}"
+        return msg
 
     def _list(self, **kwargs) -> List['DefaultResource']:
         """Internal list implementation used in list or `select` methods
@@ -257,7 +268,7 @@ class DefaultResource:
             entity_name(str): Entity name field (system_name or name ...)
             entity(dict): Entity instance
         """
-        self._entity_id = entity_id
+        self._entity_id = entity_id or entity.get('id')
         self._entity = entity
         self._client = client
         self._entity_name = entity_name
@@ -272,7 +283,7 @@ class DefaultResource:
 
     @property
     def entity_name(self) -> Optional[str]:
-        return self._entity_name
+        return self[self._entity_name]
 
     @property
     def url(self) -> str:
@@ -326,10 +337,11 @@ class DefaultResource:
     def delete(self, **kwargs):
         self.client.delete(entity_id=self.entity_id, **kwargs)
 
-    def update(self, **kwargs):
+    def update(self, **kwargs) -> 'DefaultResource':
         new_params = {**self.entity, **kwargs}
-        self._entity = self.client.update(entity_id=self.entity_id, params=new_params)
-        return self.entity
+        new_entity = self.client.update(entity_id=self.entity_id, params=new_params)
+        self._entity = new_entity.entity
+        return self
 
     def _invalidate(self):
         self._entity = None
@@ -343,8 +355,7 @@ class DefaultPlanClient(DefaultClient):
             **kwargs: Optional args
         Returns(DefaultPlanResource):
         """
-        log.info(f"[STATE] Set Default {self._instance_klass.__name__}({entity_id}): "
-                 f" {kwargs}")
+        log.info(self._log_message("[PLAN] Set default ", entity_id=entity_id, args=kwargs))
         url = self._entity_url(entity_id) + '/default'
         response = self.rest.put(url=url, **kwargs)
         instance = self._create_instance(response=response)
@@ -389,8 +400,7 @@ class DefaultStateClient(DefaultClient):
 
         Returns(DefaultStateResource): State resource instance
         """
-        log.info(f"[STATE] Set State {self._instance_klass.__name__}({entity_id}): "
-                 f"[{state}] {kwargs}")
+        log.info(self._log_message("[STATE] Set state ", body=f"[{state}]", args=kwargs))
         url = self._entity_url(entity_id) + '/' + state
         response = self.rest.put(url=url, **kwargs)
         instance = self._create_instance(response=response)

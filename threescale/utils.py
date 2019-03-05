@@ -5,6 +5,13 @@ import requests
 
 def extract_response(response: requests.Response, entity: str = None,
                      collection: str = None) -> Union[dict, list]:
+    """Extract the response from the response
+    Args:
+        response(requests.Response): Response
+        entity(str): entity name to be extracted
+        collection(str): collection name to be extracted
+    Returns(Union[dict, list]): Extracted entity or list of entities
+    """
     extracted: dict = response.json()
     if collection:
         extracted = extracted.get(collection)
