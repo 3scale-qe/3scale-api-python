@@ -323,13 +323,16 @@ class DefaultResource:
     def _lazy_load(self, **kwargs) -> 'DefaultResource':
         if not self._entity:
             # Lazy load the entity
-            self._entity = self._client.fetch(self.entity_id, **kwargs)
+            self._entity = self.fetch(**kwargs)
         return self
 
     def read(self, **kwargs) -> 'DefaultResource':
         self._invalidate()
         self._lazy_load(**kwargs)
         return self
+
+    def fetch(self, **kwargs) -> dict:
+        return self.client.fetch(self.entity_id, **kwargs)
 
     def exists(self, **kwargs) -> bool:
         return self.client.exists(entity_id=self.entity_id, **kwargs)

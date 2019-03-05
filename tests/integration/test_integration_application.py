@@ -18,7 +18,7 @@ def test_application_can_be_created(application, application_params):
 
 def test_application_list(account):
     applications = account.applications.list()
-    assert len(applications) == 2
+    assert len(applications) > 0
 
 
 def test_application_update(application, update_application_params):

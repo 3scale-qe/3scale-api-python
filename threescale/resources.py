@@ -473,6 +473,10 @@ class Proxy(DefaultResource):
     def policies(self) -> 'Policies':
         return Policies(parent=self, instance_klass=Policy)
 
+    @property
+    def entity_id(self):
+        return None
+
 
 class Service(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
