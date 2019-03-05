@@ -65,7 +65,7 @@ def account_params():
 
 @pytest.fixture(scope='module')
 def account(account_params, api):
-    entity = api.services.create(params=account_params)
+    entity = api.accounts.create(params=account_params)
     yield entity
     entity.delete()
     assert not entity.exists()
@@ -82,3 +82,19 @@ def application_plan_params() -> dict:
 def application_plan(api, service, application_plan_params):
     resource = service.app_plans.create(params=application_plan_params)
     yield resource
+
+
+# Application
+@pytest.fixture(scope='module')
+def application_params(application_plan):
+    suffix = secrets.token_urlsafe(8)
+    name = f"test-{suffix}"
+    return dict(name=name, description=name, plan_id=application_plan['id'])
+
+
+@pytest.fixture(scope='module')
+def application(account, application_plan, application_params):
+    resource = account.applications.create(params=application_params)
+    yield resource
+    resource.delete()
+    assert not resource.exists()
