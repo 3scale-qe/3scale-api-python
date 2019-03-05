@@ -37,7 +37,7 @@ class Methods(DefaultClient):
 
 
 class ApplicationPlans(DefaultClient):
-    def __init__(self, *args, entity_name='plan', entity_collection='plans', **kwargs):
+    def __init__(self, *args, entity_name='application_plan', entity_collection='plans', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 

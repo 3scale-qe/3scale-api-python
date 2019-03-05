@@ -328,7 +328,7 @@ class DefaultResource:
 
     def update(self, **kwargs):
         new_params = {**self.entity, **kwargs}
-        self._entity = self.client.update(self.entity_id, **new_params)
+        self._entity = self.client.update(entity_id=self.entity_id, params=new_params)
         return self.entity
 
     def _invalidate(self):
