@@ -29,10 +29,10 @@ def master_token() -> str:
 
 
 @pytest.fixture(scope='session')
-def api(url, token) -> threescale.TheeScaleClient:
-    return threescale.TheeScaleClient(url=url, token=token)
+def api(url, token) -> threescale.ThreeScaleClient:
+    return threescale.ThreeScaleClient(url=url, token=token)
 
 
 @pytest.fixture(scope='session')
-def master_api(master_url, master_token) -> threescale.TheeScaleClient:
-    return threescale.TheeScaleClient(url=master_url, token=master_token)
+def master_api(master_url, master_token) -> threescale.ThreeScaleClient:
+    return threescale.ThreeScaleClient(url=master_url, token=master_token)

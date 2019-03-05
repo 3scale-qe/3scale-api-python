@@ -8,7 +8,7 @@ from threescale import errors, resources
 log = logging.getLogger(__name__)
 
 
-class TheeScaleClient:
+class ThreeScaleClient:
     def __init__(self, url: str, token: str, throws: bool = True, ssl_verify: bool = True):
         self._rest = RestApiClient(url=url, token=token, throws=throws, ssl_verify=ssl_verify)
 

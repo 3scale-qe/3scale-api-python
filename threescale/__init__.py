@@ -1,1 +1,1 @@
-from .client import TheeScaleClient
+from .client import ThreeScaleClient

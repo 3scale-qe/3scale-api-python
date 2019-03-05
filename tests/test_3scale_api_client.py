@@ -13,8 +13,8 @@ def token():
     return 'test-token'
 
 
-def _create_client(url, token, **kwargs) -> client.TheeScaleClient:
-    return client.TheeScaleClient(url=url, token=token, **kwargs)
+def _create_client(url, token, **kwargs) -> client.ThreeScaleClient:
+    return client.ThreeScaleClient(url=url, token=token, **kwargs)
 
 
 @pytest.fixture()
