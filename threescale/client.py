@@ -168,7 +168,7 @@ class RestApiClient:
         log.debug(f"[{method}] ({full_url}) params={params} headers={headers} "
                   f"{kwargs if kwargs else ''}")
         response = requests.request(method=method, url=full_url, headers=headers,
-                                    params=params, **kwargs)
+                                    params=params, verify=self._ssl_verify, **kwargs)
         process_response = self._process_response(response, throws=throws)
         return process_response
 

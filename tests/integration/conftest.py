@@ -1,5 +1,6 @@
 import os
 import secrets
+from distutils.util import strtobool
 
 import pytest
 from dotenv import load_dotenv
@@ -29,14 +30,20 @@ def master_token() -> str:
     return os.getenv('THREESCALE_MASTER_TOKEN')
 
 
-@pytest.fixture(scope='session')
-def api(url, token) -> threescale.ThreeScaleClient:
-    return threescale.ThreeScaleClient(url=url, token=token)
+@pytest.fixture(scope="session")
+def ssl_verify() -> bool:
+    return bool(strtobool(os.getenv('THREESCALE_SSL_VERIFY', False)))
 
 
 @pytest.fixture(scope='session')
-def master_api(master_url: str, master_token: str) -> threescale.ThreeScaleClient:
-    return threescale.ThreeScaleClient(url=master_url, token=master_token)
+def api(url: str, token: str, ssl_verify: bool) -> threescale.ThreeScaleClient:
+    return threescale.ThreeScaleClient(url=url, token=token, ssl_verify=ssl_verify)
+
+
+@pytest.fixture(scope='session')
+def master_api(master_url: str, master_token: str,
+               ssl_verify: bool) -> threescale.ThreeScaleClient:
+    return threescale.ThreeScaleClient(url=master_url, token=master_token, ssl_verify=ssl_verify)
 
 
 # Service
