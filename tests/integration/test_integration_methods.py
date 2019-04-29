@@ -39,6 +39,7 @@ def test_should_update_method(method, updated_method_params):
 
 def test_should_delete_method(hits_metric, updated_method_params):
     resource = hits_metric.methods.create(params=updated_method_params)
+    assert resource.exists()
     resource.delete()
     assert not resource.exists()
 

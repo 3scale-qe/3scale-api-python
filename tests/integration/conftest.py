@@ -109,10 +109,19 @@ def application(account, application_plan, application_params):
 @pytest.fixture(scope='module')
 def metric_params(service):
     suffix = get_suffix()
-    friendly_name = f'test-{suffix}'
+    friendly_name = f'test-metric-{suffix}'
     system_name = f'{friendly_name}'.replace('-', '_')
     return dict(service_id=service['id'], friendly_name=friendly_name,
                 system_name=system_name, unit='count')
+
+
+@pytest.fixture
+def updated_metric_params(metric_params):
+    suffix = get_suffix()
+    friendly_name = f'test-updated-metric-{suffix}'
+    metric_params['friendly_name'] = friendly_name
+    metric_params['system_name'] = friendly_name.replace('-', '_')
+    return metric_params
 
 
 @pytest.fixture(scope='module')
@@ -121,6 +130,11 @@ def metric(service, metric_params):
     yield resource
     resource.delete()
     assert not resource.exists()
+
+
+@pytest.fixture(scope='module')
+def hits_metric(service):
+    return service.metrics.read_by(system_name='hits')
 
 
 @pytest.fixture(scope='module')
@@ -134,15 +148,10 @@ def method_params(service):
 @pytest.fixture
 def updated_method_params(method_params):
     suffix = get_suffix()
-    friendly_name = f'test-update-method-{suffix}'
+    friendly_name = f'test-updated-method-{suffix}'
     method_params['friendly_name'] = friendly_name
     method_params['system_name'] = f'{friendly_name}'.replace('-', '_')
     return method_params
-
-
-@pytest.fixture(scope='module')
-def hits_metric(service):
-    return service.metrics.read_by(system_name='hits')
 
 
 @pytest.fixture(scope='module')
