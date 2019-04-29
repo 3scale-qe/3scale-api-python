@@ -1,3 +1,5 @@
+from typing import List
+
 import threescale.defaults
 
 
@@ -5,6 +7,13 @@ def assert_resource(resource: threescale.defaults.DefaultResource):
     assert resource is not None
     assert resource.entity_id is not None
     assert resource.entity is not None
+
+
+def assert_errors_contains(resource: threescale.defaults.DefaultClient, fields: List[str]):
+    errors = resource['errors']
+    assert errors is not None
+    for field in fields:
+        assert field in errors
 
 
 def assert_resource_params(obj: threescale.defaults.DefaultResource, params: dict, allowed=None):

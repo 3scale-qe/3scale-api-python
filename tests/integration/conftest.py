@@ -10,6 +10,10 @@ import threescale
 load_dotenv()
 
 
+def get_suffix() -> str:
+    return secrets.token_urlsafe(8)
+
+
 @pytest.fixture(scope='session')
 def url() -> str:
     return os.getenv('THREESCALE_PROVIDER_URL')
@@ -46,11 +50,9 @@ def master_api(master_url: str, master_token: str,
     return threescale.ThreeScaleClient(url=master_url, token=master_token, ssl_verify=ssl_verify)
 
 
-# Service
-
 @pytest.fixture(scope='module')
 def service_params():
-    suffix = secrets.token_urlsafe(8)
+    suffix = get_suffix()
     return dict(name=f"test-{suffix}")
 
 
@@ -62,10 +64,9 @@ def service(service_params, api):
     assert not service.exists()
 
 
-# Account
 @pytest.fixture(scope='module')
 def account_params():
-    suffix = secrets.token_urlsafe(8)
+    suffix = get_suffix()
     name = f"test-{suffix}"
     return dict(name=name, username=name, org_name=name)
 
@@ -78,10 +79,9 @@ def account(account_params, api):
     assert not entity.exists()
 
 
-# Application plan
 @pytest.fixture(scope='module')
 def application_plan_params() -> dict:
-    suffix = secrets.token_urlsafe(8)
+    suffix = get_suffix()
     return dict(name=f"test-{suffix}")
 
 
@@ -91,10 +91,9 @@ def application_plan(api, service, application_plan_params):
     yield resource
 
 
-# Application
 @pytest.fixture(scope='module')
 def application_params(application_plan):
-    suffix = secrets.token_urlsafe(8)
+    suffix = get_suffix()
     name = f"test-{suffix}"
     return dict(name=name, description=name, plan_id=application_plan['id'])
 
@@ -102,6 +101,53 @@ def application_params(application_plan):
 @pytest.fixture(scope='module')
 def application(account, application_plan, application_params):
     resource = account.applications.create(params=application_params)
+    yield resource
+    resource.delete()
+    assert not resource.exists()
+
+
+@pytest.fixture(scope='module')
+def metric_params(service):
+    suffix = get_suffix()
+    friendly_name = f'test-{suffix}'
+    system_name = f'{friendly_name}'.replace('-', '_')
+    return dict(service_id=service['id'], friendly_name=friendly_name,
+                system_name=system_name, unit='count')
+
+
+@pytest.fixture(scope='module')
+def metric(service, metric_params):
+    resource = service.metrics.create(params=metric_params)
+    yield resource
+    resource.delete()
+    assert not resource.exists()
+
+
+@pytest.fixture(scope='module')
+def method_params(service):
+    suffix = get_suffix()
+    friendly_name = f'test-method-{suffix}'
+    system_name = f'{friendly_name}'.replace('-', '_')
+    return dict(friendly_name=friendly_name, system_name=system_name, unit='hits')
+
+
+@pytest.fixture
+def updated_method_params(method_params):
+    suffix = get_suffix()
+    friendly_name = f'test-update-method-{suffix}'
+    method_params['friendly_name'] = friendly_name
+    method_params['system_name'] = f'{friendly_name}'.replace('-', '_')
+    return method_params
+
+
+@pytest.fixture(scope='module')
+def hits_metric(service):
+    return service.metrics.read_by(system_name='hits')
+
+
+@pytest.fixture(scope='module')
+def method(hits_metric, method_params):
+    resource = hits_metric.methods.create(params=method_params)
     yield resource
     resource.delete()
     assert not resource.exists()

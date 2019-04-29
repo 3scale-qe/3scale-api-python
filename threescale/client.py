@@ -20,6 +20,8 @@ class ThreeScaleClient:
         self._rest = RestApiClient(url=url, token=token, throws=throws, ssl_verify=ssl_verify)
         self._services = resources.Services(self, instance_klass=resources.Service)
         self._accounts = resources.Accounts(self, instance_klass=resources.Account)
+        self._methods = resources.Methods(self, instance_klass=resources.Method)
+        self._metrics = resources.Metrics(self, instance_klass=resources.Metric)
         self._tenants = resources.Tenants(self, instance_klass=resources.Tenant)
         self._providers = resources.Providers(self, instance_klass=resources.Provider)
         self._active_docs = resources.ActiveDocs(self, instance_klass=resources.ActiveDoc)
@@ -84,6 +86,20 @@ class ThreeScaleClient:
         Returns(resources.AccountPlans): Account plans client
         """
         return self._account_plans
+
+    @property
+    def methods(self) -> resources.Methods:
+        """Gets methods client
+        Returns(resources.Methods): Methods client
+        """
+        return self._methods
+
+    @property
+    def metrics(self) -> resources.Metrics:
+        """Gets metrics client
+        Returns(resources.Metrics): Metrics client
+        """
+        return self._metrics
 
     @property
     def providers(self) -> resources.Providers:
