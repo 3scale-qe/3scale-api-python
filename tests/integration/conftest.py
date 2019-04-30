@@ -6,6 +6,7 @@ import pytest
 from dotenv import load_dotenv
 
 import threescale
+from tests.integration.common import HttpClient
 
 load_dotenv()
 
@@ -40,6 +41,11 @@ def ssl_verify() -> bool:
 
 
 @pytest.fixture(scope='session')
+def api_backend() -> str:
+    return os.getenv('TEST_API_BACKEND', 'http://www.httpbin.org')
+
+
+@pytest.fixture(scope='session')
 def api(url: str, token: str, ssl_verify: bool) -> threescale.ThreeScaleClient:
     return threescale.ThreeScaleClient(url=url, token=token, ssl_verify=ssl_verify)
 
@@ -48,6 +54,25 @@ def api(url: str, token: str, ssl_verify: bool) -> threescale.ThreeScaleClient:
 def master_api(master_url: str, master_token: str,
                ssl_verify: bool) -> threescale.ThreeScaleClient:
     return threescale.ThreeScaleClient(url=master_url, token=master_token, ssl_verify=ssl_verify)
+
+
+@pytest.fixture(scope='module')
+def apicast_endpoint(proxy):
+    endpoint = proxy['sandbox_endpoint']
+    return endpoint
+
+
+@pytest.fixture(scope='module')
+def apicast_http_client(apicast_endpoint, apicast_params,  ssl_verify):
+    http_client = HttpClient(apicast_endpoint, ssl_verify, params=apicast_params)
+    return http_client
+
+
+@pytest.fixture(scope='module')
+def apicast_params(application, proxy):
+    user_key = application['user_key']
+    user_key_param = proxy['auth_user_key']
+    return { user_key_param: user_key }
 
 
 @pytest.fixture(scope='module')
@@ -107,6 +132,17 @@ def application(account, application_plan, application_params):
 
 
 @pytest.fixture(scope='module')
+def proxy(service, application, api_backend):
+    params = {
+        'api_backend': api_backend,
+        'credentials_location': 'query',
+        'api_test_path': '/get',
+    }
+    proxy = service.proxy.update(params=params)
+    return proxy
+
+
+@pytest.fixture(scope='module')
 def metric_params(service):
     suffix = get_suffix()
     friendly_name = f'test-metric-{suffix}'
@@ -119,7 +155,7 @@ def metric_params(service):
 def updated_metric_params(metric_params):
     suffix = get_suffix()
     friendly_name = f'test-updated-metric-{suffix}'
-    metric_params['friendly_name'] = friendly_name
+    metric_params['friendly_name'] = f'/anything/{friendly_name}'
     metric_params['system_name'] = friendly_name.replace('-', '_')
     return metric_params
 
@@ -157,6 +193,33 @@ def updated_method_params(method_params):
 @pytest.fixture(scope='module')
 def method(hits_metric, method_params):
     resource = hits_metric.methods.create(params=method_params)
+    yield resource
+    resource.delete()
+    assert not resource.exists()
+
+
+def get_mapping_rule_pattern():
+    suffix = get_suffix()
+    pattern = f'test-{suffix}'.replace('_', '-')
+    return pattern
+
+
+@pytest.fixture(scope='module')
+def mapping_rule_params(hits_metric):
+    return dict(http_method='GET', pattern='/', metric_id=hits_metric['id'], delta=1)
+
+
+@pytest.fixture
+def updated_mapping_rules_params(mapping_rule_params):
+    pattern = get_mapping_rule_pattern()
+    params = mapping_rule_params.copy()
+    params['pattern'] = f'/anything/{pattern}'
+    return params
+
+
+@pytest.fixture(scope='module')
+def mapping_rule(proxy, mapping_rule_params):
+    resource = proxy.mapping_rules.create(params=mapping_rule_params)
     yield resource
     resource.delete()
     assert not resource.exists()

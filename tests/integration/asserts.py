@@ -1,5 +1,7 @@
 from typing import List
 
+import requests
+
 import threescale.defaults
 
 
@@ -21,3 +23,7 @@ def assert_resource_params(obj: threescale.defaults.DefaultResource, params: dic
         if allowed is not None and key in allowed:
             assert obj[key] == val, f"Resource value for key \"{key}\" should be correct."
             assert obj.entity[key] == val, "Entity value for key \"{key}\" should be correct."
+
+
+def assert_http_ok(response: requests.Response):
+    assert response.status_code == 200

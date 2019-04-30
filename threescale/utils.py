@@ -13,7 +13,7 @@ def extract_response(response: requests.Response, entity: str = None,
     Returns(Union[dict, list]): Extracted entity or list of entities
     """
     extracted: dict = response.json()
-    if collection:
+    if collection and collection in extracted:
         extracted = extracted.get(collection)
     if isinstance(extracted, list):
         return [value.get(entity) for value in extracted]
