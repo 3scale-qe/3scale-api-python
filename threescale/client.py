@@ -24,7 +24,7 @@ class ThreeScaleClient:
         self._providers = resources.Providers(self, instance_klass=resources.Provider)
         self._active_docs = resources.ActiveDocs(self, instance_klass=resources.ActiveDoc)
         self._account_plans = resources.AccountPlans(self, instance_klass=resources.AccountPlan)
-        self._settings = resources.SettingsClient(self, instance_klass=resources.Settings)
+        self._settings = resources.SettingsClient(self)
         self._admin_portal_auth_provider = resources.AdminPortalAuthenticationProvider(self)
         self._dev_portal_auth_provider = resources.DevPortalAuthenticationProvider(self)
 

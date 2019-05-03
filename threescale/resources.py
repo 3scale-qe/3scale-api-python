@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, Union
 
 from threescale import utils
 from threescale.defaults import DefaultClient, DefaultPlanClient, DefaultPlanResource, \
@@ -307,15 +307,46 @@ class Providers(DefaultClient):
     def url(self) -> str:
         return self.threescale_client.admin_api_url + '/providers'
 
+    def create_token(self, entity_id: int, params, **kwargs):
+        log.info(self._log_message("[TOKEN] Create token",
+                                   entity_id=entity_id, body=params, **kwargs))
+        url = self._entity_url(entity_id=entity_id) + '/access_tokens'
+        response = self.rest.put(url, json=params)
+        return utils.extract_response(response=response)
+
 
 class ActiveDocs(DefaultClient):
-    def __init__(self, *args, entity_name='active_doc', entity_collection='active_docs', **kwargs):
+    def __init__(self, *args, entity_name='api_doc', entity_collection='api_docs', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
     def url(self) -> str:
         return self.threescale_client.admin_api_url + '/active_docs'
+
+
+class Analytics(DefaultClient):
+    def _list_by_resource(self, resource_id: int, resource_type, metric_name: str = 'hits',
+                          since=None, period: str = 'year', **kwargs):
+        log.info(f"List analytics by {resource_type} ({resource_id}) f"
+                 f"or metric (#{metric_name})")
+        params = dict(
+            metric_name=metric_name,
+            since=since,
+            period=period,
+            **kwargs
+        )
+        url = self.threescale_client.url + f"/stats/{resource_type}/{resource_id}/usage"
+        response = self.rest.get(url, json=params)
+        return utils.extract_response(response=response)
+
+    def list_by_application(self, application: Union['Application', int], **kwargs):
+        app_id = _extract_entity_id(application)
+        return self._list_by_resource(resource_id=app_id, resource_type='applications', **kwargs)
+
+    def list_by_service(self, service: Union['Service', int], **kwargs):
+        app_id = _extract_entity_id(service)
+        return self._list_by_resource(resource_id=app_id, resource_type='services', **kwargs)
 
 
 class Tenants(DefaultClient):
@@ -551,5 +582,7 @@ class AccountPlan(DefaultResource):
         super().__init__(entity_name=entity_name, **kwargs)
 
 
-class Settings(DefaultClient):
-    pass
+def _extract_entity_id(entity: Union['DefaultResource', int]):
+    if isinstance(entity, DefaultResource):
+        return entity.entity_id
+    return entity
