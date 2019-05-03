@@ -19,13 +19,13 @@ class Services(DefaultClient):
 
 
 class MappingRules(DefaultClient):
-    def __init__(self, *args, entity_name='mapping_rule', entity_collection='rules', **kwargs):
+    def __init__(self, *args, entity_name='mapping_rule', entity_collection='mapping_rules', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
     def url(self) -> str:
-        return self.threescale_client.admin_api_url + '/mapping_rules'
+        return self.parent.url + '/mapping_rules'
 
 
 class Metrics(DefaultClient):
@@ -360,9 +360,8 @@ class Tenants(DefaultClient):
 
 
 class Proxies(DefaultClient):
-    def __init__(self, *args, entity_name='proxy', entity_collection='proxies', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+    def __init__(self, *args, entity_name='proxy', **kwargs):
+        super().__init__(*args, entity_name=entity_name,  **kwargs)
 
     @property
     def url(self) -> str:
@@ -485,6 +484,10 @@ class Policy(DefaultResource):
 
 
 class Proxy(DefaultResource):
+    @property
+    def url(self):
+        return self.client.url
+
     @property
     def service(self) -> 'Service':
         return self.parent
