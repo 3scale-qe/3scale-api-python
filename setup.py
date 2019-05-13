@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with io.open('ktdk/__init__.py', 'rt', encoding='utf8') as f:
+with io.open('threescale_api/__init__.py', 'rt', encoding='utf8') as f:
     VERSION = re.search(r'__version__ = \'(.*?)\'', f.read()).group(1)
 
 requirements = ['requests']
