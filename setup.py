@@ -1,7 +1,13 @@
+import io
+import re
+
 from setuptools import find_packages, setup
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
+with io.open('ktdk/__init__.py', 'rt', encoding='utf8') as f:
+    VERSION = re.search(r'__version__ = \'(.*?)\'', f.read()).group(1)
 
 requirements = ['requests']
 
@@ -16,7 +22,7 @@ extra_requirements = {
 }
 
 setup(name='3scale-api',
-      version='0.1',
+      version=VERSION,
       description='3scale API python client',
       author='Peter Stanko',
       author_email='stanko@mail.muni.cz',

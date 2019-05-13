@@ -3,7 +3,7 @@ from urllib.parse import urljoin
 
 import requests
 
-from threescale import errors, resources
+from threescale_api import errors, resources
 
 log = logging.getLogger(__name__)
 

@@ -3,10 +3,10 @@ from typing import Dict, List, Optional, TYPE_CHECKING, Union
 
 import requests
 
-from threescale import utils
+from threescale_api import utils
 
 if TYPE_CHECKING:
-    from threescale.client import ThreeScaleClient, RestApiClient
+    from threescale_api.client import ThreeScaleClient, RestApiClient
 
 log = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 import pytest
 import responses
 
-from threescale import client, errors
+from threescale_api import client, errors
 
 
 @pytest.fixture()

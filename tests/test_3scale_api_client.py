@@ -1,6 +1,6 @@
 import pytest
 
-from threescale import client
+from threescale_api import client
 
 
 @pytest.fixture()

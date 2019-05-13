@@ -17,7 +17,7 @@ logging_config = dict(
         }
     },
     loggers={
-        'threescale': {
+        'threescale_api': {
             'handlers': ['h'],
             'level': logging.DEBUG
         },

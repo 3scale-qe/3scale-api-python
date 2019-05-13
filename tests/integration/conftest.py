@@ -5,7 +5,7 @@ from distutils.util import strtobool
 import pytest
 from dotenv import load_dotenv
 
-import threescale
+import threescale_api
 from tests.integration.common import HttpClient
 
 load_dotenv()
@@ -37,7 +37,8 @@ def master_token() -> str:
 
 @pytest.fixture(scope="session")
 def ssl_verify() -> bool:
-    return bool(strtobool(os.getenv('THREESCALE_SSL_VERIFY', False)))
+    ssl_verify = os.getenv('THREESCALE_SSL_VERIFY', 'false')
+    return bool(strtobool(ssl_verify))
 
 
 @pytest.fixture(scope='session')
@@ -46,14 +47,14 @@ def api_backend() -> str:
 
 
 @pytest.fixture(scope='session')
-def api(url: str, token: str, ssl_verify: bool) -> threescale.ThreeScaleClient:
-    return threescale.ThreeScaleClient(url=url, token=token, ssl_verify=ssl_verify)
+def api(url: str, token: str, ssl_verify: bool) -> threescale_api.ThreeScaleClient:
+    return threescale_api.ThreeScaleClient(url=url, token=token, ssl_verify=ssl_verify)
 
 
 @pytest.fixture(scope='session')
 def master_api(master_url: str, master_token: str,
-               ssl_verify: bool) -> threescale.ThreeScaleClient:
-    return threescale.ThreeScaleClient(url=master_url, token=master_token, ssl_verify=ssl_verify)
+               ssl_verify: bool) -> threescale_api.ThreeScaleClient:
+    return threescale_api.ThreeScaleClient(url=master_url, token=master_token, ssl_verify=ssl_verify)
 
 
 @pytest.fixture(scope='module')

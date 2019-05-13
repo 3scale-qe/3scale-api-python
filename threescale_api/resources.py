@@ -1,8 +1,8 @@
 import logging
 from typing import Dict, Union
 
-from threescale import utils
-from threescale.defaults import DefaultClient, DefaultPlanClient, DefaultPlanResource, \
+from threescale_api import utils
+from threescale_api.defaults import DefaultClient, DefaultPlanClient, DefaultPlanResource, \
     DefaultResource, DefaultStateClient, DefaultUserResource
 
 log = logging.getLogger(__name__)

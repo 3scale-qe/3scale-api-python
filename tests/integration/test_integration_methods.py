@@ -1,6 +1,6 @@
 import pytest
 
-from threescale.errors import ApiClientError
+from threescale_api.errors import ApiClientError
 
 from tests.integration import asserts
 
