@@ -1,4 +1,5 @@
 from tests.integration import asserts
+from threescale_api.resources import Proxy, Service
 from .asserts import assert_resource, assert_resource_params
 
 
@@ -39,3 +40,28 @@ def test_service_can_be_updated(api, service):
     updated = service.read()
     assert updated['backend_version'] == '2'
     assert service['backend_version'] == '2'
+
+
+def test_service_get_proxy(api, service: Service, proxy: Proxy, api_backend):
+    assert proxy['api_backend'] == api_backend
+    assert proxy['api_test_path'] == '/get'
+
+
+def test_service_set_proxy(api, service: Service, proxy: Proxy, api_backend):
+    updated = proxy.update(params=dict(api_test_path='/ip'))
+    assert updated['api_backend'] == api_backend
+    assert updated['api_test_path'] == '/ip'
+
+
+def test_service_proxy_promote(service, proxy):
+    res = proxy.promote()
+    assert res is not None
+    assert res['environment'] == 'production'
+    assert res['content'] is not None
+
+
+def test_service_list_configs(service, proxy):
+    res = proxy.configs.list(env='staging')
+    assert res
+    item = res[0]
+    assert item

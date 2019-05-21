@@ -340,9 +340,11 @@ class DefaultResource:
     def delete(self, **kwargs):
         self.client.delete(entity_id=self.entity_id, **kwargs)
 
-    def update(self, **kwargs) -> 'DefaultResource':
-        new_params = {**self.entity, **kwargs}
-        new_entity = self.client.update(entity_id=self.entity_id, params=new_params)
+    def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
+        new_params = {**self.entity}
+        if params:
+            new_params.update(params)
+        new_entity = self.client.update(entity_id=self.entity_id, params=new_params, **kwargs)
         self._entity = new_entity.entity
         return self
 

@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 import threescale_api
 from tests.integration.common import HttpClient
+from threescale_api.resources import Service, ApplicationPlan, Application, Proxy
 
 load_dotenv()
 
@@ -43,7 +44,7 @@ def ssl_verify() -> bool:
 
 @pytest.fixture(scope='session')
 def api_backend() -> str:
-    return os.getenv('TEST_API_BACKEND', 'http://www.httpbin.org')
+    return os.getenv('TEST_API_BACKEND', 'http://www.httpbin.org:80')
 
 
 @pytest.fixture(scope='session')
@@ -83,7 +84,7 @@ def service_params():
 
 
 @pytest.fixture(scope='module')
-def service(service_params, api):
+def service(service_params, api) -> Service:
     service = api.services.create(params=service_params)
     yield service
     service.delete()
@@ -112,7 +113,7 @@ def application_plan_params() -> dict:
 
 
 @pytest.fixture(scope='module')
-def application_plan(api, service, application_plan_params):
+def application_plan(api, service, application_plan_params) -> ApplicationPlan:
     resource = service.app_plans.create(params=application_plan_params)
     yield resource
 
@@ -125,7 +126,7 @@ def application_params(application_plan):
 
 
 @pytest.fixture(scope='module')
-def application(account, application_plan, application_params):
+def application(account, application_plan, application_params) -> Application:
     resource = account.applications.create(params=application_params)
     yield resource
     resource.delete()
@@ -133,7 +134,7 @@ def application(account, application_plan, application_params):
 
 
 @pytest.fixture(scope='module')
-def proxy(service, application, api_backend):
+def proxy(service, application, api_backend) -> Proxy:
     params = {
         'api_backend': api_backend,
         'credentials_location': 'query',

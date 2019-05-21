@@ -19,7 +19,8 @@ class Services(DefaultClient):
 
 
 class MappingRules(DefaultClient):
-    def __init__(self, *args, entity_name='mapping_rule', entity_collection='mapping_rules', **kwargs):
+    def __init__(self, *args, entity_name='mapping_rule', entity_collection='mapping_rules',
+                 **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
@@ -49,13 +50,17 @@ class Limits(DefaultClient):
     def metric(self) -> 'Metric':
         return self._metric
 
+    @property
+    def application_plan(self) -> 'ApplicationPlan':
+        return self.parent
+
     def __call__(self, metric: 'Metric' = None) -> 'Limits':
         self._metric = metric
         return self
 
     @property
     def url(self) -> str:
-        return self.parent.url + f'/metrics/{self.metric.entity_id}/limits'
+        return self.application_plan.plans_url + f'/metrics/{self.metric.entity_id}/limits'
 
     def list_per_app_plan(self, **kwargs):
         log.info(f"[LIST] List limits per app plan: {kwargs}")
@@ -66,7 +71,8 @@ class Limits(DefaultClient):
 
 
 class PricingRules(DefaultClient):
-    def __init__(self, *args, entity_name='rule', entity_collection='rules', metric=None, **kwargs):
+    def __init__(self, *args, entity_name='pricing_rule', entity_collection='pricing_rules',
+                 metric: 'Metric' = None, **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
         self._metric = metric
@@ -75,13 +81,17 @@ class PricingRules(DefaultClient):
     def metric(self) -> 'Metric':
         return self._metric
 
+    @property
+    def application_plan(self) -> 'ApplicationPlan':
+        return self.parent
+
     def __call__(self, metric: 'Metric' = None) -> 'PricingRules':
         self._metric = metric
         return self
 
     @property
     def url(self) -> str:
-        return self.parent.url + f'/metrics/{self.metric.entity_id}/pricing_rules'
+        return self.application_plan.plans_url + f'/metrics/{self.metric.entity_id}/pricing_rules'
 
 
 class Methods(DefaultClient):
@@ -102,6 +112,10 @@ class ApplicationPlans(DefaultPlanClient):
     @property
     def url(self) -> str:
         return self.parent.url + '/application_plans'
+
+    @property
+    def plans_url(self) -> str:
+        return self.threescale_client.admin_api_url + '/application_plans'
 
 
 class ApplicationPlanFeatures(DefaultClient):
@@ -361,7 +375,7 @@ class Tenants(DefaultClient):
 
 class Proxies(DefaultClient):
     def __init__(self, *args, entity_name='proxy', **kwargs):
-        super().__init__(*args, entity_name=entity_name,  **kwargs)
+        super().__init__(*args, entity_name=entity_name, **kwargs)
 
     @property
     def url(self) -> str:
@@ -369,13 +383,34 @@ class Proxies(DefaultClient):
 
 
 class ProxyConfigs(DefaultClient):
-    def __init__(self, *args, entity_name='config', entity_collection='configs', **kwargs):
+    def __init__(self, *args, entity_name='proxy_config', entity_collection='configs',
+                 env: str = None, **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
+        self._env = env
 
     @property
     def url(self) -> str:
-        return self.parent.url + '/configs'
+        base = self.parent.url + '/configs'
+        return base if not self._env else f"{base}/{self._env}"
+
+    @property
+    def proxy(self) -> 'Proxy':
+        return self.parent
+
+    @property
+    def service(self) -> 'Service':
+        return self.proxy.service
+
+    def promote(self, version: int = 1, from_env: str = 'sandbox', to_env: str = 'production',
+                **kwargs) -> 'Proxy':
+        log.info(f"[PROMOTE] {self.service} version {version} from {from_env} to {to_env}")
+        url = f'{self.url}/{from_env}/{version}/promote'
+        params = dict(to=to_env)
+        kwargs.update()
+        response = self.rest.post(url, json=params, **kwargs)
+        instance = self._create_instance(response=response)
+        return instance
 
 
 class SettingsClient(DefaultClient):
@@ -413,6 +448,12 @@ class Policies(DefaultClient):
                          entity_collection=entity_collection, **kwargs)
 
 
+class OIDCConfigs(DefaultClient):
+    @property
+    def url(self) -> str:
+        return self.parent.url + '/oidc_configuration'
+
+
 # Resources
 
 class ApplicationPlan(DefaultPlanResource):
@@ -420,8 +461,20 @@ class ApplicationPlan(DefaultPlanResource):
         super().__init__(entity_name=entity_name, **kwargs)
 
     @property
+    def plans_url(self) -> str:
+        return self.threescale_client.admin_api_url + f"/application_plans/{self.entity_id}"
+
+    @property
     def service(self) -> 'Service':
         return self.parent
+
+    @property
+    def limits(self, metric: 'Metric' = None) -> 'Limits':
+        return Limits(self, metric=metric, instance_klass=Limit)
+
+    @property
+    def pricing_rules(self, metric: 'Metric' = None) -> 'PricingRules':
+        return PricingRules(self, metric=metric, instance_klass=PricingRule)
 
 
 class Method(DefaultResource):
@@ -446,7 +499,7 @@ class Metric(DefaultResource):
         return self.parent
 
     @property
-    def methods(self) -> Methods:
+    def methods(self) -> 'Methods':
         return Methods(parent=self, instance_klass=Method)
 
 
@@ -485,7 +538,7 @@ class Policy(DefaultResource):
 
 class Proxy(DefaultResource):
     @property
-    def url(self):
+    def url(self) -> str:
         return self.client.url
 
     @property
@@ -508,6 +561,9 @@ class Proxy(DefaultResource):
     def entity_id(self):
         return None
 
+    def promote(self, **kwargs) -> 'Proxy':
+        return self.configs.promote(**kwargs)
+
 
 class Service(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
@@ -524,6 +580,14 @@ class Service(DefaultResource):
     @property
     def proxy(self) -> 'Proxies':
         return Proxies(parent=self, instance_klass=Proxy)
+
+    @property
+    def mapping_rules(self) -> 'MappingRules':
+        return MappingRules(parent=self, instance_klass=MappingRule)
+
+    @property
+    def oidc(self):
+        return OIDCConfigs(self)
 
 
 class ActiveDoc(DefaultResource):
@@ -583,6 +647,18 @@ class AccountUser(DefaultUserResource):
 class AccountPlan(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
+
+
+class Limit(DefaultResource):
+    @property
+    def app_plan(self) -> ApplicationPlan:
+        return self.parent
+
+
+class PricingRule(DefaultResource):
+    @property
+    def app_plan(self) -> ApplicationPlan:
+        return self.parent
 
 
 def _extract_entity_id(entity: Union['DefaultResource', int]):
