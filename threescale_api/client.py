@@ -22,6 +22,7 @@ class ThreeScaleClient:
         self._accounts = resources.Accounts(self, instance_klass=resources.Account)
         self._methods = resources.Methods(self, instance_klass=resources.Method)
         self._metrics = resources.Metrics(self, instance_klass=resources.Metric)
+        self._analytics = resources.Analytics(self)
         self._tenants = resources.Tenants(self, instance_klass=resources.Tenant)
         self._providers = resources.Providers(self, instance_klass=resources.Provider)
         self._active_docs = resources.ActiveDocs(self, instance_klass=resources.ActiveDoc)
@@ -100,6 +101,13 @@ class ThreeScaleClient:
         Returns(resources.Metrics): Metrics client
         """
         return self._metrics
+
+    @property
+    def analytics(self):
+        """Gets analytics data client
+        Returns(resources.Analytics): Analytics client
+        """
+        return self._analytics
 
     @property
     def providers(self) -> resources.Providers:
