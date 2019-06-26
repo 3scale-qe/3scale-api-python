@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 
 import threescale_api
 from tests.integration.common import HttpClient
-from threescale_api.resources import Service, ApplicationPlan, Application, Proxy
+from threescale_api.resources import (Service, ApplicationPlan, Application,
+                                      Proxy)
 
 load_dotenv()
 
@@ -48,14 +49,17 @@ def api_backend() -> str:
 
 
 @pytest.fixture(scope='session')
-def api(url: str, token: str, ssl_verify: bool) -> threescale_api.ThreeScaleClient:
-    return threescale_api.ThreeScaleClient(url=url, token=token, ssl_verify=ssl_verify)
+def api(url: str, token: str,
+        ssl_verify: bool) -> threescale_api.ThreeScaleClient:
+    return threescale_api.ThreeScaleClient(url=url, token=token,
+                                           ssl_verify=ssl_verify)
 
 
 @pytest.fixture(scope='session')
 def master_api(master_url: str, master_token: str,
                ssl_verify: bool) -> threescale_api.ThreeScaleClient:
-    return threescale_api.ThreeScaleClient(url=master_url, token=master_token, ssl_verify=ssl_verify)
+    return threescale_api.ThreeScaleClient(url=master_url, token=master_token,
+                                           ssl_verify=ssl_verify)
 
 
 @pytest.fixture(scope='module')
@@ -66,7 +70,8 @@ def apicast_endpoint(proxy):
 
 @pytest.fixture(scope='module')
 def apicast_http_client(apicast_endpoint, apicast_params,  ssl_verify):
-    http_client = HttpClient(apicast_endpoint, ssl_verify, params=apicast_params)
+    http_client = HttpClient(apicast_endpoint, ssl_verify,
+                             params=apicast_params)
     return http_client
 
 
@@ -74,7 +79,7 @@ def apicast_http_client(apicast_endpoint, apicast_params,  ssl_verify):
 def apicast_params(application, proxy):
     user_key = application['user_key']
     user_key_param = proxy['auth_user_key']
-    return { user_key_param: user_key }
+    return {user_key_param: user_key}
 
 
 @pytest.fixture(scope='module')
@@ -180,7 +185,8 @@ def method_params(service):
     suffix = get_suffix()
     friendly_name = f'test-method-{suffix}'
     system_name = f'{friendly_name}'.replace('-', '_')
-    return dict(friendly_name=friendly_name, system_name=system_name, unit='hits')
+    return dict(friendly_name=friendly_name, system_name=system_name,
+                unit='hits')
 
 
 @pytest.fixture
@@ -208,7 +214,8 @@ def get_mapping_rule_pattern():
 
 @pytest.fixture(scope='module')
 def mapping_rule_params(hits_metric):
-    return dict(http_method='GET', pattern='/', metric_id=hits_metric['id'], delta=1)
+    return dict(http_method='GET', pattern='/', metric_id=hits_metric['id'],
+                delta=1)
 
 
 @pytest.fixture
@@ -225,3 +232,25 @@ def mapping_rule(proxy, mapping_rule_params):
     yield resource
     resource.delete()
     assert not resource.exists()
+
+
+@pytest.fixture
+def create_mapping_rule(service):
+    rules = []
+    proxy = service.proxy.list()
+
+    def _create(metric, http_method, path):
+        params = dict(service_id=service['id'],
+                      http_method=http_method,
+                      pattern=f'/anything{path}',
+                      delta=1, metric_id=metric['id'])
+        rule = proxy.mapping_rules.create(params=params)
+        rules.append(rule)
+        return rule
+
+    yield _create
+
+    for rule in rules:
+        if rule.exists():
+            rule.delete()
+

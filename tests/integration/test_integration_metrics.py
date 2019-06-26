@@ -1,8 +1,10 @@
 import pytest
+import backoff
 
 from threescale_api.errors import ApiClientError
 
 from tests.integration import asserts
+from tests.integration.common import http_client
 
 
 def test_should_create_metric(metric, metric_params):
@@ -48,3 +50,45 @@ def test_should_delete_metric(service, updated_metric_params):
 def test_should_list_metrics(service):
     resources = service.metrics.list()
     assert len(resources) > 1
+
+
+def test_should_return_auth_error_when_metric_is_disabled(
+        service, metric_params, create_mapping_rule,
+        account, ssl_verify, api_backend):
+    """Metric is disabled when its limit is set to 0."""
+
+    proxy = service.proxy.list()
+    plan = service.app_plans.create(params=dict(name='metrics-disabled'))
+    application_params = dict(name='metrics-disabled', plan_id=plan['id'],
+                              description='metric disabled')
+    app = account.applications.create(params=application_params)
+
+    metric = service.metrics.create(params=metric_params)
+    plan.limits(metric).create(params=dict(period='month', value=0))
+
+    rules = proxy.mapping_rules.list()
+    for rule in rules:
+        rule.delete()
+    rule = create_mapping_rule(metric, 'GET', '/foo/bah/')
+
+    # update proxy after adding mapping rule
+    # required for working
+    service.proxy.update(params={'endpoint': 'http://test.test:80'})
+
+    params = get_user_key_from_application(app, proxy)
+    client = http_client(proxy['sandbox_endpoint'], ssl_verify, params=params)
+    response = make_request(client, rule['pattern'])
+    assert response.status_code == 403
+
+
+@backoff.on_predicate(backoff.expo, lambda resp: resp.status_code == 200,
+                      max_tries=8)
+def make_request(client, path):
+    return client.get(path=path)
+
+
+def get_user_key_from_application(app, proxy):
+    user_key = app['user_key']
+    user_key_param = proxy['auth_user_key']
+    return {user_key_param: user_key}
+
