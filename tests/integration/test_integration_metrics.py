@@ -52,7 +52,7 @@ def test_should_list_metrics(service):
     assert len(resources) > 1
 
 
-def test_should_return_auth_error_when_metric_is_disabled(
+def test_should_apicast_return_403_when_metric_is_disabled(
         service, metric_params, create_mapping_rule,
         account, ssl_verify, api_backend):
     """Metric is disabled when its limit is set to 0."""
@@ -71,9 +71,7 @@ def test_should_return_auth_error_when_metric_is_disabled(
         rule.delete()
     rule = create_mapping_rule(metric, 'GET', '/foo/bah/')
 
-    # update proxy after adding mapping rule
-    # required for working
-    service.proxy.update(params={'endpoint': 'http://test.test:80'})
+    update_proxy_endpoint(service)
 
     params = get_user_key_from_application(app, proxy)
     client = http_client(proxy['sandbox_endpoint'], ssl_verify, params=params)
@@ -91,4 +89,31 @@ def get_user_key_from_application(app, proxy):
     user_key = app['user_key']
     user_key_param = proxy['auth_user_key']
     return {user_key_param: user_key}
+
+
+def update_proxy_endpoint(service):
+    """Update service proxy.
+
+    Bug that if the proxy is not updated the changes applied
+    to the mapping rules dont take effect."""
+    service.proxy.update(params={'endpoint': 'http://test.test:80'})
+
+
+def test_should_apicast_return_429_when_limits_exceeded(
+        service, application_plan, create_mapping_rule,
+        apicast_http_client):
+    metric_params = dict(system_name='limits_exceeded', unit='count',
+                         friendly_name='Limits Exceeded')
+    metric = service.metrics.create(params=metric_params)
+    application_plan.limits(metric).create(params=dict(period='day', value=1))
+
+    rule = create_mapping_rule(metric, 'GET', '/limits/exceeded/')
+
+    update_proxy_endpoint(service)
+
+    response = apicast_http_client.get(path=rule['pattern'])
+    while response.status_code == 200:
+        response = apicast_http_client.get(path=rule['pattern'])
+
+    assert response.status_code == 429
 
