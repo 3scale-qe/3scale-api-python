@@ -24,8 +24,9 @@ class HttpClient:
             self._params.update(params)
         logger.debug(f"[{method}] ({full_url}) params={self._params} headers={headers} "
                      f"{kwargs if kwargs else ''}")
-        response = self._session.request(method=method, url=full_url, headers=headers,
-                                         params=self._params, verify=self._ssl_verify, **kwargs)
+        response = self._session.request(method=method, url=full_url,
+                                         headers=headers, params=self._params,
+                                         verify=self._ssl_verify, **kwargs)
         return response
 
     def get(self, *args, **kwargs) -> requests.Response:
@@ -42,3 +43,8 @@ class HttpClient:
 
     def delete(self, *args, **kwargs) -> requests.Response:
         return self.request('DELETE', *args, **kwargs)
+
+
+def http_client(url: str, ssl_verify: bool, params: dict = None) -> HttpClient:
+    http_client = HttpClient(url, ssl_verify, params=params)
+    return http_client
