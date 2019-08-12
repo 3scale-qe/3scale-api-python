@@ -447,6 +447,10 @@ class Policies(DefaultClient):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
+    @property
+    def url(self) -> str:
+        return f"{self.parent.url}/{self._entity_collection}"
+
 
 class OIDCConfigs(DefaultClient):
     @property
