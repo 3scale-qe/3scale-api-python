@@ -402,6 +402,16 @@ class ProxyConfigs(DefaultClient):
     def service(self) -> 'Service':
         return self.proxy.service
 
+    # tests/integration/test_integration_services.py::test_service_list_configs
+    # defines usage in a form proxy.configs.list(env='staging').
+    # To reflect this (good tests are considered immutable and defining the behavior)
+    # list method has to be customized
+    def list(self, **kwargs):
+        if "env" in kwargs:
+            self._env = kwargs["env"]
+            del(kwargs["env"])
+        return super().list(**kwargs)
+
     def promote(self, version: int = 1, from_env: str = 'sandbox', to_env: str = 'production',
                 **kwargs) -> 'Proxy':
         log.info(f"[PROMOTE] {self.service} version {version} from {from_env} to {to_env}")
@@ -525,6 +535,17 @@ class ProxyConfig(DefaultResource):
     @property
     def service(self) -> 'Service':
         return self.proxy.service
+
+    # ProxyConfig is once instantiated with just proxy config obj (for example
+    # through promote()) other times as dict of key "proxy_configs". This seems
+    # to be clear bug in the code (this code) and behavior should be always
+    # consistent. For now keeping inconsistency as it introduces minimal change
+    # and keeps everything working
+    def __getitem__(self, key):
+        if "proxy_configs" in self.entity:
+            return self.entity["proxy_configs"][key]
+        else:
+            return super().__getitem__(key)
 
 
 class Policy(DefaultResource):
