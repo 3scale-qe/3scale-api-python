@@ -1,6 +1,9 @@
 import logging
 from urllib.parse import urljoin
 
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+
 import requests
 
 
@@ -13,6 +16,12 @@ class HttpClient:
         self._url = url
         self._ssl_verify = ssl_verify
         self._session = requests.Session()
+        retry = Retry(total=3, backoff_factor=2, status_forcelist=(503,),
+                      respect_retry_after_header=False)
+        adapter = HTTPAdapter(max_retries=retry)
+        self._session.mount("https://", adapter)
+        self._session.mount("http://", adapter)
+
         self._params = params or {}
         logger.debug(f"[HTTP CLIENT] New instance: {url} ssl={ssl_verify} params={params}")
 
