@@ -1,7 +1,11 @@
 import logging
 from typing import Dict, Union
 
+import requests
+
+from threescale_api import auth
 from threescale_api import utils
+from threescale_api import errors
 from threescale_api.defaults import DefaultClient, DefaultPlanClient, DefaultPlanResource, \
     DefaultResource, DefaultStateClient, DefaultUserResource
 
@@ -591,6 +595,10 @@ class Proxy(DefaultResource):
 
 
 class Service(DefaultResource):
+    AUTH_USER_KEY = "1"
+    AUTH_APP_ID_KEY = "2"
+    AUTH_OIDC = "oidc"
+
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
@@ -647,6 +655,61 @@ class Application(DefaultResource):
     def keys(self):
         "Application keys"
         return ApplicationKeys(parent=self, instance_klass=DefaultResource)
+
+    @property
+    def authobj(self) -> requests.auth.AuthBase:
+        """Returns subclass of requests.auth.BaseAuth to provide authentication
+        for queries agains 3scale service"""
+
+        svc = self.service
+        auth_mode = svc["backend_version"]
+        creds_location = svc.proxy.list().entity["credentials_location"]
+
+        if auth_mode == Service.AUTH_USER_KEY:
+            return auth.UserKeyAuth(self, creds_location)
+
+        if auth_mode == Service.AUTH_APP_ID_KEY:
+            return auth.AppIdKeyAuth(self, creds_location)
+
+        if auth_mode == Service.AUTH_OIDC:
+            raise NotImplementedError("OpenID authentication not implemented yet.")
+
+        raise errors.ThreeScaleApiError(
+            f"Unknown credentials for configuration {auth_mode}/{creds_location}")
+
+    def api_client(self, endpoint: str = "sandbox_endpoint",
+                   session: requests.Session = None, verify: bool = None) -> 'utils.HttpClient':
+        """This is preconfigured client for the application to run api calls.
+        To avoid failures due to delays in infrastructure it retries call
+        in case of certain condition. To modify this behavior customized session
+        has to be passed. This custom session should have configured all necessary
+        (e.g. authentication)
+
+        :param endpoint: Choose whether 'sandbox_endpoint' or 'endpoint', defaults to sandbox_endpoint
+        :param session: Customized requests.Session, all necessary has to be already done
+        :param verify: Whether to do ssl verification or not, by default doesn't change whatt's in session, defaults to None
+
+        :return: threescale.utils.HttpClient
+        """
+
+        return utils.HttpClient(self, endpoint, session, verify)
+
+    def test_request(self, relpath=None):
+        """Quick call to do test request against configured service. This is
+        equivalent to test request on Integration page from UI
+
+        :param relpath: relative path to run the requests, if not set, preconfigured value is used, defaults to None
+
+        :return: requests.Response
+        """
+        proxy = self.service.proxy.list().entity
+
+        if relpath is None:
+            relpath = proxy["api_test_path"]
+
+        client = self.api_client()
+
+        return client.get(relpath)
 
 class Account(DefaultResource):
     def __init__(self, entity_name='org_name', **kwargs):

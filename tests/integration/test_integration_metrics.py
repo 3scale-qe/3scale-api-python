@@ -4,7 +4,6 @@ import backoff
 from threescale_api.errors import ApiClientError
 
 from tests.integration import asserts
-from tests.integration.common import http_client
 
 
 def test_should_create_metric(metric, metric_params):
@@ -74,7 +73,7 @@ def test_should_apicast_return_403_when_metric_is_disabled(
     update_proxy_endpoint(service)
 
     params = get_user_key_from_application(app, proxy)
-    client = http_client(proxy['sandbox_endpoint'], ssl_verify, params=params)
+    client = app.api_client(verify=ssl_verify)
     response = make_request(client, rule['pattern'])
     assert response.status_code == 403
 
