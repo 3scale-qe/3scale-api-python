@@ -646,7 +646,7 @@ class Application(DefaultResource):
     @property
     def keys(self):
         "Application keys"
-        return ApplicationKeys(parrent=self, instance_klass=DefaultResource)
+        return ApplicationKeys(parent=self, instance_klass=DefaultResource)
 
 class Account(DefaultResource):
     def __init__(self, entity_name='org_name', **kwargs):
