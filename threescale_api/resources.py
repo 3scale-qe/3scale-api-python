@@ -638,6 +638,15 @@ class Application(DefaultResource):
     def account(self) -> 'Account':
         return self.parent
 
+    @property
+    def service(self) -> 'Service':
+        "The service to which this application is bound"
+        return self.threescale_client.services[self["service_id"]]
+
+    @property
+    def keys(self):
+        "Application keys"
+        return ApplicationKeys(parrent=self, instance_klass=DefaultResource)
 
 class Account(DefaultResource):
     def __init__(self, entity_name='org_name', **kwargs):
