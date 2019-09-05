@@ -705,11 +705,12 @@ class Application(DefaultResource):
 
         return utils.HttpClient(self, endpoint, session, verify)
 
-    def test_request(self, relpath=None):
+    def test_request(self, relpath=None, verify: bool = None):
         """Quick call to do test request against configured service. This is
         equivalent to test request on Integration page from UI
 
         :param relpath: relative path to run the requests, if not set, preconfigured value is used, defaults to None
+        :param verify: SSL verification
 
         :return: requests.Response
         """
@@ -718,7 +719,7 @@ class Application(DefaultResource):
         if relpath is None:
             relpath = proxy["api_test_path"]
 
-        client = self.api_client()
+        client = self.api_client(verify=verify)
 
         return client.get(relpath)
 
