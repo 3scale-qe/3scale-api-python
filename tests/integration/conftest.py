@@ -6,7 +6,6 @@ import pytest
 from dotenv import load_dotenv
 
 import threescale_api
-from tests.integration.common import HttpClient
 from threescale_api.resources import (Service, ApplicationPlan, Application,
                                       Proxy)
 
@@ -63,23 +62,8 @@ def master_api(master_url: str, master_token: str,
 
 
 @pytest.fixture(scope='module')
-def apicast_endpoint(proxy):
-    endpoint = proxy['sandbox_endpoint']
-    return endpoint
-
-
-@pytest.fixture(scope='module')
-def apicast_http_client(apicast_endpoint, apicast_params,  ssl_verify):
-    http_client = HttpClient(apicast_endpoint, ssl_verify,
-                             params=apicast_params)
-    return http_client
-
-
-@pytest.fixture(scope='module')
-def apicast_params(application, proxy):
-    user_key = application['user_key']
-    user_key_param = proxy['auth_user_key']
-    return {user_key_param: user_key}
+def apicast_http_client(application, ssl_verify):
+    return application.api_client(verify=ssl_verify)
 
 
 @pytest.fixture(scope='module')
