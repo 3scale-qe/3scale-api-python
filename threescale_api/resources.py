@@ -461,6 +461,17 @@ class Policies(DefaultClient):
     def url(self) -> str:
         return f"{self.parent.url}/{self._entity_collection}"
 
+    def append(self, policy):
+        params = self.list().entity
+        params["policies_config"].append(policy)
+        params["service_id"] = self.parent["service_id"]
+        self.update(params=params)
+
+    def insert(self, index, policy):
+        params = self.list().entity
+        params["policies_config"].insert(index, policy)
+        params["service_id"] = self.parent["service_id"]
+        self.update(params=params)
 
 class OIDCConfigs(DefaultClient):
     @property
