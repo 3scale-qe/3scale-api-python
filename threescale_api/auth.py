@@ -48,3 +48,10 @@ class AppIdKeyAuth(BaseClientAuth):
         return (
             self.app["application_id"],
             self.app.keys.list()["keys"][0]["key"]["value"])
+
+class BasicAuth(BaseClientAuth):
+    """Provides Basic Authentication for api client calls."""
+
+    @property
+    def credentials(self):
+        return (self.app["user_key"], "")

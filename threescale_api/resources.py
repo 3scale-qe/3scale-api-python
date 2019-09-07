@@ -608,6 +608,7 @@ class Proxy(DefaultResource):
 class Service(DefaultResource):
     AUTH_USER_KEY = "1"
     AUTH_APP_ID_KEY = "2"
+    AUTH_BASIC = "3"
     AUTH_OIDC = "oidc"
 
     def __init__(self, entity_name='system_name', **kwargs):
@@ -678,6 +679,9 @@ class Application(DefaultResource):
 
         if auth_mode == Service.AUTH_USER_KEY:
             return auth.UserKeyAuth(self, creds_location)
+
+        if auth_mode == Service.AUTH_BASIC:
+            return auth.BasicAuth(self, creds_location)
 
         if auth_mode == Service.AUTH_APP_ID_KEY:
             return auth.AppIdKeyAuth(self, creds_location)
