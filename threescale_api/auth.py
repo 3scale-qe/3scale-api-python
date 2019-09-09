@@ -41,6 +41,13 @@ class UserKeyAuth(BaseClientAuth):
             self.app.service.proxy.list()["auth_user_key"],
             self.app["user_key"])
 
+    def __call__(self, r):
+        if self.location == "authorization":
+            auth = requests.auth.HTTPBasicAuth(self.credentials[1], "")
+            return auth(r)
+        return super().__call__(r)
+
+
 class AppIdKeyAuth(BaseClientAuth):
     "Provides app_id/app_key pair based authentication for api client calls"
     @property
