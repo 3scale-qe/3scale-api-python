@@ -1,4 +1,5 @@
 import logging
+import weakref
 from typing import Dict, List, Optional, TYPE_CHECKING, Union
 
 import requests
@@ -12,6 +13,7 @@ log = logging.getLogger(__name__)
 
 
 class DefaultClient:
+    _instances = {}
     def __init__(self, parent=None, instance_klass=None,
                  entity_name: str = None, entity_collection: str = None):
         """Creates instance of the default client
@@ -156,7 +158,13 @@ class DefaultClient:
         Returns(DefaultResource): Default resource
         """
         log.debug(self._log_message("[READ] Read ", entity_id=entity_id))
-        return self._instance_klass(client=self, entity_id=entity_id)
+
+        inst = self._instances.get(entity_id, lambda: None)()
+        if inst is None:
+            inst = self._instance_klass(client=self, entity_id=entity_id)
+            self._instances[entity_id] = weakref.ref(inst)
+
+        return inst
 
     def read_by_name(self, name: str, **kwargs) -> 'DefaultResource':
         """Read resource by name
