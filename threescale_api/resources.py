@@ -660,6 +660,7 @@ class Application(DefaultResource):
             Service.AUTH_USER_KEY: auth.UserKeyAuth,
             Service.AUTH_APP_ID_KEY: auth.AppIdKeyAuth
         }
+        self._api_client_verify = None
 
     @property
     def account(self) -> 'Account':
@@ -704,9 +705,27 @@ class Application(DefaultResource):
         :param verify: Whether to do ssl verification or not, by default doesn't change whatt's in session, defaults to None
 
         :return: threescale.utils.HttpClient
+
+        Instance property api_client_verify of Application can change default of verify param
+        to avoid passing non-default value to multiple api_client calls. It is applied whenever
+        verify param is kept unchanged (None).
         """
 
+        if verify is None:
+            verify = self.api_client_verify
+
         return utils.HttpClient(self, endpoint, session, verify)
+
+    @property
+    def api_client_verify(self) -> bool:
+        """Allows to change defaults of SSL verification for api_client (and
+        test_request); default: None - do not alter library default"""
+
+        return self._api_client_verify
+
+    @api_client_verify.setter
+    def set_api_client_verify(self, value: bool):
+        self._api_client_verify = value
 
     def test_request(self, relpath=None, verify: bool = None):
         """Quick call to do test request against configured service. This is
@@ -716,6 +735,9 @@ class Application(DefaultResource):
         :param verify: SSL verification
 
         :return: requests.Response
+
+        Instance attribute api_client_verify of Application can change default of verify param
+        to avoid passing non-default value to multiple test_request calls.
         """
         proxy = self.service.proxy.list().entity
 
