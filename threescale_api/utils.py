@@ -49,8 +49,9 @@ class HttpClient:
         self._endpoint = endpoint
         if session is None:
             session = requests.Session()
-            retry = Retry(total=3, backoff_factor=2, status_forcelist=(503,),
+            retry = Retry(total=4, status_forcelist=(503,), raise_on_status=False,
                           respect_retry_after_header=False)
+
             adapter = HTTPAdapter(max_retries=retry)
             session.mount("https://", adapter)
             session.mount("http://", adapter)
