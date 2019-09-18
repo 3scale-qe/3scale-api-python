@@ -385,6 +385,10 @@ class Proxies(DefaultClient):
     def url(self) -> str:
         return self.parent.url + '/proxy'
 
+    @property
+    def oidc(self) -> 'OIDCConfig':
+        return OIDCConfig(self)
+
 
 class ProxyConfigs(DefaultClient):
     def __init__(self, *args, entity_name='proxy_config', entity_collection='configs',
@@ -477,11 +481,14 @@ class Policies(DefaultClient):
         params["service_id"] = self.parent["service_id"]
         self.update(params=params)
 
-class OIDCConfigs(DefaultClient):
+
+class OIDCConfig(DefaultClient):
     @property
     def url(self) -> str:
         return self.parent.url + '/oidc_configuration'
 
+    def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
+        return self.rest.patch(url=self.url, json=params, **kwargs)
 
 # Resources
 
@@ -629,10 +636,6 @@ class Service(DefaultResource):
     def mapping_rules(self) -> 'MappingRules':
         return MappingRules(parent=self, instance_klass=MappingRule)
 
-    @property
-    def oidc(self):
-        return OIDCConfigs(self)
-
 
 class ActiveDoc(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
@@ -683,7 +686,7 @@ class Application(DefaultResource):
             return auth.AppIdKeyAuth(self, creds_location)
 
         if auth_mode == Service.AUTH_OIDC:
-            raise NotImplementedError("OpenID authentication not implemented yet.")
+            return None
 
         raise errors.ThreeScaleApiError(
             f"Unknown credentials for configuration {auth_mode}/{creds_location}")

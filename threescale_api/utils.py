@@ -49,12 +49,9 @@ class HttpClient:
         self._endpoint = endpoint
         if session is None:
             session = requests.Session()
-            retry = Retry(total=4, status_forcelist=(503,), raise_on_status=False,
-                          respect_retry_after_header=False)
+            self.retry_for_session(session)
 
-            adapter = HTTPAdapter(max_retries=retry)
-            session.mount("https://", adapter)
-            session.mount("http://", adapter)
+        if app.authobj is not None:
             session.auth = app.authobj
 
         if verify is not None:
@@ -63,6 +60,14 @@ class HttpClient:
         self._session = session
 
         logger.debug("[HTTP CLIENT] New instance: %s", self._baseurl)
+
+    @staticmethod
+    def retry_for_session(session: requests.Session, total: int = 4):
+        retry = Retry(total=total, backoff_factor=1, status_forcelist=(503,), raise_on_status=True,
+                      respect_retry_after_header=False)
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount("https://", adapter)
+        session.mount("http://", adapter)
 
     @property
     def _baseurl(self) -> str:
