@@ -417,7 +417,7 @@ class ProxyConfigs(DefaultClient):
     def list(self, **kwargs):
         if "env" in kwargs:
             self._env = kwargs["env"]
-            del(kwargs["env"])
+            del (kwargs["env"])
         return super().list(**kwargs)
 
     def promote(self, version: int = 1, from_env: str = 'sandbox', to_env: str = 'production',
@@ -489,6 +489,7 @@ class OIDCConfig(DefaultClient):
 
     def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
         return self.rest.patch(url=self.url, json=params, **kwargs)
+
 
 # Resources
 
@@ -655,6 +656,10 @@ class Tenant(DefaultResource):
 class Application(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
+        self.authobj_factories = {
+            Service.AUTH_USER_KEY: auth.UserKeyAuth,
+            Service.AUTH_APP_ID_KEY: auth.AppIdKeyAuth
+        }
 
     @property
     def account(self) -> 'Account':
@@ -677,19 +682,14 @@ class Application(DefaultResource):
 
         svc = self.service
         auth_mode = svc["backend_version"]
-        creds_location = svc.proxy.list().entity["credentials_location"]
 
-        if auth_mode == Service.AUTH_USER_KEY:
-            return auth.UserKeyAuth(self, creds_location)
+        if auth_mode not in self.authobj_factories:
+            raise errors.ThreeScaleApiError(f"Unknown credentials for configuration {auth_mode}")
 
-        if auth_mode == Service.AUTH_APP_ID_KEY:
-            return auth.AppIdKeyAuth(self, creds_location)
+        return self.authobj_factories[auth_mode](self)
 
-        if auth_mode == Service.AUTH_OIDC:
-            return None
-
-        raise errors.ThreeScaleApiError(
-            f"Unknown credentials for configuration {auth_mode}/{creds_location}")
+    def register_auth(self, auth_mode: str, factory):
+        self.authobj_factories[auth_mode] = factory
 
     def api_client(self, endpoint: str = "sandbox_endpoint",
                    session: requests.Session = None, verify: bool = None) -> 'utils.HttpClient':
@@ -725,6 +725,7 @@ class Application(DefaultResource):
         client = self.api_client(verify=verify)
 
         return client.get(relpath)
+
 
 class Account(DefaultResource):
     def __init__(self, entity_name='org_name', **kwargs):
