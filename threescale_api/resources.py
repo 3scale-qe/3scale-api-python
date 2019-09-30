@@ -386,8 +386,8 @@ class Proxies(DefaultClient):
         return self.parent.url + '/proxy'
 
     @property
-    def oidc(self) -> 'OIDCConfig':
-        return OIDCConfig(self)
+    def oidc(self) -> 'OIDCConfigs':
+        return OIDCConfigs(self)
 
 
 class ProxyConfigs(DefaultClient):
@@ -417,7 +417,7 @@ class ProxyConfigs(DefaultClient):
     def list(self, **kwargs):
         if "env" in kwargs:
             self._env = kwargs["env"]
-            del (kwargs["env"])
+            del(kwargs["env"])
         return super().list(**kwargs)
 
     def promote(self, version: int = 1, from_env: str = 'sandbox', to_env: str = 'production',
@@ -482,14 +482,13 @@ class Policies(DefaultClient):
         self.update(params=params)
 
 
-class OIDCConfig(DefaultClient):
+class OIDCConfigs(DefaultClient):
     @property
     def url(self) -> str:
         return self.parent.url + '/oidc_configuration'
 
     def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
         return self.rest.patch(url=self.url, json=params, **kwargs)
-
 
 # Resources
 
@@ -656,7 +655,7 @@ class Tenant(DefaultResource):
 class Application(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
-        self.authobj_factories = {
+        self._auth_objects = {
             Service.AUTH_USER_KEY: auth.UserKeyAuth,
             Service.AUTH_APP_ID_KEY: auth.AppIdKeyAuth
         }
@@ -683,13 +682,13 @@ class Application(DefaultResource):
         svc = self.service
         auth_mode = svc["backend_version"]
 
-        if auth_mode not in self.authobj_factories:
+        if auth_mode not in self._auth_objects:
             raise errors.ThreeScaleApiError(f"Unknown credentials for configuration {auth_mode}")
 
-        return self.authobj_factories[auth_mode](self)
+        return self._auth_objects[auth_mode](self)
 
     def register_auth(self, auth_mode: str, factory):
-        self.authobj_factories[auth_mode] = factory
+        self._auth_objects[auth_mode] = factory
 
     def api_client(self, endpoint: str = "sandbox_endpoint",
                    session: requests.Session = None, verify: bool = None) -> 'utils.HttpClient':
@@ -725,7 +724,6 @@ class Application(DefaultResource):
         client = self.api_client(verify=verify)
 
         return client.get(relpath)
-
 
 class Account(DefaultResource):
     def __init__(self, entity_name='org_name', **kwargs):

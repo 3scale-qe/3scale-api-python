@@ -4,7 +4,6 @@ import abc
 
 import requests
 
-
 class BaseClientAuth(requests.auth.AuthBase):
     "Abstract class for authentication of api client"
     def __init__(self, app):
