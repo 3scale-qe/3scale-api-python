@@ -469,9 +469,9 @@ class Policies(DefaultClient):
     def url(self) -> str:
         return f"{self.parent.url}/{self._entity_collection}"
 
-    def append(self, policy):
+    def append(self, *policies):
         params = self.list().entity
-        params["policies_config"].append(policy)
+        params["policies_config"].extend(policies)
         params["service_id"] = self.parent["service_id"]
         self.update(params=params)
 
