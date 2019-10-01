@@ -51,7 +51,7 @@ class HttpClient:
             session = requests.Session()
             self.retry_for_session(session)
 
-        session.auth = app.authobj
+            session.auth = app.authobj
 
         if verify is not None:
             session.verify = verify
