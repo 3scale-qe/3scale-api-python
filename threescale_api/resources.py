@@ -385,6 +385,10 @@ class Proxies(DefaultClient):
     def url(self) -> str:
         return self.parent.url + '/proxy'
 
+    @property
+    def oidc(self) -> 'OIDCConfigs':
+        return OIDCConfigs(self)
+
 
 class ProxyConfigs(DefaultClient):
     def __init__(self, *args, entity_name='proxy_config', entity_collection='configs',
@@ -477,11 +481,14 @@ class Policies(DefaultClient):
         params["service_id"] = self.parent["service_id"]
         self.update(params=params)
 
+
 class OIDCConfigs(DefaultClient):
     @property
     def url(self) -> str:
         return self.parent.url + '/oidc_configuration'
 
+    def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
+        return self.rest.patch(url=self.url, json=params, **kwargs)
 
 # Resources
 
@@ -629,10 +636,6 @@ class Service(DefaultResource):
     def mapping_rules(self) -> 'MappingRules':
         return MappingRules(parent=self, instance_klass=MappingRule)
 
-    @property
-    def oidc(self):
-        return OIDCConfigs(self)
-
 
 class ActiveDoc(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
@@ -652,6 +655,10 @@ class Tenant(DefaultResource):
 class Application(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
+        self._auth_objects = {
+            Service.AUTH_USER_KEY: auth.UserKeyAuth,
+            Service.AUTH_APP_ID_KEY: auth.AppIdKeyAuth
+        }
 
     @property
     def account(self) -> 'Account':
@@ -674,19 +681,14 @@ class Application(DefaultResource):
 
         svc = self.service
         auth_mode = svc["backend_version"]
-        creds_location = svc.proxy.list().entity["credentials_location"]
 
-        if auth_mode == Service.AUTH_USER_KEY:
-            return auth.UserKeyAuth(self, creds_location)
+        if auth_mode not in self._auth_objects:
+            raise errors.ThreeScaleApiError(f"Unknown credentials for configuration {auth_mode}")
 
-        if auth_mode == Service.AUTH_APP_ID_KEY:
-            return auth.AppIdKeyAuth(self, creds_location)
+        return self._auth_objects[auth_mode](self)
 
-        if auth_mode == Service.AUTH_OIDC:
-            raise NotImplementedError("OpenID authentication not implemented yet.")
-
-        raise errors.ThreeScaleApiError(
-            f"Unknown credentials for configuration {auth_mode}/{creds_location}")
+    def register_auth(self, auth_mode: str, factory):
+        self._auth_objects[auth_mode] = factory
 
     def api_client(self, endpoint: str = "sandbox_endpoint",
                    session: requests.Session = None, verify: bool = None) -> 'utils.HttpClient':
