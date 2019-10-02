@@ -6,9 +6,11 @@ import requests
 
 class BaseClientAuth(requests.auth.AuthBase):
     "Abstract class for authentication of api client"
-    def __init__(self, app):
+    def __init__(self, app, location=None):
         self.app = app
-        self.location = app.service.proxy.list().entity["credentials_location"]
+        self.location = location
+        if location is None:
+            self.location = app.service.proxy.list().entity["credentials_location"]
 
     @property
     @abc.abstractmethod
