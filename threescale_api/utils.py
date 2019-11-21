@@ -62,7 +62,7 @@ class HttpClient:
 
     @staticmethod
     def retry_for_session(session: requests.Session, total: int = 4):
-        retry = Retry(total=total, backoff_factor=1, status_forcelist=(503,), raise_on_status=False,
+        retry = Retry(total=total, backoff_factor=1, status_forcelist=(503, 404), raise_on_status=False,
                       respect_retry_after_header=False)
         adapter = HTTPAdapter(max_retries=retry)
         session.mount("https://", adapter)
