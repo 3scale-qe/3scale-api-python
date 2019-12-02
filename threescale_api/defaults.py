@@ -167,6 +167,7 @@ class DefaultClient:
         Returns:
 
         """
+        print(self.__class__)
         for item in self._list(**kwargs):
             if item.entity_name and item.entity_name == name:
                 return item

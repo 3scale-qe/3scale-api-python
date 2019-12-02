@@ -60,6 +60,18 @@ def test_service_proxy_promote(service, proxy):
     assert res['content'] is not None
 
 
+def test_service_proxy_deploy(service, proxy):
+    # this will not propagate to proxy config but it allows deployment
+    proxy.update(params=dict(support_email='test@example.com'))
+    proxy.deploy()
+    res = proxy.configs.list(env='staging')
+    proxy_config = res.entity['proxy_configs'][-1]['proxy_config']
+    assert proxy_config is not None
+    assert proxy_config['environment'] == 'sandbox'
+    assert proxy_config['content'] is not None
+    assert proxy_config['version'] > 1
+
+
 def test_service_list_configs(service, proxy):
     res = proxy.configs.list(env='staging')
     assert res

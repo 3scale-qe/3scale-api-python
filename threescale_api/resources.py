@@ -51,7 +51,7 @@ class Limits(DefaultClient):
         self._metric = metric
 
     @property
-    def metric(self) -> 'Metric':
+    def metric(self):
         return self._metric
 
     @property
@@ -384,6 +384,14 @@ class Proxies(DefaultClient):
     @property
     def url(self) -> str:
         return self.parent.url + '/proxy'
+    
+    def deploy(self) -> 'Proxy':
+        log.info(f"[DEPLOY] {self._entity_name} to Staging")
+        url = f'{self.url}/deploy'
+        response = self.rest.post(url)
+        instance = self._create_instance(response=response)
+        return instance
+
 
     @property
     def oidc(self) -> 'OIDCConfigs':
@@ -429,8 +437,7 @@ class ProxyConfigs(DefaultClient):
         response = self.rest.post(url, json=params, **kwargs)
         instance = self._create_instance(response=response)
         return instance
-
-
+    
 class SettingsClient(DefaultClient):
     def __init__(self, *args, entity_name='settings', **kwargs):
         super().__init__(*args, entity_name=entity_name, **kwargs)
@@ -491,6 +498,31 @@ class OIDCConfigs(DefaultClient):
     def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
         return self.rest.patch(url=self.url, json=params, **kwargs)
 
+class Backends(DefaultClient):
+    def __init__(self, *args, entity_name='backend_api', entity_collection='backend_apis', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.admin_api_url + '/backend_apis'
+
+class BackendMetrics(Metrics):
+    def __init__(self, *args, entity_name='metric', entity_collection='metrics', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+class BackendMappingRules(MappingRules):
+    def __init__(self, *args, entity_name='mapping_rule', entity_collection='mapping_rules', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+class BackendServices(Services):
+    def __init__(self, *args, entity_name='backend_usage', entity_collection='backend_usages', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+    @property
+    def url(self) -> str:
+        return self.parent.url + '/backend_usages'
 
 class PoliciesRegistry(DefaultClient):
     def __init__(self, *args, entity_name='policy', entity_collection='policies', **kwargs):
@@ -627,6 +659,8 @@ class Proxy(DefaultResource):
     def policies_registry(self) -> PoliciesRegistry:
         return PoliciesRegistry(parent=self, instance_klass=PolicyRegistry)
 
+    def deploy(self) -> 'Proxy':
+        return self.client.deploy()
 
 class Service(DefaultResource):
     AUTH_USER_KEY = "1"
@@ -656,6 +690,12 @@ class Service(DefaultResource):
     def policies_registry(self) -> PoliciesRegistry:
         return PoliciesRegistry(parent=self, instance_klass=PoliciesRegistry)
 
+    def oidc(self):
+        return OIDCConfigs(self)
+
+    @property
+    def backendservices(self):
+        return BackendServices(parent=self, instance_klass=BackendService)
 
 class ActiveDoc(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
@@ -813,6 +853,37 @@ class PricingRule(DefaultResource):
     @property
     def app_plan(self) -> ApplicationPlan:
         return self.parent
+
+
+class Backend(DefaultResource):
+    def __init__(self, entity_name='system_name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+    @property
+    def metrics(self) -> Metrics:
+        return BackendMetrics(parent=self, instance_klass=Metric)
+
+    @property
+    def mapping_rules(self) -> 'MappingRules':
+        return BackendMappingRules(parent=self, instance_klass=BackendMappingRule)
+
+    @property
+    def services(self) -> 'Services':
+        return BackendServices(parent=self, instance_klass=Service)
+
+
+class BackendMetric(Metric):
+    def __init__(self, entity_name='system_name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class BackendMappingRule(MappingRule):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+class BackendService(Service):
+    def __init__(self, entity_name='', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
 
 
 def _extract_entity_id(entity: Union['DefaultResource', int]):

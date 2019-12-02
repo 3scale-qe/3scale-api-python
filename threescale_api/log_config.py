@@ -1,6 +1,9 @@
 import logging
 from logging.config import dictConfig
 
+#LEVEL=logging.DEBUG
+LEVEL=logging.INFO
+
 logging_config = dict(
     version=1,
     formatters={
@@ -13,17 +16,17 @@ logging_config = dict(
         'h': {
             'class': 'logging.StreamHandler',
             'formatter': 'f',
-            'level': logging.DEBUG
+            'level': LEVEL
         }
     },
     loggers={
         'threescale_api': {
             'handlers': ['h'],
-            'level': logging.DEBUG
+            'level': LEVEL
         },
         'tests': {
             'handlers': ['h'],
-            'level': logging.DEBUG
+            'level': LEVEL
         }
     },
 )
