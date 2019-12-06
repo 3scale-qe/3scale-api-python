@@ -724,7 +724,7 @@ class Application(DefaultResource):
         return self._api_client_verify
 
     @api_client_verify.setter
-    def set_api_client_verify(self, value: bool):
+    def api_client_verify(self, value: bool):
         self._api_client_verify = value
 
     def test_request(self, relpath=None, verify: bool = None):
