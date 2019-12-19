@@ -12,11 +12,6 @@ class BaseClientAuth(requests.auth.AuthBase):
         if location is None:
             self.location = app.service.proxy.list().entity["credentials_location"]
 
-    @property
-    @abc.abstractmethod
-    def credentials(self):
-        "returns credentials pair as tuple"
-
     def __call__(self, request):
         credentials = self.credentials
 
@@ -37,10 +32,10 @@ class BaseClientAuth(requests.auth.AuthBase):
 
 class UserKeyAuth(BaseClientAuth):
     "Provides user_key authentication for api client calls"
-    @property
-    def credentials(self):
-        return {
-            self.app.service.proxy.list()["auth_user_key"]: self.app["user_key"]}
+    def __init__(self, app, location=None):
+        super(UserKeyAuth, self).__init__(app, location)
+        self.credentials = {
+             self.app.service.proxy.list()["auth_user_key"]: self.app["user_key"]}
 
     def __call__(self, request):
         if self.location == "authorization":
@@ -51,11 +46,12 @@ class UserKeyAuth(BaseClientAuth):
 
 class AppIdKeyAuth(BaseClientAuth):
     "Provides app_id/app_key pair based authentication for api client calls"
-    @property
-    def credentials(self):
-        return {
+    def __init__(self, app, location=None):
+        super(AppIdKeyAuth, self).__init__(app, location)
+        self.credentials = {
             "app_id": self.app["application_id"],
             "app_key": self.app.keys.list()["keys"][0]["key"]["value"]}
+
 
     def __call__(self, request):
         if self.location == "authorization":
