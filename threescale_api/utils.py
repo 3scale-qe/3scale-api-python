@@ -61,7 +61,7 @@ class HttpClient:
         logger.debug("[HTTP CLIENT] New instance: %s", self._baseurl)
 
     @staticmethod
-    def retry_for_session(session: requests.Session, total: int = 4):
+    def retry_for_session(session: requests.Session, total: int = 8):
         retry = Retry(total=total, backoff_factor=1, status_forcelist=(503, 404), raise_on_status=False,
                       respect_retry_after_header=False)
         adapter = HTTPAdapter(max_retries=retry)
