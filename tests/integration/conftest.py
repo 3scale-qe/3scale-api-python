@@ -350,12 +350,3 @@ def backend_metric(backend, metric_params) -> Metric:
     resource = backend.metrics.create(params=metric_params)
     yield resource
     cleanup(resource)
-
-@pytest.fixture(scope='module')
-def backend_mapping_rule(backend, backend_mapping_rule_params) -> MappingRule:
-    """
-    Fixture for getting mapping rule for backend.
-    """
-    resource = backend.mapping_rules.create(params=backend_mapping_rule_params)
-    yield resource
-    cleanup(resource)

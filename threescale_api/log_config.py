@@ -2,7 +2,7 @@ import logging
 from logging.config import dictConfig
 
 #LEVEL=logging.DEBUG
-LEVEL=logging.INFO
+LEVEL = logging.INFO
 
 logging_config = dict(
     version=1,

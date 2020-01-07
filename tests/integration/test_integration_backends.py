@@ -47,4 +47,4 @@ def test_backend_metrics_list(backend, backend_metric):
 
 
 def test_backend_mapping_rules_list(backend, backend_mapping_rule):
-    assert len(backend.mapping_rules.list()) > 0
+    assert backend.mapping_rules.list()

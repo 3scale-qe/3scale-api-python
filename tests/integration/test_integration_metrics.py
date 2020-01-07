@@ -69,10 +69,10 @@ def test_should_apicast_return_403_when_metric_is_disabled(
     for rule in rules:
         rule.delete()
     rule = create_mapping_rule(metric, 'GET', '/foo/bah/')
-    
+
     update_proxy_endpoint(service, backendservice)
 
-    params = get_user_key_from_application(app, proxy)
+    # params = get_user_key_from_application(app, proxy)
     client = app.api_client(verify=ssl_verify)
     response = make_request(client, rule['pattern'])
     assert response.status_code == 403
@@ -114,7 +114,7 @@ def test_should_apicast_return_429_when_limits_exceeded(
     application_plan.limits(metric).create(params=dict(period='day', value=1))
 
     rule = create_mapping_rule(metric, 'GET', '/limits/exceeded/')
-    
+
     update_proxy_endpoint(service, backendservice)
 
     response = apicast_http_client.get(path=rule['pattern'])
@@ -122,4 +122,3 @@ def test_should_apicast_return_429_when_limits_exceeded(
         response = apicast_http_client.get(path=rule['pattern'])
 
     assert response.status_code == 429
-

@@ -384,7 +384,7 @@ class Proxies(DefaultClient):
     @property
     def url(self) -> str:
         return self.parent.url + '/proxy'
-    
+
     def deploy(self) -> 'Proxy':
         log.info(f"[DEPLOY] {self._entity_name} to Staging")
         url = f'{self.url}/deploy'
@@ -437,7 +437,7 @@ class ProxyConfigs(DefaultClient):
         response = self.rest.post(url, json=params, **kwargs)
         instance = self._create_instance(response=response)
         return instance
-    
+
 class SettingsClient(DefaultClient):
     def __init__(self, *args, entity_name='settings', **kwargs):
         super().__init__(*args, entity_name=entity_name, **kwargs)
