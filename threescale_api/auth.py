@@ -13,6 +13,15 @@ class BaseClientAuth(requests.auth.AuthBase):
         self.location = location
         if location is None:
             self.location = app.service.proxy.list().entity["credentials_location"]
+        self._credentials = None
+
+    @property
+    def credentials(self) -> Optional[Dict]:
+        return self._credentials
+
+    @credentials.setter
+    def credentials(self, value: Dict) -> None:
+        self._credentials = value
 
     def __call__(self, request):
         credentials = self.credentials
@@ -37,7 +46,7 @@ class UserKeyAuth(BaseClientAuth):
 
     def __init__(self, app, location=None):
         super(UserKeyAuth, self).__init__(app, location)
-        self.credentials = {
+        self._credentials = {
             self.app.service.proxy.list()["auth_user_key"]: self.app["user_key"]
         }
 
@@ -53,7 +62,7 @@ class AppIdKeyAuth(BaseClientAuth):
 
     def __init__(self, app, location=None):
         super(AppIdKeyAuth, self).__init__(app, location)
-        self.credentials = {
+        self._credentials = {
             "app_id": self.app["application_id"],
             "app_key": self.app.keys.list()["keys"][0]["key"]["value"]
         }

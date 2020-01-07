@@ -1,4 +1,5 @@
 import logging
+import functools
 from typing import Dict, Union
 
 import requests
@@ -6,13 +7,13 @@ import requests
 from threescale_api import auth
 from threescale_api import utils
 from threescale_api import errors
-from threescale_api.defaults import DefaultClient, DefaultPlanClient, DefaultPlanResource, \
-    DefaultResource, DefaultStateClient, DefaultUserResource
+from threescale_api.defaults import CRUDClient, DefaultPlanClient, DefaultPlanResource, \
+    CRUDResource, DefaultStateClient, DefaultUserResource
 
 log = logging.getLogger(__name__)
 
 
-class Services(DefaultClient):
+class Services(CRUDClient):
     def __init__(self, *args, entity_name='service', entity_collection='services', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -22,7 +23,7 @@ class Services(DefaultClient):
         return self.threescale_client.admin_api_url + '/services'
 
 
-class MappingRules(DefaultClient):
+class MappingRules(CRUDClient):
     def __init__(self, *args, entity_name='mapping_rule', entity_collection='mapping_rules',
                  **kwargs):
         super().__init__(*args, entity_name=entity_name,
@@ -33,7 +34,7 @@ class MappingRules(DefaultClient):
         return self.parent.url + '/mapping_rules'
 
 
-class Metrics(DefaultClient):
+class Metrics(CRUDClient):
     def __init__(self, *args, entity_name='metric', entity_collection='metrics', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -43,23 +44,23 @@ class Metrics(DefaultClient):
         return self.parent.url + '/metrics'
 
 
-class Limits(DefaultClient):
+class Limits(CRUDClient):
     def __init__(self, *args, entity_name='limit', entity_collection='limits', metric=None,
                  **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
-        self._metric = metric
+        self.__metric = metric
 
     @property
     def metric(self) -> 'Metric':
-        return self._metric
+        return self.__metric
 
     @property
     def application_plan(self) -> 'ApplicationPlan':
         return self.parent
 
     def __call__(self, metric: 'Metric' = None) -> 'Limits':
-        self._metric = metric
+        self.__metric = metric
         return self
 
     @property
@@ -74,23 +75,23 @@ class Limits(DefaultClient):
         return instance
 
 
-class PricingRules(DefaultClient):
+class PricingRules(CRUDClient):
     def __init__(self, *args, entity_name='pricing_rule', entity_collection='pricing_rules',
                  metric: 'Metric' = None, **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
-        self._metric = metric
+        self.__metric = metric
 
     @property
     def metric(self) -> 'Metric':
-        return self._metric
+        return self.__metric
 
     @property
     def application_plan(self) -> 'ApplicationPlan':
         return self.parent
 
     def __call__(self, metric: 'Metric' = None) -> 'PricingRules':
-        self._metric = metric
+        self.__metric = metric
         return self
 
     @property
@@ -98,7 +99,7 @@ class PricingRules(DefaultClient):
         return self.application_plan.plans_url + f'/metrics/{self.metric.entity_id}/pricing_rules'
 
 
-class Methods(DefaultClient):
+class Methods(CRUDClient):
     def __init__(self, *args, entity_name='method', entity_collection='methods', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -122,7 +123,7 @@ class ApplicationPlans(DefaultPlanClient):
         return self.threescale_client.admin_api_url + '/application_plans'
 
 
-class ApplicationPlanFeatures(DefaultClient):
+class ApplicationPlanFeatures(CRUDClient):
     def __init__(self, *args, entity_name='feature', entity_collection='features', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -132,7 +133,7 @@ class ApplicationPlanFeatures(DefaultClient):
         return self.parent.url + '/features'
 
 
-class AccountUsers(DefaultClient):
+class AccountUsers(CRUDClient):
     def __init__(self, *args, entity_name='user', entity_collection='users', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -283,7 +284,7 @@ class Applications(DefaultStateClient):
         self.set_state(entity_id=entity_id, state='resume', **kwargs)
 
 
-class DevPortalAuthenticationProvider(DefaultClient):
+class DevPortalAuthenticationProvider(CRUDClient):
     def __init__(self, *args, entity_name='authentication_provider',
                  entity_collection='authentication_providers', **kwargs):
         super().__init__(*args, entity_name=entity_name,
@@ -294,7 +295,7 @@ class DevPortalAuthenticationProvider(DefaultClient):
         return self.threescale_client.admin_api_url + '/authentication_providers'
 
 
-class ApplicationReferrerFilters(DefaultClient):
+class ApplicationReferrerFilters(CRUDClient):
     def __init__(self, *args, entity_name='application', entity_collection='applications',
                  **kwargs):
         super().__init__(*args, entity_name=entity_name,
@@ -305,7 +306,7 @@ class ApplicationReferrerFilters(DefaultClient):
         return self.parent.url + '/referrer_filters'
 
 
-class ApplicationKeys(DefaultClient):
+class ApplicationKeys(CRUDClient):
     def __init__(self, *args, entity_name='application', entity_collection='applications',
                  **kwargs):
         super().__init__(*args, entity_name=entity_name,
@@ -316,7 +317,7 @@ class ApplicationKeys(DefaultClient):
         return self.parent.url + '/keys'
 
 
-class Providers(DefaultClient):
+class Providers(CRUDClient):
     def __init__(self, *args, entity_name='user', entity_collection='users', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -333,7 +334,7 @@ class Providers(DefaultClient):
         return utils.extract_response(response=response)
 
 
-class ActiveDocs(DefaultClient):
+class ActiveDocs(CRUDClient):
     def __init__(self, *args, entity_name='api_doc', entity_collection='api_docs', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -343,7 +344,7 @@ class ActiveDocs(DefaultClient):
         return self.threescale_client.admin_api_url + '/active_docs'
 
 
-class Analytics(DefaultClient):
+class Analytics(CRUDClient):
     def _list_by_resource(self, resource_id: int, resource_type, metric_name: str = 'hits',
                           since=None, period: str = 'year', **kwargs):
         log.info(f"List analytics by {resource_type} ({resource_id}) f"
@@ -367,7 +368,7 @@ class Analytics(DefaultClient):
         return self._list_by_resource(resource_id=app_id, resource_type='services', **kwargs)
 
 
-class Tenants(DefaultClient):
+class Tenants(CRUDClient):
     def __init__(self, *args, entity_name='tenant', entity_collection='tenants', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -377,7 +378,7 @@ class Tenants(DefaultClient):
         return self.threescale_client.admin_api_url + '/tenants'
 
 
-class Proxies(DefaultClient):
+class Proxies(CRUDClient):
     def __init__(self, *args, entity_name='proxy', **kwargs):
         super().__init__(*args, entity_name=entity_name, **kwargs)
 
@@ -390,7 +391,7 @@ class Proxies(DefaultClient):
         return OIDCConfigs(self)
 
 
-class ProxyConfigs(DefaultClient):
+class ProxyConfigs(CRUDClient):
     def __init__(self, *args, entity_name='proxy_config', entity_collection='configs',
                  env: str = None, **kwargs):
         super().__init__(*args, entity_name=entity_name,
@@ -431,7 +432,7 @@ class ProxyConfigs(DefaultClient):
         return instance
 
 
-class SettingsClient(DefaultClient):
+class SettingsClient(CRUDClient):
     def __init__(self, *args, entity_name='settings', **kwargs):
         super().__init__(*args, entity_name=entity_name, **kwargs)
 
@@ -440,7 +441,7 @@ class SettingsClient(DefaultClient):
         return self.threescale_client.admin_api_url + '/settings'
 
 
-class AdminPortalAuthenticationProvider(DefaultClient):
+class AdminPortalAuthenticationProvider(CRUDClient):
     def __init__(self, *args, entity_name='authentication_provider',
                  entity_collection='authentication_providers', **kwargs):
         super().__init__(*args, entity_name=entity_name,
@@ -451,7 +452,7 @@ class AdminPortalAuthenticationProvider(DefaultClient):
         return self.threescale_client.admin_api_url + '/account/authentication_providers'
 
 
-class UserPermissionsClient(DefaultClient):
+class UserPermissionsClient(CRUDClient):
     def __init__(self, *args, entity_name='permissions', **kwargs):
         super().__init__(*args, entity_name=entity_name, **kwargs)
 
@@ -460,7 +461,7 @@ class UserPermissionsClient(DefaultClient):
         return self.threescale_client.admin_api_url + '/tenants'
 
 
-class Policies(DefaultClient):
+class Policies(CRUDClient):
     def __init__(self, *args, entity_name='policy', entity_collection='policies', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -483,12 +484,12 @@ class Policies(DefaultClient):
         return self.update(params=params)
 
 
-class OIDCConfigs(DefaultClient):
+class OIDCConfigs(CRUDClient):
     @property
     def url(self) -> str:
         return self.parent.url + '/oidc_configuration'
 
-    def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
+    def update(self, params: dict = None, **kwargs) -> 'CRUDResource':
         return self.rest.patch(url=self.url, json=params, **kwargs)
 
 
@@ -515,7 +516,7 @@ class ApplicationPlan(DefaultPlanResource):
         return PricingRules(self, metric=metric, instance_klass=PricingRule)
 
 
-class Method(DefaultResource):
+class Method(CRUDResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
@@ -528,9 +529,10 @@ class Method(DefaultResource):
         return self.metric.parent
 
 
-class Metric(DefaultResource):
+class Metric(CRUDResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
+        self.__methods = Methods(parent=self, instance_klass=Method)
 
     @property
     def service(self) -> 'Service':
@@ -538,10 +540,10 @@ class Metric(DefaultResource):
 
     @property
     def methods(self) -> 'Methods':
-        return Methods(parent=self, instance_klass=Method)
+        return self.__methods
 
 
-class MappingRule(DefaultResource):
+class MappingRule(CRUDResource):
     @property
     def proxy(self) -> 'Proxy':
         return self.parent
@@ -551,7 +553,7 @@ class MappingRule(DefaultResource):
         return self.proxy.service
 
 
-class ProxyConfig(DefaultResource):
+class ProxyConfig(CRUDResource):
     @property
     def proxy(self) -> 'Proxy':
         return self.parent
@@ -572,7 +574,7 @@ class ProxyConfig(DefaultResource):
             return super().__getitem__(key)
 
 
-class Policy(DefaultResource):
+class Policy(CRUDResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
@@ -585,7 +587,7 @@ class Policy(DefaultResource):
         return self.proxy.service
 
 
-class Proxy(DefaultResource):
+class Proxy(CRUDResource):
     @property
     def url(self) -> str:
         return self.client.url
@@ -595,73 +597,79 @@ class Proxy(DefaultResource):
         return self.parent
 
     @property
+    @functools.lru_cache
     def mapping_rules(self) -> MappingRules:
         return MappingRules(parent=self, instance_klass=MappingRule)
 
     @property
+    @functools.lru_cache
     def configs(self) -> 'ProxyConfigs':
         return ProxyConfigs(parent=self, instance_klass=ProxyConfig)
 
     @property
+    @functools.lru_cache
     def policies(self) -> 'Policies':
         return Policies(parent=self, instance_klass=Policy)
 
     @property
-    def entity_id(self):
+    def entity_id(self) -> None:
         return None
 
     def promote(self, **kwargs) -> 'Proxy':
         return self.configs.promote(**kwargs)
 
 
-class Service(DefaultResource):
+class Service(CRUDResource):
     AUTH_USER_KEY = "1"
     AUTH_APP_ID_KEY = "2"
     AUTH_OIDC = "oidc"
-
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
+        self.__app_plans = ApplicationPlans(parent=self, instance_klass=ApplicationPlan)
+        self.__metrics = Metrics(parent=self, instance_klass=Metric)
+        self.__proxies = Proxies(parent=self, instance_klass=Proxy)
+        self.__mapping_rules = MappingRules(parent=self, instance_klass=MappingRule)
 
     @property
     def app_plans(self) -> ApplicationPlans:
-        return ApplicationPlans(parent=self, instance_klass=ApplicationPlan)
+        return self.__app_plans
 
     @property
     def metrics(self) -> Metrics:
-        return Metrics(parent=self, instance_klass=Metric)
+        return self.__metrics
 
     @property
     def proxy(self) -> 'Proxies':
-        return Proxies(parent=self, instance_klass=Proxy)
+        return self.__proxies
 
     @property
     def mapping_rules(self) -> 'MappingRules':
-        return MappingRules(parent=self, instance_klass=MappingRule)
+        return self.__mapping_rules
 
 
-class ActiveDoc(DefaultResource):
+class ActiveDoc(CRUDResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
 
-class Provider(DefaultResource):
+class Provider(CRUDResource):
     def __init__(self, entity_name='org_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
 
-class Tenant(DefaultResource):
+class Tenant(CRUDResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
 
-class Application(DefaultResource):
+class Application(CRUDResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
-        self._auth_objects = {
+        self.__auth_objects = {
             Service.AUTH_USER_KEY: auth.UserKeyAuth,
             Service.AUTH_APP_ID_KEY: auth.AppIdKeyAuth
         }
-        self._api_client_verify = None
+        self.__api_client_verify = None
 
     @property
     def account(self) -> 'Account':
@@ -669,29 +677,29 @@ class Application(DefaultResource):
 
     @property
     def service(self) -> 'Service':
-        "The service to which this application is bound"
+        """The service to which this application is bound"""
         return self.threescale_client.services[self["service_id"]]
 
     @property
     def keys(self):
-        "Application keys"
-        return ApplicationKeys(parent=self, instance_klass=DefaultResource)
+        """Application keys"""
+        return ApplicationKeys(parent=self, instance_klass=CRUDResource)
 
     @property
     def authobj(self) -> requests.auth.AuthBase:
         """Returns subclass of requests.auth.BaseAuth to provide authentication
-        for queries agains 3scale service"""
+        for queries against 3scale service"""
 
         svc = self.service
         auth_mode = svc["backend_version"]
 
-        if auth_mode not in self._auth_objects:
+        if auth_mode not in self.__auth_objects:
             raise errors.ThreeScaleApiError(f"Unknown credentials for configuration {auth_mode}")
 
-        return self._auth_objects[auth_mode](self)
+        return self.__auth_objects[auth_mode](self)
 
     def register_auth(self, auth_mode: str, factory):
-        self._auth_objects[auth_mode] = factory
+        self.__auth_objects[auth_mode] = factory
 
     def api_client(self, endpoint: str = "sandbox_endpoint",
                    session: requests.Session = None, verify: bool = None) -> 'utils.HttpClient':
@@ -724,11 +732,11 @@ class Application(DefaultResource):
         """Allows to change defaults of SSL verification for api_client (and
         test_request); default: None - do not alter library default"""
 
-        return self._api_client_verify
+        return self.__api_client_verify
 
     @api_client_verify.setter
     def api_client_verify(self, value: bool):
-        self._api_client_verify = value
+        self.__api_client_verify = value
 
     def test_request(self, relpath=None, verify: bool = None):
         """Quick call to do test request against configured service. This is
@@ -753,23 +761,26 @@ class Application(DefaultResource):
 class Account(DefaultResource):
     def __init__(self, entity_name='org_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
+        self.__apps = Applications(parent=self, instance_klass=Application)
+        self.__users = AccountUsers(parent=self, instance_klass=AccountUser)
 
     @property
     def applications(self) -> Applications:
-        return Applications(parent=self, instance_klass=Application)
+        return self.__apps
 
     @property
     def users(self) -> AccountUsers:
-        return AccountUsers(parent=self, instance_klass=AccountUser)
+        return self.__users
 
 
-class UserPermissions(DefaultResource):
+class UserPermissions(CRUDResource):
     pass
 
 
 class AccountUser(DefaultUserResource):
     def __init__(self, entity_name='username', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
+        self.__permissions = UserPermissionsClient(parent=self, instance_klass=UserPermissions)
 
     @property
     def account(self) -> 'Account':
@@ -777,27 +788,27 @@ class AccountUser(DefaultUserResource):
 
     @property
     def permissions(self) -> 'UserPermissionsClient':
-        return UserPermissionsClient(parent=self, instance_klass=UserPermissions)
+        return self.__permissions
 
 
-class AccountPlan(DefaultResource):
+class AccountPlan(CRUDResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
 
-class Limit(DefaultResource):
+class Limit(CRUDResource):
     @property
     def app_plan(self) -> ApplicationPlan:
         return self.parent
 
 
-class PricingRule(DefaultResource):
+class PricingRule(CRUDResource):
     @property
     def app_plan(self) -> ApplicationPlan:
         return self.parent
 
 
-def _extract_entity_id(entity: Union['DefaultResource', int]):
-    if isinstance(entity, DefaultResource):
+def _extract_entity_id(entity: Union['CRUDResource', int]):
+    if isinstance(entity, CRUDResource):
         return entity.entity_id
     return entity

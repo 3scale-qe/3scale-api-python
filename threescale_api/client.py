@@ -9,13 +9,17 @@ log = logging.getLogger(__name__)
 
 
 class ThreeScaleClient:
+    __slots__ = ('_rest', '_services', '_accounts', '_methods', '_metrics', '_analytics',
+                 '_tenants', '_providers', '_active_docs', '_account_plans', '_settings',
+                 '_admin_portal_auth_provider', '_dev_portal_auth_provider')
+
     def __init__(self, url: str, token: str, throws: bool = True, ssl_verify: bool = True):
         """Creates instance of the 3scale client
         Args:
-            url: 3scale instance url
-            token: Access token
-            throws: Whether it should throw an error
-            ssl_verify: Whether to verify ssl
+            url(str): 3scale instance url
+            token(str): Access token
+            throws(bool): Whether it should throw an error
+            ssl_verify(bool): Whether to verify ssl
         """
         self._rest = RestApiClient(url=url, token=token, throws=throws, ssl_verify=ssl_verify)
         self._services = resources.Services(self, instance_klass=resources.Service)
@@ -146,6 +150,8 @@ class ThreeScaleClient:
 
 
 class RestApiClient:
+    __slots__ = ('_url', '_token', '_throws', '_ssl_verify')
+
     def __init__(self, url: str, token: str, throws: bool = True, ssl_verify: bool = True):
         """Creates instance of the Rest API client
         Args:

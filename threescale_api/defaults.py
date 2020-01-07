@@ -1,9 +1,10 @@
 import logging
-from typing import Dict, List, Optional, TYPE_CHECKING, Union
+from typing import Dict, List, Optional, TYPE_CHECKING, Union, Iterator
 
 import requests
 
 from threescale_api import utils
+from collections.abc import MutableMapping
 
 if TYPE_CHECKING:
     from threescale_api.client import ThreeScaleClient, RestApiClient
@@ -11,7 +12,9 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-class DefaultClient:
+class CRUDClient(MutableMapping):
+    __slots__ = ('_parent', '_instance_klass', '_entity_name', '_entity_collection')
+
     def __init__(self, parent=None, instance_klass=None,
                  entity_name: str = None, entity_collection: str = None):
         """Creates instance of the default client
@@ -44,7 +47,7 @@ class DefaultClient:
         return self.parent.threescale_client
 
     @property
-    def parent(self) -> 'DefaultResource':
+    def parent(self) -> 'CRUDResource':
         """ Instance of the parent resource
         Returns(DefaultResource): Parent of the client is an subclass of the default resource
 
@@ -59,7 +62,7 @@ class DefaultClient:
         """
         return self.threescale_client.rest
 
-    def list(self, **kwargs) -> List['DefaultResource']:
+    def list(self, **kwargs) -> List['CRUDResource']:
         """List all entities
         Args:
             **kwargs: Optional parameters
@@ -69,7 +72,7 @@ class DefaultClient:
         instance = self._list(**kwargs)
         return instance
 
-    def create(self, params: dict = None, **kwargs) -> 'DefaultResource':
+    def create(self, params: dict = None, **kwargs) -> 'CRUDResource':
         """Create a new instance
         Args:
             params: Parameters required to create new instance
@@ -110,7 +113,7 @@ class DefaultClient:
         response = self.rest.get(url=url, throws=False, **kwargs)
         return response.ok
 
-    def update(self, entity_id=None, params: dict = None, **kwargs) -> 'DefaultResource':
+    def update(self, entity_id=None, params: dict = None, **kwargs) -> 'CRUDResource':
         """Update resource
         Args:
             entity_id(int): Entity id
@@ -139,7 +142,7 @@ class DefaultClient:
         response = self.rest.get(url=url, **kwargs)
         return utils.extract_response(response=response, entity=self._entity_name)
 
-    def __getitem__(self, selector: Union[int, 'str']) -> 'DefaultResource':
+    def __getitem__(self, selector: Union[int, 'str']) -> 'CRUDResource':
         """Gets the item
         Args:
             selector(Union[int, 'str']): Selector whether id or string
@@ -149,7 +152,19 @@ class DefaultClient:
             return self.read(selector)
         return self.read_by_name(selector)
 
-    def read(self, entity_id: int = None) -> 'DefaultResource':
+    def __setitem__(self, entity_id: int, val: Dict) -> None:
+        self.update(entity_id, val)
+
+    def __delitem__(self, entity_id: int) -> None:
+        self.delete(entity_id=entity_id)
+
+    def __len__(self) -> int:
+        return len(self._list())
+
+    def __iter__(self) -> Iterator['CRUDResource']:
+        return next(iter(self._list()))
+
+    def read(self, entity_id: int = None) -> 'CRUDResource':
         """Read the instance, read will just create empty resource and lazyloads only if needed
         Args:
             entity_id(int): Entity id
@@ -158,7 +173,7 @@ class DefaultClient:
         log.debug(self._log_message("[READ] Read ", entity_id=entity_id))
         return self._instance_klass(client=self, entity_id=entity_id)
 
-    def read_by_name(self, name: str, **kwargs) -> 'DefaultResource':
+    def read_by_name(self, name: str, **kwargs) -> 'CRUDResource':
         """Read resource by name
         Args:
             name: Name of the resource (either system name, name, org_name ...)
@@ -171,7 +186,7 @@ class DefaultClient:
             if item.entity_name and item.entity_name == name:
                 return item
 
-    def select(self, predicate, **kwargs) -> List['DefaultResource']:
+    def select(self, predicate, **kwargs) -> List['CRUDResource']:
         """Select resource s based on the predicate
         Args:
             predicate: Predicate
@@ -180,7 +195,7 @@ class DefaultClient:
         """
         return [item for item in self._list(**kwargs) if predicate(item)]
 
-    def select_by(self, **params) -> List['DefaultResource']:
+    def select_by(self, **params) -> List['CRUDResource']:
         """Select by params - logical and
         Args:
             **params: params used for selection
@@ -196,7 +211,7 @@ class DefaultClient:
 
         return self.select(predicate=predicate)
 
-    def read_by(self, **params) -> 'DefaultResource':
+    def read_by(self, **params) -> 'CRUDResource':
         """Read by params - it will return just one instance of the resource
         Args:
             **params: params used for selection
@@ -215,7 +230,7 @@ class DefaultClient:
             msg += f" args={args}"
         return msg
 
-    def _list(self, **kwargs) -> List['DefaultResource']:
+    def _list(self, **kwargs) -> List['CRUDResource']:
         """Internal list implementation used in list or `select` methods
         Args:
             **kwargs: Optional parameters
@@ -233,10 +248,10 @@ class DefaultClient:
             return self.url
         return self.url + '/' + str(entity_id)
 
-    def _create_instance(self, response: requests.Response, klass=None, collection: bool = False):
-        klass = klass or self._instance_klass
+    def _create_instance(self, response: requests.Response, cls=None, collection: bool = False):
+        cls = cls or self._instance_klass
         extracted = self._extract_resource(response, collection)
-        instance = self._instantiate(extracted=extracted, klass=klass)
+        instance = self._instantiate(extracted=extracted, cls=cls)
         log.debug(f"[INSTANCE] Created instance: {instance}")
         return instance
 
@@ -247,19 +262,21 @@ class DefaultClient:
         extracted = utils.extract_response(**extract_params)
         return extracted
 
-    def _instantiate(self, extracted, klass):
+    def _instantiate(self, extracted, cls):
         if isinstance(extracted, list):
-            instance = [self.__make_instance(item, klass) for item in extracted]
+            instance = [self.__make_instance(item, cls) for item in extracted]
             return instance
-        return self.__make_instance(extracted, klass)
+        return self.__make_instance(extracted, cls)
 
-    def __make_instance(self, extracted: dict, klass):
-        instance = klass(client=self, entity=extracted) if klass else extracted
+    def __make_instance(self, extracted: dict, cls):
+        instance = cls(client=self, entity=extracted) if cls else extracted
         return instance
 
 
-class DefaultResource:
-    def __init__(self, client: DefaultClient = None, entity_id: int = None, entity_name: str = None,
+class CRUDResource(MutableMapping):
+    __slots__ = ('_entity_id', '_entity', '_client', '_entity_name')
+
+    def __init__(self, client: CRUDClient = None, entity_id: int = None, entity_name: str = None,
                  entity: dict = None):
         """Create instance of the resource
         Args:
@@ -278,7 +295,7 @@ class DefaultResource:
         return self.client.threescale_client
 
     @property
-    def parent(self) -> 'DefaultResource':
+    def parent(self) -> 'CRUDResource':
         return self.client.parent
 
     @property
@@ -295,7 +312,7 @@ class DefaultResource:
         return self._entity
 
     @property
-    def client(self) -> DefaultClient:
+    def client(self) -> CRUDClient:
         return self._client
 
     @property
@@ -307,6 +324,15 @@ class DefaultResource:
 
     def __setitem__(self, key: str, value):
         self.set(key, value)
+
+    def __delitem__(self, key: str):
+        del self.entity[key]
+
+    def __iter__(self):
+        return iter(self.entity)
+
+    def __len__(self):
+         return len(self.entity)
 
     def __str__(self) -> str:
         return self.__class__.__name__ + f"({self.entity_id}): " + str(self.entity)
@@ -320,13 +346,13 @@ class DefaultResource:
     def set(self, item, value):
         self.entity[item] = value
 
-    def _lazy_load(self, **kwargs) -> 'DefaultResource':
+    def _lazy_load(self, **kwargs) -> 'CRUDResource':
         if not self._entity:
             # Lazy load the entity
             self._entity = self.fetch(**kwargs)
         return self
 
-    def read(self, **kwargs) -> 'DefaultResource':
+    def read(self, **kwargs) -> 'CRUDResource':
         self._invalidate()
         self._lazy_load(**kwargs)
         return self
@@ -340,7 +366,7 @@ class DefaultResource:
     def delete(self, **kwargs):
         self.client.delete(entity_id=self.entity_id, **kwargs)
 
-    def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
+    def update(self, params: dict = None, **kwargs) -> 'CRUDResource':
         new_params = {**self.entity}
         if params:
             new_params.update(params)
@@ -352,7 +378,7 @@ class DefaultResource:
         self._entity = None
 
 
-class DefaultPlanClient(DefaultClient):
+class DefaultPlanClient(CRUDClient):
     def set_default(self, entity_id: int, **kwargs) -> 'DefaultPlanResource':
         """Sets default plan for the entity
         Args:
@@ -366,7 +392,7 @@ class DefaultPlanClient(DefaultClient):
         instance = self._create_instance(response=response)
         return instance
 
-    def get_default(self, **kwargs) -> Optional['DefaultResource']:
+    def get_default(self, **kwargs) -> Optional['CRUDResource']:
         """Get default plan if set
         Args:
             **kwargs: Optional arguments
@@ -378,7 +404,7 @@ class DefaultPlanClient(DefaultClient):
         return None
 
 
-class DefaultPlanResource(DefaultResource):
+class DefaultPlanResource(CRUDResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
@@ -395,7 +421,7 @@ class DefaultPlanResource(DefaultResource):
         return self['default'] is True
 
 
-class DefaultStateClient(DefaultClient):
+class DefaultStateClient(CRUDClient):
     def set_state(self, entity_id, state: str, **kwargs):
         """Sets the state for the resource
         Args:
@@ -412,7 +438,7 @@ class DefaultStateClient(DefaultClient):
         return instance
 
 
-class DefaultStateResource(DefaultResource):
+class DefaultStateResource(CRUDResource):
     def set_state(self, state: str, **kwargs) -> 'DefaultStateResource':
         """Sets the state for the resource
         Args:

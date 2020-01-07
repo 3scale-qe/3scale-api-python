@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import Union, Optional
 from urllib.parse import urljoin
 
 import requests
@@ -44,10 +44,13 @@ class HttpClient:
     :param verify: SSL verification
     """
 
-    def __init__(self, app, endpoint: str = "sandbox_endpoint",
+    __slots__ = ('__app', '__endpoint', '__default_total_retry', '__session')
+
+    def __init__(self, app, endpoint: str = "sandbox_endpoint", total_retry=8,
                  session: requests.Session = None, verify: bool = None):
-        self._app = app
-        self._endpoint = endpoint
+        self.__app = app
+        self.__endpoint = endpoint
+        self.__default_total_retry = total_retry
         if session is None:
             session = requests.Session()
             self.retry_for_session(session)
@@ -57,19 +60,19 @@ class HttpClient:
         if verify is not None:
             session.verify = verify
 
-        self._session = session
+        self.__session = session
 
         logger.debug("[HTTP CLIENT] New instance: %s", self._base_url)
 
-    @staticmethod
-    def retry_for_session(session: requests.Session, total: int = 8):
+    def retry_for_session(self, session: requests.Session, total: Optional[int] = None):
+        total = total if total is not None else self.__default_total_retry
         retry = Retry(
-            total=total,
-            backoff_factor=1,
-            status_forcelist=(503, 404),
-            raise_on_status=False,
-            respect_retry_after_header=False
-        )
+                total=total,
+                backoff_factor=1,
+                status_forcelist=(503, 404),
+                raise_on_status=False,
+                respect_retry_after_header=False
+            )
         adapter = HTTPAdapter(max_retries=retry)
         session.mount("https://", adapter)
         session.mount("http://", adapter)
@@ -77,14 +80,14 @@ class HttpClient:
     @property
     def _base_url(self) -> str:
         """Determine right url at runtime"""
-        return self._app.service.proxy.fetch()[self._endpoint]
+        return self.__app.service.proxy.fetch()[self.__endpoint]
 
     def request(self, method: str, path: str, **kwargs) -> requests.Response:
         """mimics requests interface"""
         url = urljoin(self._base_url, path)
 
         logger.debug("[%s] (%s) %s", method, url, kwargs or "")
-        response = self._session.request(method=method, url=url, **kwargs)
+        response = self.__session.request(method=method, url=url, **kwargs)
         return response
 
     def get(self, *args, **kwargs) -> requests.Response:
