@@ -35,10 +35,11 @@ class HttpClient:
     Due to some delays in the infrastructure the client is configured to retry
     calls under certain conditions. To modify this behavior customized session
     has to be passed. session has to be fully configured in such case
-    (e.g. including authentification"
+    (e.g. including authentication"
 
     :param app: Application for which client should do the calls
-    :param endpoint: either 'sandbox_endpoint' or 'endpoint' to choose staging or production, defaults to sandbox_endpoint
+    :param endpoint: either 'sandbox_endpoint' (staging) or 'endpoint' (production),
+        defaults to sandbox_endpoint
     :param session: Used instead of default; it has to be fully configured
     :param verify: SSL verification
     """
@@ -58,45 +59,50 @@ class HttpClient:
 
         self._session = session
 
-        logger.debug("[HTTP CLIENT] New instance: %s", self._baseurl)
+        logger.debug("[HTTP CLIENT] New instance: %s", self._base_url)
 
     @staticmethod
     def retry_for_session(session: requests.Session, total: int = 8):
-        retry = Retry(total=total, backoff_factor=1, status_forcelist=(503, 404), raise_on_status=False,
-                      respect_retry_after_header=False)
+        retry = Retry(
+            total=total,
+            backoff_factor=1,
+            status_forcelist=(503, 404),
+            raise_on_status=False,
+            respect_retry_after_header=False
+        )
         adapter = HTTPAdapter(max_retries=retry)
         session.mount("https://", adapter)
         session.mount("http://", adapter)
 
     @property
-    def _baseurl(self) -> str:
-        "Determine right url at runtime"
+    def _base_url(self) -> str:
+        """Determine right url at runtime"""
         return self._app.service.proxy.fetch()[self._endpoint]
 
     def request(self, method: str, path: str, **kwargs) -> requests.Response:
-        "mimics requests interface"
-        url = urljoin(self._baseurl, path)
+        """mimics requests interface"""
+        url = urljoin(self._base_url, path)
 
         logger.debug("[%s] (%s) %s", method, url, kwargs or "")
         response = self._session.request(method=method, url=url, **kwargs)
         return response
 
     def get(self, *args, **kwargs) -> requests.Response:
-        "mimics requests interface"
+        """mimics requests interface"""
         return self.request('GET', *args, **kwargs)
 
     def post(self, *args, **kwargs) -> requests.Response:
-        "mimics requests interface"
+        """mimics requests interface"""
         return self.request('POST', *args, **kwargs)
 
     def patch(self, *args, **kwargs) -> requests.Response:
-        "mimics requests interface"
+        """mimics requests interface"""
         return self.request('PATCH', *args, **kwargs)
 
     def put(self, *args, **kwargs) -> requests.Response:
-        "mimics requests interface"
+        """mimics requests interface"""
         return self.request('PUT', *args, **kwargs)
 
     def delete(self, *args, **kwargs) -> requests.Response:
-        "mimics requests interface"
+        """mimics requests interface"""
         return self.request('DELETE', *args, **kwargs)

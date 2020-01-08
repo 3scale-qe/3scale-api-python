@@ -24,11 +24,13 @@ def rest(url, token):
     return client.RestApiClient(url=url, token=token)
 
 
+@pytest.mark.smoke
 def test_rest_api_initialization(rest, url):
     assert rest.url == url
 
 
 @responses.activate
+@pytest.mark.smoke
 def test_404_response(rest, url, token):
     responses.add(responses.GET, f'{url}.json',
                   json={'error': 'not found'}, status=404)
@@ -37,6 +39,7 @@ def test_404_response(rest, url, token):
         rest.request()
 
 
+@pytest.mark.smoke
 @responses.activate
 def test_get_response(rest, url, token):
     add_response(responses.GET, url)
@@ -45,6 +48,7 @@ def test_get_response(rest, url, token):
     assert_valid_message(resp=resp, url=url, token=token, method='GET')
 
 
+@pytest.mark.smoke
 @responses.activate
 def test_delete_response(rest, url, token):
     add_response(responses.DELETE, url)
@@ -53,6 +57,7 @@ def test_delete_response(rest, url, token):
     assert_valid_message(resp=resp, url=url, token=token, method='DELETE')
 
 
+@pytest.mark.smoke
 @responses.activate
 def test_post_response(rest, url, token):
     add_response(responses.POST, url)
@@ -61,6 +66,7 @@ def test_post_response(rest, url, token):
     assert_valid_message(resp=resp, url=url, token=token, method='POST', body=True)
 
 
+@pytest.mark.smoke
 @responses.activate
 def test_put_response(rest, url, token):
     add_response(responses.PUT, url)
@@ -69,6 +75,7 @@ def test_put_response(rest, url, token):
     assert_valid_message(resp=resp, url=url, token=token, method='PUT', body=True)
 
 
+@pytest.mark.smoke
 @responses.activate
 def test_patch_response(rest, url, token):
     add_response(responses.PATCH, url)
