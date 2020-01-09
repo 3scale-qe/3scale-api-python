@@ -4,6 +4,8 @@
 import requests
 import requests.auth
 
+from typing import Optional, Dict
+
 
 class BaseClientAuth(requests.auth.AuthBase):
     """Abstract class for authentication of api client"""

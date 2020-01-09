@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Optional, TYPE_CHECKING, Union, Iterator
+from typing import Dict, List, Optional, TYPE_CHECKING, Union, Iterator, Any
 
 import requests
 
@@ -260,7 +260,7 @@ class CRUDClient(MutableMapping):
         extracted = utils.extract_response(**extract_params)
         return extracted
 
-    def _instantiate(self, extracted, cls):
+    def _instantiate(self, extracted, cls: type):
         if isinstance(extracted, list):
             instance = [self.__make_instance(item, cls) for item in extracted]
             return instance
@@ -315,20 +315,20 @@ class CRUDResource(MutableMapping):
     def entity_id(self) -> int:
         return self._entity_id or self._entity.get('id')
 
-    def __getitem__(self, item: str):
+    def __getitem__(self, item: str) -> Any:
         return self.get(item)
 
-    def __setitem__(self, key: str, value):
+    def __setitem__(self, key: str, value) -> Any:
         self.set(key, value)
 
-    def __delitem__(self, key: str):
+    def __delitem__(self, key: str) -> None:
         del self.entity[key]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         return iter(self.entity)
 
-    def __len__(self):
-         return len(self.entity)
+    def __len__(self) -> int:
+        return len(self.entity)
 
     def __str__(self) -> str:
         return self.__class__.__name__ + f"({self.entity_id}): " + str(self.entity)

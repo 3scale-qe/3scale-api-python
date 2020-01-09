@@ -597,17 +597,17 @@ class Proxy(CRUDResource):
         return self.parent
 
     @property
-    @functools.lru_cache
+    @functools.lru_cache()
     def mapping_rules(self) -> MappingRules:
         return MappingRules(parent=self, instance_klass=MappingRule)
 
     @property
-    @functools.lru_cache
+    @functools.lru_cache()
     def configs(self) -> 'ProxyConfigs':
         return ProxyConfigs(parent=self, instance_klass=ProxyConfig)
 
     @property
-    @functools.lru_cache
+    @functools.lru_cache()
     def policies(self) -> 'Policies':
         return Policies(parent=self, instance_klass=Policy)
 
@@ -623,6 +623,7 @@ class Service(CRUDResource):
     AUTH_USER_KEY = "1"
     AUTH_APP_ID_KEY = "2"
     AUTH_OIDC = "oidc"
+
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
         self.__app_plans = ApplicationPlans(parent=self, instance_klass=ApplicationPlan)
@@ -758,7 +759,7 @@ class Application(CRUDResource):
         return client.get(relpath)
 
 
-class Account(DefaultResource):
+class Account(CRUDResource):
     def __init__(self, entity_name='org_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
         self.__apps = Applications(parent=self, instance_klass=Application)

@@ -4,7 +4,7 @@ from logging.config import dictConfig
 
 def _to_log_level_map(log_map: dict) -> dict:
     result = {}
-    for level, arr in log_map:
+    for level, arr in log_map.items():
         for item in arr:
             result[item] = level
     return result
