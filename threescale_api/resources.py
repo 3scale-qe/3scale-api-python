@@ -417,7 +417,7 @@ class ProxyConfigs(DefaultClient):
     def list(self, **kwargs):
         if "env" in kwargs:
             self._env = kwargs["env"]
-            del(kwargs["env"])
+            del (kwargs["env"])
         return super().list(**kwargs)
 
     def promote(self, version: int = 1, from_env: str = 'sandbox', to_env: str = 'production',
@@ -490,6 +490,7 @@ class OIDCConfigs(DefaultClient):
 
     def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
         return self.rest.patch(url=self.url, json=params, **kwargs)
+
 
 # Resources
 
@@ -700,9 +701,11 @@ class Application(DefaultResource):
         has to be passed. This custom session should have configured all necessary
         (e.g. authentication)
 
-        :param endpoint: Choose whether 'sandbox_endpoint' or 'endpoint', defaults to sandbox_endpoint
+        :param endpoint: Choose whether 'sandbox_endpoint' or 'endpoint',
+                defaults to sandbox_endpoint
         :param session: Customized requests.Session, all necessary has to be already done
-        :param verify: Whether to do ssl verification or not, by default doesn't change whatt's in session, defaults to None
+        :param verify: Whether to do ssl verification or not,
+                by default doesn't change what's in session, defaults to None
 
         :return: threescale.utils.HttpClient
 
@@ -731,7 +734,8 @@ class Application(DefaultResource):
         """Quick call to do test request against configured service. This is
         equivalent to test request on Integration page from UI
 
-        :param relpath: relative path to run the requests, if not set, preconfigured value is used, defaults to None
+        :param relpath: relative path to run the requests,
+                if not set, preconfigured value is used, defaults to None
         :param verify: SSL verification
 
         :return: requests.Response
@@ -740,13 +744,11 @@ class Application(DefaultResource):
         to avoid passing non-default value to multiple test_request calls.
         """
         proxy = self.service.proxy.list().entity
-
-        if relpath is None:
-            relpath = proxy["api_test_path"]
-
+        relpath = relpath if relpath is not None else proxy["api_test_path"]
         client = self.api_client(verify=verify)
 
         return client.get(relpath)
+
 
 class Account(DefaultResource):
     def __init__(self, entity_name='org_name', **kwargs):

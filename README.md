@@ -1,5 +1,4 @@
-class List(object):
-    pass# 3scale REST API client in Python
+# 3scale REST API client in Python
 
 3Scale REST API client in a wrapper over the 3scale API.
 
@@ -33,7 +32,7 @@ from typing import List
 client = ThreeScaleClient(url="myaccount.3scale.net", token="secret_token", ssl_verify=True)
 
 # Get list of APIs/Services or any other resource
-services: List[resources.Service] = client.services.list() 
+services: List[resources.Service] = client.services.list()
 
 # Get service by it's name
 test_service: resources.Service = client.services["test_service"] # or use: client.services.read_by_name(system_name)
@@ -49,7 +48,7 @@ new_service: resources.Service = client.services.create(system_name='my_testing_
 
 # In order to update service you can either
 client.services[123456].update(param="new_value")
-# or 
+# or
 service: resources.Service = client.services[123456]
 service['param'] = 'new_value'
 service.update()
@@ -59,7 +58,7 @@ proxy: resources.Proxy = client.services['test_service'].proxy.read()
 
 # To update the proxy you can either
 proxy: resources.Proxy = client.services['test_service'].proxy.update(parameter_to_update='update')
-# or 
+# or
 proxy_instance = client.services['test_service'].proxy.read()
 proxy_instance['param'] = 'new_value'
 proxy_instance.update()

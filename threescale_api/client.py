@@ -31,7 +31,6 @@ class ThreeScaleClient:
         self._admin_portal_auth_provider = resources.AdminPortalAuthenticationProvider(self)
         self._dev_portal_auth_provider = resources.DevPortalAuthenticationProvider(self)
 
-
     @property
     def rest(self) -> 'RestApiClient':
         """Get REST api client instance
@@ -211,7 +210,8 @@ class RestApiClient:
     def patch(self, *args, **kwargs):
         return self.request('PATCH', *args, **kwargs)
 
-    def _process_response(self, response: requests.Response, throws=None) -> requests.Response:
+    @classmethod
+    def _process_response(cls, response: requests.Response, throws=None) -> requests.Response:
         message = f"[RES] Response({response.status_code}): {response.content}"
 
         if response.ok:
