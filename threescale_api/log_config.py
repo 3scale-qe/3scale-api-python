@@ -31,7 +31,7 @@ def to_log_level(level: str, default=logging.NOTSET) -> int:
     return default
 
 
-def load_config(level: str = "DEBUG", handler_level=None, api_level=None, tests_level=None):
+def load_config(level: str = "INFO", handler_level=None, api_level=None, tests_level=None):
     config = dict(
         version=1,
         formatters={

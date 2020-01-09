@@ -7,7 +7,6 @@ import requests.auth
 
 class BaseClientAuth(requests.auth.AuthBase):
     """Abstract class for authentication of api client"""
-
     def __init__(self, app, location=None):
         self.app = app
         self.location = location

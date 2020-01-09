@@ -13,8 +13,6 @@ log = logging.getLogger(__name__)
 
 
 class CRUDClient(MutableMapping):
-    __slots__ = ('_parent', '_instance_klass', '_entity_name', '_entity_collection')
-
     def __init__(self, parent=None, instance_klass=None,
                  entity_name: str = None, entity_collection: str = None):
         """Creates instance of the default client
@@ -274,8 +272,6 @@ class CRUDClient(MutableMapping):
 
 
 class CRUDResource(MutableMapping):
-    __slots__ = ('_entity_id', '_entity', '_client', '_entity_name')
-
     def __init__(self, client: CRUDClient = None, entity_id: int = None, entity_name: str = None,
                  entity: dict = None):
         """Create instance of the resource
