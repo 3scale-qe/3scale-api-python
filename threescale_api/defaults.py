@@ -1,5 +1,7 @@
 import logging
-from typing import Dict, List, Optional, TYPE_CHECKING, Union
+from typing import Dict, List, Optional, TYPE_CHECKING, Union, Any, Iterator
+
+import collections.abc
 
 import requests
 
@@ -11,7 +13,7 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-class DefaultClient:
+class DefaultClient(collections.abc.Mapping):
     def __init__(self, parent=None, instance_klass=None,
                  entity_name: str = None, entity_collection: str = None):
         """Creates instance of the default client
@@ -149,6 +151,12 @@ class DefaultClient:
             return self.read(selector)
         return self.read_by_name(selector)
 
+    def __len__(self) -> int:
+        return len(self._list())
+
+    def __iter__(self) -> Iterator['CRUDResource']:
+        return next(iter(self._list()))
+
     def read(self, entity_id: int = None) -> 'DefaultResource':
         """Read the instance, read will just create empty resource and lazyloads only if needed
         Args:
@@ -258,7 +266,7 @@ class DefaultClient:
         return instance
 
 
-class DefaultResource:
+class DefaultResource(collections.abc.MutableMapping):
     def __init__(self, client: DefaultClient = None, entity_id: int = None, entity_name: str = None,
                  entity: dict = None):
         """Create instance of the resource
@@ -303,10 +311,19 @@ class DefaultResource:
         return self._entity_id or self._entity.get('id')
 
     def __getitem__(self, item: str):
-        return self.get(item)
+        return self.entity.get(item)
 
     def __setitem__(self, key: str, value):
         self.set(key, value)
+
+    def __delitem__(self, key: str):
+        del self.entity[key]
+
+    def __len__(self) -> int:
+        return len(self.entity)
+
+    def __iter__(self) -> Iterator:
+        return iter(self.entity)
 
     def __str__(self) -> str:
         return self.__class__.__name__ + f"({self.entity_id}): " + str(self.entity)
@@ -314,10 +331,7 @@ class DefaultResource:
     def __repr__(self) -> str:
         return str(self)
 
-    def get(self, item):
-        return self.entity.get(item)
-
-    def set(self, item, value):
+    def set(self, item: str, value: Any):
         self.entity[item] = value
 
     def _lazy_load(self, **kwargs) -> 'DefaultResource':
