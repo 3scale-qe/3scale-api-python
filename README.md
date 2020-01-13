@@ -2,6 +2,8 @@
 
 3Scale REST API client in a wrapper over the 3scale API.
 
+Build status: [![CircleCI](https://circleci.com/gh/pestanko/3scale-api-python.svg?style=svg)](https://circleci.com/gh/pestanko/3scale-api-python)
+
 ## Installing
 
 Install and update using pip:
