@@ -12,9 +12,8 @@ def test_should_create_mapping_rule(backend_mapping_rule, backend_mapping_rule_p
     asserts.assert_resource_params(backend_mapping_rule, backend_mapping_rule_params)
 
 def test_should_mapping_rule_endpoint_return_ok(service,
-        backend_mapping_rule, backendservice, apicast_http_client):
-    # workaround because of https://issues.jboss.org/browse/THREESCALE-3758
-    service.proxy.list().update()
+        backend_mapping_rule, backend_usage, apicast_http_client):
+    service.proxy.deploy()
 
     response = apicast_http_client.get(path=backend_mapping_rule['pattern'])
     asserts.assert_http_ok(response)
@@ -34,7 +33,7 @@ def test_should_read_mapping_rule(backend_mapping_rule, backend_mapping_rule_par
 
 
 def test_should_update_mapping_rule(service,
-        backend, backendservice, updated_backend_mapping_rules_params, apicast_http_client):
+        backend, backend_usage, updated_backend_mapping_rules_params, apicast_http_client):
     resource = backend.mapping_rules.create(updated_backend_mapping_rules_params)
     pattern = '/get/anything/test-foo'
     resource['pattern'] = pattern
@@ -42,8 +41,7 @@ def test_should_update_mapping_rule(service,
     updated_resource = resource.read()
     assert updated_resource['pattern'] == pattern
 
-    # workaround because of https://issues.jboss.org/browse/THREESCALE-3758
-    service.proxy.list().update()
+    service.proxy.deploy()
 
     response = apicast_http_client.get(path=pattern)
     asserts.assert_http_ok(response)
@@ -57,7 +55,7 @@ def test_should_delete_mapping_rule(backend, updated_backend_mapping_rules_param
 
 
 def test_stop_processing_mapping_rules_once_first_one_is_met(service,
-        backendservice, backend, updated_backend_mapping_rules_params, apicast_http_client):
+        backend_usage, backend, updated_backend_mapping_rules_params, apicast_http_client):
     params_first = updated_backend_mapping_rules_params.copy()
     params_first['pattern'] = '/get/anything/search'
     resource_first = backend.mapping_rules.create(params=params_first)
@@ -68,8 +66,7 @@ def test_stop_processing_mapping_rules_once_first_one_is_met(service,
     resource_second = backend.mapping_rules.create(params=params_second)
     assert resource_second.exists()
 
-    # workaround because of https://issues.jboss.org/browse/THREESCALE-3758
-    service.proxy.list().update()
+    service.proxy.deploy()
 
     response = apicast_http_client.get(path=params_first['pattern'])
     asserts.assert_http_ok(response)

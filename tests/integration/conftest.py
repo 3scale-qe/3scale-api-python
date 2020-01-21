@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import threescale_api
 from threescale_api.resources import (Service, ApplicationPlan, Application,
                                       Proxy, Backend, Metric, MappingRule,
-                                      BackendMappingRule, BackendService)
+                                      BackendMappingRule, BackendUsage)
 
 load_dotenv()
 
@@ -135,13 +135,13 @@ def proxy(service, application, api_backend) -> Proxy:
 
 
 @pytest.fixture(scope='module')
-def backendservice(service, backend, application) -> BackendService:
+def backend_usage(service, backend, application) -> BackendUsage:
     params = {
         'service_id': service['id'],
         'backend_api_id': backend['id'],
         'path': '/get',
     }
-    resource = service.backendservices.create(params=params)
+    resource = service.backend_usages.create(params=params)
     yield resource
     cleanup(resource)
 

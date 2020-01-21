@@ -11,7 +11,7 @@ def test_3scale_url_is_set(api, url, token):
 
 def test_services_list(api):
     services = api.services.list()
-    assert len(services) > 1
+    assert len(services) >= 1
 
 
 def test_service_can_be_created(api, service_params, service):

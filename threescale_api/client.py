@@ -67,7 +67,7 @@ class ThreeScaleClient:
         """Get admin API url
         Returns(str): URL of the 3scale admin api
         """
-        return f"{self.url}/admin/api"
+        return self.url + "/admin/api"
 
     @property
     def services(self) -> resources.Services:

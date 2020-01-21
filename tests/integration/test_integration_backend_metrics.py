@@ -49,36 +49,32 @@ def test_should_list_metrics(backend):
     resources = backend.metrics.list()
     assert len(resources) > 1
 
-# Hibernated until https://issues.jboss.org/browse/THREESCALE-3746
-#def test_should_apicast_return_403_when_metric_is_disabled(
-#        service, backend_metric_params, create_backend_mapping_rule,
-#        account, ssl_verify, backend):
-#    """Metric is disabled when its limit is set to 0."""
-#
-#    proxy = service.proxy.list()
-#    plan = service.app_plans.create(params=dict(name='metrics-disabled'))
-#    application_params = dict(name='metrics-disabled', plan_id=plan['id'],
-#                              description='metric disabled')
-#    app = account.applications.create(params=application_params)
-#
-#    back_metric = backend.metrics.create(params=backend_metric_params)
-#    plan.limits(back_metric).create(params=dict(period='month', value=0))
-#
-#    rules = backend.mapping_rules.list()
-#    for rule in rules:
-#        rule.delete()
-#    rule = create_mapping_rule(back_metric, 'GET', '/foo/bah/')
-#
-#    service_backend_params = {service_id: service['id'], backend_api_id: backend['id']}
-#    service.backend_apis.create(params=service_backend_params)
-#    proxy = service.proxy.list()
-#
-#    update_proxy_endpoint(service)
-#
-#    params = get_user_key_from_application(app, proxy)
-#    client = app.api_client(verify=ssl_verify)
-#    response = make_request(client, rule['pattern'])
-#    assert response.status_code == 403
+def test_should_apicast_return_403_when_metric_is_disabled(
+        service, backend_metric_params, create_backend_mapping_rule,
+        account, ssl_verify, backend, backend_usage):
+    """Metric is disabled when its limit is set to 0."""
+
+    proxy = service.proxy.list()
+    plan = service.app_plans.create(params=dict(name='metrics-disabled'))
+    application_params = dict(name='metrics-disabled', plan_id=plan['id'],
+                              description='metric disabled')
+    app = account.applications.create(params=application_params)
+
+    back_metric = backend.metrics.create(params=backend_metric_params)
+    plan.limits(back_metric).create(params=dict(period='month', value=0))
+
+    rules = backend.mapping_rules.list()
+    for rule in rules:
+        rule.delete()
+    rule = create_backend_mapping_rule(back_metric, 'GET', '/foo/bah/')
+
+    proxy = service.proxy.list()
+    proxy.deploy()
+
+    params = get_user_key_from_application(app, proxy)
+    client = app.api_client(verify=ssl_verify)
+    response = make_request(client, backend_usage['path'] + '/' + rule['pattern'])
+    assert response.status_code == 403
 
 
 @backoff.on_predicate(backoff.expo, lambda resp: resp.status_code == 200,
@@ -100,21 +96,20 @@ def update_proxy_endpoint(service):
     to the mapping rules dont take effect."""
     service.proxy.update(params={'endpoint': 'http://test.test:80'})
 
-# Hibernated until https://issues.jboss.org/browse/THREESCALE-3746
-#def test_should_apicast_return_429_when_limits_exceeded(
-#        service, application_plan, create_mapping_rule,
-#        apicast_http_client):
-#    metric_params = dict(system_name='limits_exceeded', unit='count',
-#                         friendly_name='Limits Exceeded')
-#    metric = service.metrics.create(params=metric_params)
-#    application_plan.limits(metric).create(params=dict(period='day', value=1))
-#
-#    rule = create_mapping_rule(metric, 'GET', '/limits/exceeded/')
-#
-#    update_proxy_endpoint(service)
-#
-#    response = apicast_http_client.get(path=rule['pattern'])
-#    while response.status_code == 200:
-#        response = apicast_http_client.get(path=rule['pattern'])
-#
-#    assert response.status_code == 429
+def test_should_apicast_return_429_when_limits_exceeded(
+        service, application_plan, create_mapping_rule,
+        apicast_http_client):
+    metric_params = dict(system_name='limits_exceeded', unit='count',
+                         friendly_name='Limits Exceeded')
+    metric = service.metrics.create(params=metric_params)
+    application_plan.limits(metric).create(params=dict(period='day', value=1))
+
+    rule = create_mapping_rule(metric, 'GET', '/limits/exceeded/')
+
+    update_proxy_endpoint(service)
+
+    response = apicast_http_client.get(path=rule['pattern'])
+    while response.status_code == 200:
+        response = apicast_http_client.get(path=rule['pattern'])
+
+    assert response.status_code == 429

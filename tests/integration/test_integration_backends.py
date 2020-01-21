@@ -11,7 +11,7 @@ def test_3scale_url_is_set(api, url, token):
 
 def test_backends_list(api):
     backends = api.backends.list()
-    assert len(backends) > 1
+    assert len(backends) >= 1
 
 
 def test_backend_can_be_created(api, backend_params, backend):
@@ -26,8 +26,8 @@ def test_backend_can_be_read(api, backend_params, backend):
 
 
 def test_backend_can_be_read_by_name(api, backend_params, backend):
-    account_name = backend['system_name']
-    read = api.backends[account_name]
+    backend_name = backend['system_name']
+    read = api.backends[backend_name]
     asserts.assert_resource(read)
     asserts.assert_resource_params(read, backend_params)
 

@@ -51,7 +51,7 @@ class Limits(DefaultClient):
         self._metric = metric
 
     @property
-    def metric(self):
+    def metric(self) -> Union['Metric', 'BackendMetric']:
         return self._metric
 
     @property
@@ -392,7 +392,6 @@ class Proxies(DefaultClient):
         instance = self._create_instance(response=response)
         return instance
 
-
     @property
     def oidc(self) -> 'OIDCConfigs':
         return OIDCConfigs(self)
@@ -437,6 +436,7 @@ class ProxyConfigs(DefaultClient):
         response = self.rest.post(url, json=params, **kwargs)
         instance = self._create_instance(response=response)
         return instance
+
 
 class SettingsClient(DefaultClient):
     def __init__(self, *args, entity_name='settings', **kwargs):
@@ -498,8 +498,10 @@ class OIDCConfigs(DefaultClient):
     def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
         return self.rest.patch(url=self.url, json=params, **kwargs)
 
+
 class Backends(DefaultClient):
-    def __init__(self, *args, entity_name='backend_api', entity_collection='backend_apis', **kwargs):
+    def __init__(self, *args, entity_name='backend_api',
+                 entity_collection='backend_apis', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
@@ -507,22 +509,30 @@ class Backends(DefaultClient):
     def url(self) -> str:
         return self.threescale_client.admin_api_url + '/backend_apis'
 
+
 class BackendMetrics(Metrics):
     def __init__(self, *args, entity_name='metric', entity_collection='metrics', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
+
+
 class BackendMappingRules(MappingRules):
-    def __init__(self, *args, entity_name='mapping_rule', entity_collection='mapping_rules', **kwargs):
+    def __init__(self, *args, entity_name='mapping_rule',
+                 entity_collection='mapping_rules', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
-class BackendServices(Services):
-    def __init__(self, *args, entity_name='backend_usage', entity_collection='backend_usages', **kwargs):
+
+class BackendUsages(Services):
+    def __init__(self, *args, entity_name='backend_usage',
+                 entity_collection='backend_usages', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
+
     @property
     def url(self) -> str:
         return self.parent.url + '/backend_usages'
+
 
 class PoliciesRegistry(DefaultClient):
     def __init__(self, *args, entity_name='policy', entity_collection='policies', **kwargs):
@@ -535,6 +545,7 @@ class PoliciesRegistry(DefaultClient):
 
 
 # Resources
+
 
 class ApplicationPlan(DefaultPlanResource):
     def __init__(self, entity_name='system_name', **kwargs):
@@ -662,6 +673,7 @@ class Proxy(DefaultResource):
     def deploy(self) -> 'Proxy':
         return self.client.deploy()
 
+
 class Service(DefaultResource):
     AUTH_USER_KEY = "1"
     AUTH_APP_ID_KEY = "2"
@@ -687,15 +699,16 @@ class Service(DefaultResource):
         return MappingRules(parent=self, instance_klass=MappingRule)
 
     @property
-    def policies_registry(self) -> PoliciesRegistry:
+    def policies_registry(self) -> 'PoliciesRegistry':
         return PoliciesRegistry(parent=self, instance_klass=PoliciesRegistry)
 
     def oidc(self):
         return OIDCConfigs(self)
 
     @property
-    def backendservices(self):
-        return BackendServices(parent=self, instance_klass=BackendService)
+    def backend_usages(self) -> 'BackendUsages':
+        return BackendUsages(parent=self, instance_klass=BackendUsage)
+
 
 class ActiveDoc(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
@@ -860,16 +873,16 @@ class Backend(DefaultResource):
         super().__init__(entity_name=entity_name, **kwargs)
 
     @property
-    def metrics(self) -> Metrics:
-        return BackendMetrics(parent=self, instance_klass=Metric)
+    def metrics(self) -> 'BackendMetrics':
+        return BackendMetrics(parent=self, instance_klass=BackendMetric)
 
     @property
-    def mapping_rules(self) -> 'MappingRules':
+    def mapping_rules(self) -> 'BackendMappingRules':
         return BackendMappingRules(parent=self, instance_klass=BackendMappingRule)
 
     @property
-    def services(self) -> 'Services':
-        return BackendServices(parent=self, instance_klass=Service)
+    def usages(self) -> 'BackendUsages':
+        return BackendUsages(parent=self, instance_klass=Service)
 
 
 class BackendMetric(Metric):
@@ -881,7 +894,8 @@ class BackendMappingRule(MappingRule):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-class BackendService(Service):
+
+class BackendUsage(DefaultResource):
     def __init__(self, entity_name='', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
