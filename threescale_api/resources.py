@@ -492,6 +492,16 @@ class OIDCConfigs(DefaultClient):
         return self.rest.patch(url=self.url, json=params, **kwargs)
 
 
+class PoliciesRegistry(DefaultClient):
+    def __init__(self, *args, entity_name='policy', entity_collection='policies', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.admin_api_url + '/registry/policies'
+
+
 # Resources
 
 class ApplicationPlan(DefaultPlanResource):
@@ -613,6 +623,10 @@ class Proxy(DefaultResource):
     def promote(self, **kwargs) -> 'Proxy':
         return self.configs.promote(**kwargs)
 
+    @property
+    def policies_registry(self) -> PoliciesRegistry:
+        return PoliciesRegistry(parent=self, instance_klass=PolicyRegistry)
+
 
 class Service(DefaultResource):
     AUTH_USER_KEY = "1"
@@ -637,6 +651,10 @@ class Service(DefaultResource):
     @property
     def mapping_rules(self) -> 'MappingRules':
         return MappingRules(parent=self, instance_klass=MappingRule)
+
+    @property
+    def policies_registry(self) -> PoliciesRegistry:
+        return PoliciesRegistry(parent=self, instance_klass=PoliciesRegistry)
 
 
 class ActiveDoc(DefaultResource):
@@ -801,3 +819,16 @@ def _extract_entity_id(entity: Union['DefaultResource', int]):
     if isinstance(entity, DefaultResource):
         return entity.entity_id
     return entity
+
+
+class PolicyRegistry(DefaultResource):
+    def __init__(self, entity_name='system_name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+    @property
+    def proxy(self) -> 'Proxy':
+        return self.parent
+
+    @property
+    def service(self) -> 'Service':
+        return self.proxy.service

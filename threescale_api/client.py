@@ -30,6 +30,8 @@ class ThreeScaleClient:
         self._settings = resources.SettingsClient(self)
         self._admin_portal_auth_provider = resources.AdminPortalAuthenticationProvider(self)
         self._dev_portal_auth_provider = resources.DevPortalAuthenticationProvider(self)
+        self._policy_registry = resources.PoliciesRegistry(self,
+                                                           instance_klass=resources.PolicyRegistry)
 
     @property
     def rest(self) -> 'RestApiClient':
@@ -143,6 +145,10 @@ class ThreeScaleClient:
     @property
     def admin_portal_auth_provider(self) -> resources.AdminPortalAuthenticationProvider:
         return self._admin_portal_auth_provider
+
+    @property
+    def policy_registry(self) -> resources.PolicyRegistry:
+        return self._policy_registry
 
 
 class RestApiClient:
