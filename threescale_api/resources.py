@@ -882,7 +882,7 @@ class Backend(DefaultResource):
 
     @property
     def usages(self) -> 'BackendUsages':
-        return BackendUsages(parent=self, instance_klass=Service)
+        return BackendUsages(parent=self, instance_klass=BackendUsages)
 
 
 class BackendMetric(Metric):
