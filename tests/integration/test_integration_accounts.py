@@ -3,7 +3,7 @@ from tests.integration import asserts
 
 def test_accounts_list(api):
     services = api.accounts.list()
-    assert len(services) > 1
+    assert len(services) >= 1
 
 
 def test_account_can_be_created(api, account, account_params):

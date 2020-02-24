@@ -53,7 +53,7 @@ def test_should_list_metrics(service):
 
 def test_should_apicast_return_403_when_metric_is_disabled(
         service, metric_params, create_mapping_rule,
-        account, ssl_verify, api_backend):
+        account, ssl_verify, backend_usage):
     """Metric is disabled when its limit is set to 0."""
 
     proxy = service.proxy.list()
@@ -70,9 +70,9 @@ def test_should_apicast_return_403_when_metric_is_disabled(
         rule.delete()
     rule = create_mapping_rule(metric, 'GET', '/foo/bah/')
 
-    update_proxy_endpoint(service)
+    update_proxy_endpoint(service, backend_usage)
 
-    params = get_user_key_from_application(app, proxy)
+    # params = get_user_key_from_application(app, proxy)
     client = app.api_client(verify=ssl_verify)
     response = make_request(client, rule['pattern'])
     assert response.status_code == 403
@@ -90,17 +90,23 @@ def get_user_key_from_application(app, proxy):
     return {user_key_param: user_key}
 
 
-def update_proxy_endpoint(service):
-    """Update service proxy.
-
-    Bug that if the proxy is not updated the changes applied
-    to the mapping rules dont take effect."""
-    service.proxy.update(params={'endpoint': 'http://test.test:80'})
+def update_proxy_endpoint(service, backend_usage):
+    """Update service proxy."""
+    path = backend_usage['path']
+    backend_usage['path'] = '/moloko'
+    backend_usage.update()
+    backend_usage['path'] = path
+    backend_usage.update()
+    proxy = service.proxy.list().configs.list(env='sandbox').proxy
+    proxy.deploy()
+    proxy_tmp = service.proxy.list().configs.list(env='sandbox')
+    version = proxy_tmp.entity['proxy_configs'][-1]['proxy_config']['version']
+    proxy.promote(version=version)
 
 
 def test_should_apicast_return_429_when_limits_exceeded(
         service, application_plan, create_mapping_rule,
-        apicast_http_client):
+        apicast_http_client, backend_usage):
     metric_params = dict(system_name='limits_exceeded', unit='count',
                          friendly_name='Limits Exceeded')
     metric = service.metrics.create(params=metric_params)
@@ -108,11 +114,10 @@ def test_should_apicast_return_429_when_limits_exceeded(
 
     rule = create_mapping_rule(metric, 'GET', '/limits/exceeded/')
 
-    update_proxy_endpoint(service)
+    update_proxy_endpoint(service, backend_usage)
 
     response = apicast_http_client.get(path=rule['pattern'])
     while response.status_code == 200:
         response = apicast_http_client.get(path=rule['pattern'])
 
     assert response.status_code == 429
-
