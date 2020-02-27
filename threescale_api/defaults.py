@@ -331,6 +331,16 @@ class DefaultResource(collections.abc.MutableMapping):
     def __repr__(self) -> str:
         return str(self)
 
+    def __eq__(self, other) -> bool:
+        return (
+            self.__class__ == other.__class__ and
+            self.entity_name == other.entity_name and
+            self.entity_id == other.entity_id
+        )
+
+    def get(self, item):
+        return self.entity.get(item)
+
     def set(self, item: str, value: Any):
         self.entity[item] = value
 
