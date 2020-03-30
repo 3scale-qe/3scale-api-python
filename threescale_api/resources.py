@@ -733,6 +733,7 @@ class Application(DefaultResource):
             Service.AUTH_APP_ID_KEY: auth.AppIdKeyAuth
         }
         self._api_client_verify = None
+        self._client_factory = utils.HttpClient
 
     @property
     def account(self) -> 'Account':
@@ -788,7 +789,7 @@ class Application(DefaultResource):
         if verify is None:
             verify = self.api_client_verify
 
-        return utils.HttpClient(self, endpoint, session, verify)
+        return self._client_factory(self, endpoint, session, verify)
 
     @property
     def api_client_verify(self) -> bool:
