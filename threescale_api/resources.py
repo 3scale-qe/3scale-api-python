@@ -509,6 +509,34 @@ class Backends(DefaultClient):
     def url(self) -> str:
         return self.threescale_client.admin_api_url + '/backend_apis'
 
+    def list(self, **kwargs):
+        return list(super().list(**kwargs))
+
+    def _list(self, **kwargs):
+        if "page" in kwargs.get("params", {}):
+            return super()._list(**kwargs)
+
+        pagenum = 1
+
+        kwargs = kwargs.copy()
+        if "params" not in kwargs:
+            kwargs["params"] = {}
+
+        kwargs["params"]["page"] = pagenum
+        kwargs["params"]["per_page"] = 500
+
+        page = super()._list(**kwargs)
+
+        while len(page):
+            for i in page:
+                yield i
+            pagenum += 1
+            kwargs["params"]["page"] = pagenum
+            page = super()._list(**kwargs)
+
+    def __iter__(self):
+        return self._list()
+
 
 class BackendMetrics(Metrics):
     def __init__(self, *args, entity_name='metric', entity_collection='metrics', **kwargs):
