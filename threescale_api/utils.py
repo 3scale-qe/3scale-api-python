@@ -1,4 +1,5 @@
 import logging
+import shlex
 from typing import Union
 from urllib.parse import urljoin
 
@@ -83,8 +84,12 @@ class HttpClient:
         """mimics requests interface"""
         url = urljoin(self._base_url, path)
 
-        logger.debug("[%s] (%s) %s", method, url, kwargs or "")
-        response = self._session.request(method=method, url=url, **kwargs)
+        req = requests.Request(method=method, url=url, **kwargs)
+        req = self._session.prepare_request(req)
+
+        logger.info("[CLIENT]: %s", request2curl(req))
+
+        response = self._session.send(req)
         return response
 
     def get(self, *args, **kwargs) -> requests.Response:
@@ -106,3 +111,21 @@ class HttpClient:
     def delete(self, *args, **kwargs) -> requests.Response:
         """mimics requests interface"""
         return self.request('DELETE', *args, **kwargs)
+
+
+def request2curl(request: requests.PreparedRequest) -> str:
+    """Create curl command corresponding to given request"""
+
+    cmd = ["curl", "-X %s" % shlex.quote(request.method)]
+    if request.headers:
+        cmd.extend([
+            "-H %s" % shlex.quote(f"{key}: {value}")
+            for key, value in request.headers.items()])
+    if request.body:
+        body = request.body
+        if isinstance(body, bytes):
+            body = body.decode("utf-8")
+        cmd.append("-d %s" % shlex.quote(body))
+    cmd.append(shlex.quote(request.url))
+
+    return " ".join(cmd)
