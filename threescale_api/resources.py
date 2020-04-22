@@ -437,6 +437,22 @@ class ProxyConfigs(DefaultClient):
         instance = self._create_instance(response=response)
         return instance
 
+    def latest(self, env: str = "sandbox") -> 'ProxyConfig':
+        log.info(f"[LATEST] Get latest proxy configuration of {env}")
+        self._env = env
+        url = self.url + '/latest'
+        response = self.rest.get(url=url)
+        instance = self._create_instance(response=response)
+        return instance
+
+    def version(self, version: int = 1, env: str = "sandbox") -> 'ProxyConfig':
+        log.info(f"[VERSION] Get proxy configuration of {env} of version {version}")
+        self._env = env
+        url = f'{self.url}/{version}'
+        response = self.rest.get(url=url)
+        instance = self._create_instance(response=response)
+        return instance
+
 
 class SettingsClient(DefaultClient):
     def __init__(self, *args, entity_name='settings', **kwargs):
@@ -680,8 +696,8 @@ class Proxy(DefaultResource):
         return MappingRules(parent=self, instance_klass=MappingRule)
 
     @property
-    def configs(self, env="sandbox") -> 'ProxyConfigs':
-        return ProxyConfigs(parent=self, instance_klass=ProxyConfig, env=env)
+    def configs(self) -> 'ProxyConfigs':
+        return ProxyConfigs(parent=self, instance_klass=ProxyConfig)
 
     @property
     def policies(self) -> 'Policies':

@@ -77,3 +77,19 @@ def test_service_list_configs(service, proxy):
     assert res
     item = res[0]
     assert item
+
+
+def test_service_proxy_configs_version(service, proxy):
+    config = service.proxy.list().configs.version(version=1)
+    assert config
+    assert config['environment'] == "sandbox"
+    assert config['version'] == 1
+    assert config['content']
+
+
+def test_service_proxy_configs_latest(service, proxy):
+    config = service.proxy.list().configs.latest()
+    assert config
+    assert config['environment'] == "sandbox"
+    assert config['version']
+    assert config['content']
