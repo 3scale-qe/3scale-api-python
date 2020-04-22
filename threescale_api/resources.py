@@ -366,6 +366,11 @@ class Analytics(DefaultClient):
         app_id = _extract_entity_id(service)
         return self._list_by_resource(resource_id=app_id, resource_type='services', **kwargs)
 
+    def list_by_backend(self, backend: Union['Backend', int], **kwargs):
+        backend_id = _extract_entity_id(backend)
+        return self._list_by_resource(
+            resource_id=backend_id, resource_type='backend_apis', **kwargs)
+
 
 class Tenants(DefaultClient):
     def __init__(self, *args, entity_name='tenant', entity_collection='tenants', **kwargs):
