@@ -680,8 +680,8 @@ class Proxy(DefaultResource):
         return MappingRules(parent=self, instance_klass=MappingRule)
 
     @property
-    def configs(self) -> 'ProxyConfigs':
-        return ProxyConfigs(parent=self, instance_klass=ProxyConfig)
+    def configs(self, env="sandbox") -> 'ProxyConfigs':
+        return ProxyConfigs(parent=self, instance_klass=ProxyConfig, env=env)
 
     @property
     def policies(self) -> 'Policies':
