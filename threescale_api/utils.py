@@ -89,7 +89,19 @@ class HttpClient:
 
         logger.info("[CLIENT]: %s", request2curl(req))
 
-        response = self._session.send(req)
+        # Session.send does not honor env variables (e.g. REQUESTS_CA_BUNDLE)
+        proxies = kwargs.get("proxies", {})
+        stream = kwargs.get("stream")
+        verify = kwargs.get("verify")
+        cert = kwargs.get("cert")
+        send_kwargs = {
+            "timeout": kwargs.get("timeout"),
+            "allow_redirects": kwargs.get("allow_redirects", True)}
+
+        send_kwargs.update(
+            self._session.merge_environment_settings(req.url, proxies, stream, verify, cert))
+
+        response = self._session.send(req, **send_kwargs)
         return response
 
     def get(self, *args, **kwargs) -> requests.Response:
