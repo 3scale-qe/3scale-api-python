@@ -80,28 +80,41 @@ class HttpClient:
         """Determine right url at runtime"""
         return self._app.service.proxy.fetch()[self._endpoint]
 
-    def request(self, method: str, path: str, **kwargs) -> requests.Response:
+    def request(self, method, path,
+            params=None, data=None, headers=None, cookies=None, files=None,
+            auth=None, timeout=None, allow_redirects=True, proxies=None,
+            hooks=None, stream=None, verify=None, cert=None, json=None) -> requests.Response:
         """mimics requests interface"""
         url = urljoin(self._base_url, path)
 
-        req = requests.Request(method=method, url=url, **kwargs)
-        req = self._session.prepare_request(req)
+        req = requests.Request(
+            method=method.upper(),
+            url=url,
+            headers=headers,
+            files=files,
+            data=data or {},
+            json=json,
+            params=params or {},
+            auth=auth,
+            cookies=cookies,
+            hooks=hooks,
+        )
+        prep = self._session.prepare_request(req)
 
-        logger.info("[CLIENT]: %s", request2curl(req))
+        logger.info("[CLIENT]: %s", request2curl(prep))
 
-        # Session.send does not honor env variables (e.g. REQUESTS_CA_BUNDLE)
-        proxies = kwargs.get("proxies", {})
-        stream = kwargs.get("stream")
-        verify = kwargs.get("verify")
-        cert = kwargs.get("cert")
         send_kwargs = {
-            "timeout": kwargs.get("timeout"),
-            "allow_redirects": kwargs.get("allow_redirects", True)}
+            "timeout": timeout,
+            "allow_redirects": allow_redirects
+        }
+
+        proxies = proxies or {}
 
         send_kwargs.update(
-            self._session.merge_environment_settings(req.url, proxies, stream, verify, cert))
+            self._session.merge_environment_settings(prep.url, proxies, stream, verify, cert))
 
-        response = self._session.send(req, **send_kwargs)
+        response = self._session.send(prep, **send_kwargs)
+
         return response
 
     def get(self, *args, **kwargs) -> requests.Response:
