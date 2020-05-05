@@ -53,15 +53,11 @@ class AppIdKeyAuth(BaseClientAuth):
 
     def __init__(self, app, location=None):
         super(AppIdKeyAuth, self).__init__(app, location)
+        proxy = self.app.service.proxy.list()
         self.credentials = {
-            "app_id": self.app["application_id"],
-            "app_key": self.app.keys.list()["keys"][0]["key"]["value"]
+            proxy["auth_app_id"]: self.app["application_id"],
+            proxy["auth_app_key"]: self.app.keys.list()["keys"][0]["key"]["value"]
         }
 
     def __call__(self, request):
-        if self.location == "authorization":
-            credentials = self.credentials
-            auth = requests.auth.HTTPBasicAuth(
-                credentials["app_id"], credentials["app_key"])
-            return auth(request)
         return super().__call__(request)
