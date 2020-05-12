@@ -18,7 +18,7 @@ def always_no_ssl_client(application, endpoint, session, verify):
 
 def test_api_client_replacement(application, proxy):
     application.api_client_verify = True
-    application._api_client = always_no_ssl_client
+    application._client_factory = always_no_ssl_client
     api_client = application.api_client()
 
     assert api_client is not None
