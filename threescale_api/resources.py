@@ -379,7 +379,7 @@ class Tenants(DefaultClient):
 
     @property
     def url(self) -> str:
-        return self.threescale_client.admin_api_url + '/tenants'
+        return self.threescale_client.master_api_url + '/providers'
 
 
 class Proxies(DefaultClient):
@@ -772,6 +772,10 @@ class Provider(DefaultResource):
 class Tenant(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
+
+    @property
+    def entity_id(self) -> int:
+        return self.entity["signup"]["account"]["id"]
 
 
 class Application(DefaultResource):
