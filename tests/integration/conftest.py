@@ -10,7 +10,8 @@ from threescale_api import errors
 import threescale_api
 from threescale_api.resources import (Service, ApplicationPlan, Application,
                                       Proxy, Backend, Metric, MappingRule,
-                                      BackendMappingRule, BackendUsage)
+                                      BackendMappingRule, BackendUsage,
+                                      ActiveDoc)
 
 load_dotenv()
 
@@ -376,3 +377,28 @@ def tenant_params():
                 password="123456",
                 email="email@invalid.invalid",
                 org_name="org")
+
+@pytest.fixture(scope='module')
+def active_docs_body():
+    return """
+{"swagger":"2.0","info":{"version":"1.0.0","title":"Test"},"paths":{"/test":{"get":{"operationId":"Test",
+"parameters":[],"responses":{"400":{"description":"bad input parameter"}}}}},"definitions":{}}
+"""
+
+@pytest.fixture(scope='module')
+def active_docs_params(active_docs_body):
+    suffix = get_suffix()
+    name = f"test-{suffix}"
+    return dict(name=name, body=active_docs_body)
+
+
+@pytest.fixture(scope='module')
+def active_doc(api, service, active_docs_params) -> ActiveDoc:
+    """
+    Fixture for getting active doc.
+    """
+    acs = active_docs_params.copy()
+    acs['service_id'] = service['id']
+    resource = api.active_docs.create(params=acs)
+    yield resource
+    cleanup(resource)

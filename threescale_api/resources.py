@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Union
+from typing import Dict, Union, List
 
 import requests
 
@@ -761,6 +761,19 @@ class Service(DefaultResource):
     @property
     def backend_usages(self) -> 'BackendUsages':
         return BackendUsages(parent=self, instance_klass=BackendUsage)
+
+    @property
+    def active_docs(self) -> 'ActiveDocs':
+        """ Active docs related to service. """
+        up_self = self
+
+        class Wrap(ActiveDocs):
+            def list(self, **kwargs) -> List['DefaultResource']:
+                """List all ActiveDocs related to this service."""
+                kwargs.update({'service_id': up_self['id']})
+                instance = self.select_by(**kwargs)
+                return instance
+        return Wrap(parent=self, instance_klass=ActiveDoc)
 
 
 class ActiveDoc(DefaultResource):
