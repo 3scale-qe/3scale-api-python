@@ -93,3 +93,8 @@ def test_service_proxy_configs_latest(service, proxy):
     assert config['environment'] == "sandbox"
     assert config['version']
     assert config['content']
+
+
+def test_service_mapping_rules(service):
+    map_rules = service.mapping_rules.list()
+    assert len(map_rules) >= 1

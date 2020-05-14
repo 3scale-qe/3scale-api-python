@@ -401,6 +401,10 @@ class Proxies(DefaultClient):
     def oidc(self) -> 'OIDCConfigs':
         return OIDCConfigs(self)
 
+    @property
+    def mapping_rules(self) -> 'MappingRules':
+        return MappingRules(parent=self, instance_klass=MappingRule)
+
 
 class ProxyConfigs(DefaultClient):
     def __init__(self, *args, entity_name='proxy_config', entity_collection='configs',
@@ -745,7 +749,7 @@ class Service(DefaultResource):
 
     @property
     def mapping_rules(self) -> 'MappingRules':
-        return MappingRules(parent=self, instance_klass=MappingRule)
+        return self.proxy.mapping_rules
 
     @property
     def policies_registry(self) -> 'PoliciesRegistry':
