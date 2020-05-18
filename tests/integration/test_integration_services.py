@@ -98,3 +98,7 @@ def test_service_proxy_configs_latest(service, proxy):
 def test_service_mapping_rules(service):
     map_rules = service.mapping_rules.list()
     assert len(map_rules) >= 1
+
+
+def test_service_backend_usages_backend(backend_usage, backend):
+    assert backend_usage.backend.entity_id == backend.entity_id

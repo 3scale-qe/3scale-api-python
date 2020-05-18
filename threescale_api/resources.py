@@ -953,6 +953,12 @@ class BackendUsage(DefaultResource):
     def __init__(self, entity_name='', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
+    @property
+    def backend(self) -> 'Backend':
+        return Backend(
+            client=Backends(parent=self, instance_klass=Backend),
+            entity_id=self['backend_id'])
+
 
 def _extract_entity_id(entity: Union['DefaultResource', int]):
     if isinstance(entity, DefaultResource):
