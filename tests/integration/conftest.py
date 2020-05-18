@@ -1,9 +1,11 @@
 import os
 import secrets
+import time
 from distutils.util import strtobool
 
 import pytest
 from dotenv import load_dotenv
+from threescale_api import errors
 
 import threescale_api
 from threescale_api.resources import (Service, ApplicationPlan, Application,
@@ -350,3 +352,27 @@ def backend_metric(backend, metric_params) -> Metric:
     resource = backend.metrics.create(params=metric_params)
     yield resource
     cleanup(resource)
+
+@pytest.fixture(scope="module")
+def custom_tenant(master_api, tenant_params):
+    """
+    Fixture for getting the custom tenant.
+    """
+    resource = master_api.tenants.create(tenant_params)
+    yield resource
+    resource.delete()
+    # tenants are not deleted immediately, they are scheduled for the deletion
+    # the exists method returns ok response, even if the tenant is scheduled for deletion
+    # However, the deletion of the tenant fails, if already deleted
+    with pytest.raises(errors.ApiClientError):
+        resource.delete()
+
+@pytest.fixture(scope="module")
+def tenant_params():
+    """
+    Params for custom tenant
+    """
+    return dict(username="tenant",
+                password="123456",
+                email="email@invalid.invalid",
+                org_name="org")
