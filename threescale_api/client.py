@@ -70,6 +70,13 @@ class ThreeScaleClient:
         return self.url + "/admin/api"
 
     @property
+    def master_api_url(self) -> str:
+        """Get master API url
+        Returns(str): URL of the 3scale master api
+        """
+        return self.url + "/master/api"
+
+    @property
     def services(self) -> resources.Services:
         """Gets services client
         Returns(resources.Services): Services client
