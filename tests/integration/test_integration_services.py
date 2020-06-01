@@ -102,3 +102,6 @@ def test_service_mapping_rules(service):
 
 def test_service_backend_usages_backend(backend_usage, backend):
     assert backend_usage.backend.entity_id == backend.entity_id
+
+def test_service_active_docs(service, active_doc):
+    assert all([acs['service_id'] == service['id'] for acs in service.active_docs.list()])
