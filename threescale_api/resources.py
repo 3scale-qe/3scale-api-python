@@ -597,6 +597,88 @@ class PoliciesRegistry(DefaultClient):
         return self.threescale_client.admin_api_url + '/registry/policies'
 
 
+class Webhooks(DefaultClient):
+    """
+    Default client for webhooks
+    """
+
+    def __init__(self, *args, entity_name='webhook', entity_collection='webhooks', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.admin_api_url + '/webhooks'
+
+    def update(self, params: dict = None, **kwargs):
+        url = self.url
+        return self.rest.put(url=url, json=params, **kwargs)
+
+    def setup(self, webhook_type, url):
+        """
+        Configure webhooks for given webhooks type
+        """
+        params = {"url": url,
+                  "active": "true",
+                  "provider_actions": "true"}
+        if webhook_type == "Keys":
+            params.update({
+                "application_key_created_on": "true",
+                "application_key_deleted_on": "true",
+                "application_key_updated_on": "true"
+            })
+        elif webhook_type == "Users":
+            params.update({
+                "user_created_on": "true",
+                "user_updated_on": "true",
+                "user_deleted_on": "true"
+            })
+        elif webhook_type == "Applications":
+            params.update({
+                "application_created_on": "true",
+                "application_updated_on": "true",
+                "application_suspended_on": "true",
+                "application_plan_changed_on": "true",
+                "application_user_key_updated_on": "true",
+                "application_deleted_on": "true"
+            })
+        elif webhook_type == "Accounts":
+            params.update({
+                "account_created_on": "true",
+                "account_updated_on": "true",
+                "account_deleted_on": "true",
+                "account_plan_changed_on": "true"
+            })
+
+        return self.update(params=params)
+
+    def clear(self):
+        """
+        Configure webhooks to default settings
+        """
+        params = {"url": "",
+                  "active": "false",
+                  "provider_actions": "false",
+                  "account_created_on": "false",
+                  "account_updated_on": "false",
+                  "account_deleted_on": "false",
+                  "user_created_on": "false",
+                  "user_updated_on": "false",
+                  "user_deleted_on": "false",
+                  "application_created_on": "false",
+                  "application_updated_on": "false",
+                  "application_deleted_on": "false",
+                  "account_plan_changed_on": "false",
+                  "application_plan_changed_on": "false",
+                  "application_user_key_updated_on": "false",
+                  "application_key_created_on": "false",
+                  "application_key_deleted_on": "false",
+                  "application_suspended_on": "false",
+                  "application_key_updated_on": "false",
+                  }
+        return self.update(params=params)
+
+
 # Resources
 
 
