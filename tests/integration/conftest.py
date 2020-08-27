@@ -11,7 +11,7 @@ import threescale_api
 from threescale_api.resources import (Service, ApplicationPlan, Application,
                                       Proxy, Backend, Metric, MappingRule,
                                       BackendMappingRule, BackendUsage,
-                                      ActiveDoc)
+                                      ActiveDoc, Webhooks)
 
 load_dotenv()
 
@@ -402,3 +402,7 @@ def active_doc(api, service, active_docs_params) -> ActiveDoc:
     resource = api.active_docs.create(params=acs)
     yield resource
     cleanup(resource)
+
+@pytest.fixture(scope='module')
+def webhook(api):
+    return api.webhooks
