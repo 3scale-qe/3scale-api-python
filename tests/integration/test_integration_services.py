@@ -95,6 +95,14 @@ def test_service_proxy_configs_latest(service, proxy):
     assert config['content']
 
 
+def test_service_proxy_configs_list_length(service, proxy):
+    configs = service.proxy.list().configs.list(env="sandbox")
+    length = len(configs)
+    proxy.update(params=dict(api_test_path='/ip'))
+    configs = service.proxy.list().configs.list(env="sandbox")
+    assert len(configs) == length + 1
+
+
 def test_service_mapping_rules(service):
     map_rules = service.mapping_rules.list()
     assert len(map_rules) >= 1
@@ -102,6 +110,7 @@ def test_service_mapping_rules(service):
 
 def test_service_backend_usages_backend(backend_usage, backend):
     assert backend_usage.backend.entity_id == backend.entity_id
+
 
 def test_service_active_docs(service, active_doc):
     assert all([acs['service_id'] == service['id'] for acs in service.active_docs.list()])
