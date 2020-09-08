@@ -772,6 +772,13 @@ class ProxyConfig(DefaultResource):
         else:
             return super().__getitem__(key)
 
+    # Same problem as in __getitem__.
+    def __len__(self):
+        if "proxy_configs" in self.entity:
+            return len(self.entity["proxy_configs"])
+        else:
+            return super().__len__()
+
 
 class Policy(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
