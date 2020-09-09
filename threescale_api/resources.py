@@ -518,10 +518,13 @@ class Policies(DefaultClient):
 class OIDCConfigs(DefaultClient):
     @property
     def url(self) -> str:
-        return self.parent.url + '/oidc_configuration'
+        return self.parent.url + '/proxy/oidc_configuration'
 
     def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
-        return self.rest.patch(url=self.url, json=params, **kwargs)
+        return self.rest.patch(url=self.url, json=params, **kwargs).json()
+
+    def read(self, params: dict = None, **kwargs) -> 'DefaultResource':
+        return self.rest.get(url=self.url, json=params, **kwargs).json()
 
 
 class Backends(DefaultClient):
