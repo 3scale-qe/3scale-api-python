@@ -115,6 +115,8 @@ class HttpClient:
 
         response = self._session.send(prep, **send_kwargs)
 
+        logger.info("\n".join(["[CLIENT]:", response2str(response)]))
+
         return response
 
     def get(self, *args, **kwargs) -> requests.Response:
@@ -154,3 +156,18 @@ def request2curl(request: requests.PreparedRequest) -> str:
     cmd.append(shlex.quote(request.url))
 
     return " ".join(cmd)
+
+
+def response2str(response: requests.Response):
+    """Return string representation of requests.Response"""
+
+    # Let's cheat with protocol, hopefully no-one will ever notice this ;)
+    msg = [f"HTTP/1.1 {response.status_code} {response.reason}"]
+    for key in response.headers:
+        msg.append(f"{key}: {response.headers[key]}")
+    msg.append("")
+    body = response.text
+    if len(body) > 160:
+        body = body[:160] + "..."
+    msg.append(body)
+    return "\n".join(msg)
