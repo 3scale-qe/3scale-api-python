@@ -518,13 +518,13 @@ class Policies(DefaultClient):
 class OIDCConfigs(DefaultClient):
     @property
     def url(self) -> str:
-        return self.parent.url + '/proxy/oidc_configuration'
+        return self.parent.url + '/oidc_configuration'
 
-    def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
-        return self.rest.patch(url=self.url, json=params, **kwargs).json()
+    def update(self, params: dict = None, **kwargs) -> requests.Response:
+        return self.rest.patch(url=self.url, json=params, **kwargs)
 
-    def read(self, params: dict = None, **kwargs) -> 'DefaultResource':
-        return self.rest.get(url=self.url, json=params, **kwargs).json()
+    def read(self, params: dict = None, **kwargs) -> requests.Response:
+        return self.rest.get(url=self.url, json=params, **kwargs)
 
 
 class Backends(DefaultClient):
@@ -909,7 +909,7 @@ class Service(DefaultResource):
         return PoliciesRegistry(parent=self, instance_klass=PoliciesRegistry)
 
     def oidc(self):
-        return OIDCConfigs(self)
+        return self.proxy.oidc
 
     @property
     def backend_usages(self) -> 'BackendUsages':
