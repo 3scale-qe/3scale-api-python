@@ -245,6 +245,6 @@ class RestApiClient:
         else:
             log.error(message)
             if throws:
-                raise errors.ApiClientError(response.status_code, response.content)
+                raise errors.ApiClientError(response.status_code, response.reason, response.content)
 
         return response

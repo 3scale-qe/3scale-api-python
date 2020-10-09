@@ -5,11 +5,12 @@ class ThreeScaleApiError(Exception):
 
 
 class ApiClientError(ThreeScaleApiError):
-    def __init__(self, code, body, message: str = None):
+    def __init__(self, code, reason, body, message: str = None):
         self.code = code
+        self.reason = reason
         self.body = body
         self._message = message
-        msg = f"Response({self.code}): {body}"
+        msg = f"Response({self.code} {reason}): {body}"
         if message:
             msg += f"; {message}"
         super(ApiClientError, self).__init__(msg)
