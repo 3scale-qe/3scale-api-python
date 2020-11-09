@@ -7,7 +7,7 @@ from threescale_api import auth
 from threescale_api import utils
 from threescale_api import errors
 from threescale_api.defaults import DefaultClient, DefaultPlanClient, DefaultPlanResource, \
-    DefaultResource, DefaultStateClient, DefaultUserResource
+    DefaultResource, DefaultStateClient, DefaultUserResource, DefaultStateResource
 
 log = logging.getLogger(__name__)
 
@@ -610,6 +610,40 @@ class PoliciesRegistry(DefaultClient):
         return self.threescale_client.admin_api_url + '/registry/policies'
 
 
+class ProviderAccounts(DefaultStateClient):
+    """
+    Client for Provider Accounts.
+    In 3scale, entity under Account Settings > Users
+    """
+    def __init__(self, *args, entity_name='user', entity_collection='users', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.admin_api_url + '/users'
+
+    def set_role_member(self, entity_id: int):
+        log.info("Changes the role of the user of the provider account to member")
+        return self.set_state(entity_id, state='member')
+
+    def set_role_admin(self, entity_id: int):
+        log.info("Changes the role of the provider account to admin")
+        return self.set_state(entity_id, state='admin')
+
+    def suspend(self, entity_id):
+        log.info("Changes the state of the user of the provider account to suspended")
+        return self.set_state(entity_id, state='suspend')
+
+    def unsuspend(self, entity_id: int):
+        log.info("Revokes the suspension of a user of the provider account")
+        return self.set_state(entity_id, state='unsuspend')
+
+    def activate(self, entity_id: int):
+        log.info("Changes the state of the user of the provider account to active")
+        return self.set_state(entity_id, state='activate')
+
+
 class Webhooks(DefaultClient):
     """
     Default client for webhooks
@@ -1096,3 +1130,28 @@ class PolicyRegistry(DefaultResource):
     @property
     def service(self) -> 'Service':
         return self.proxy.service
+
+
+class ProviderAccount(DefaultStateResource):
+    def __init__(self, entity_name='username', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+    def set_role_member(self):
+        log.info("Changes the role of the user of the provider account to member")
+        return self.set_state(state='member')
+
+    def set_role_admin(self):
+        log.info("Changes the role of the provider account to admin")
+        return self.set_state(state='admin')
+
+    def suspend(self):
+        log.info("Changes the state of the user of the provider account to suspended")
+        return self.set_state(state='suspend')
+
+    def unsuspend(self):
+        log.info("Revokes the suspension of a user of the provider account")
+        return self.set_state(state='unsuspend')
+
+    def activate(self):
+        log.info("Changes the state of the user of the provider account to active")
+        return self.set_state(state='activate')
