@@ -342,19 +342,6 @@ class ActiveDocs(DefaultClient):
     def url(self) -> str:
         return self.threescale_client.admin_api_url + '/active_docs'
 
-    def fetch(self, entity_id: int = None, **kwargs) -> dict:
-        """Fetch the entity dictionary
-        This is temporary overwrittening of default fetch method because of THREESCALE-5826
-        Args:
-            entity_id(int): Entity id
-            **kwargs: Optional args
-
-        Returns(dict): Resource dict from the 3scale
-        """
-        kwargs.update({'id': entity_id})
-        log.debug(self._log_message("[FETCH] Fetch ", entity_id=entity_id, args=kwargs))
-        return self.read_by(**kwargs)
-
 
 class Analytics(DefaultClient):
     def _list_by_resource(self, resource_id: int, resource_type, metric_name: str = 'hits',
@@ -868,6 +855,7 @@ class Service(DefaultResource):
                 kwargs.update({'service_id': up_self['id']})
                 instance = self.select_by(**kwargs)
                 return instance
+
         return Wrap(parent=self, instance_klass=ActiveDoc)
 
 
