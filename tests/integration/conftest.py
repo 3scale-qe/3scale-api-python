@@ -403,6 +403,23 @@ def active_doc(api, service, active_docs_params) -> ActiveDoc:
     yield resource
     cleanup(resource)
 
+
+@pytest.fixture(scope='module')
+def provider_account_params():
+    suffix = get_suffix()
+    name = f"test-{suffix}"
+    return dict(username=name,
+                email=f'{name}@example.com',
+                assword='123456')
+
+
+@pytest.fixture(scope='module')
+def provider_account(provider_account_params, api):
+    entity = api.provider_accounts.create(params=provider_account_params)
+    yield entity
+    cleanup(entity)
+
+
 @pytest.fixture(scope='module')
 def webhook(api):
     return api.webhooks
