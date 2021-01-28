@@ -1,6 +1,6 @@
 import logging
 import shlex
-from typing import Union
+from typing import Union, Iterable
 from urllib.parse import urljoin
 
 import requests
@@ -46,12 +46,14 @@ class HttpClient:
     """
 
     def __init__(self, app, endpoint: str = "sandbox_endpoint",
-                 session: requests.Session = None, verify: bool = None):
+                 session: requests.Session = None, verify: bool = None, disable_retry_status_list: Iterable = ()):
         self._app = app
         self._endpoint = endpoint
+        _status_forcelist = {503, 404} - set(disable_retry_status_list)
+
         if session is None:
             session = requests.Session()
-            self.retry_for_session(session)
+            self.retry_for_session(session, _status_forcelist)
 
             session.auth = app.authobj
 
@@ -61,11 +63,11 @@ class HttpClient:
         logger.debug("[HTTP CLIENT] New instance: %s", self._base_url)
 
     @staticmethod
-    def retry_for_session(session: requests.Session, total: int = 8):
+    def retry_for_session(session: requests.Session, status_forcelist: Iterable, total: int = 8):
         retry = Retry(
             total=total,
             backoff_factor=1,
-            status_forcelist=(503, 404),
+            status_forcelist=status_forcelist,
             raise_on_status=False,
             respect_retry_after_header=False
         )

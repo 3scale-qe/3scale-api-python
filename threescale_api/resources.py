@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Iterable
 
 import requests
 
@@ -989,8 +989,8 @@ class Application(DefaultResource):
     def register_auth(self, auth_mode: str, factory):
         self._auth_objects[auth_mode] = factory
 
-    def api_client(self, endpoint: str = "sandbox_endpoint",
-                   session: requests.Session = None, verify: bool = None) -> 'utils.HttpClient':
+    def api_client(self, endpoint: str = "sandbox_endpoint", session: requests.Session = None,
+                   verify: bool = None, disable_retry_status_list: Iterable = ()) -> 'utils.HttpClient':
         """This is preconfigured client for the application to run api calls.
         To avoid failures due to delays in infrastructure it retries call
         in case of certain condition. To modify this behavior customized session
@@ -1002,6 +1002,8 @@ class Application(DefaultResource):
         :param session: Customized requests.Session, all necessary has to be already done
         :param verify: Whether to do ssl verification or not,
                 by default doesn't change what's in session, defaults to None
+        :param disable_retry_status_list: Iterable collection that represents status codes
+                that should not be retried.
 
         :return: threescale.utils.HttpClient
 
@@ -1013,7 +1015,7 @@ class Application(DefaultResource):
         if verify is None:
             verify = self.api_client_verify
 
-        return self._client_factory(self, endpoint, session, verify)
+        return self._client_factory(self, endpoint, session, verify, disable_retry_status_list)
 
     @property
     def api_client_verify(self) -> bool:
