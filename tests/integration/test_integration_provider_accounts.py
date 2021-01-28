@@ -27,3 +27,31 @@ def test_api_role_change(api, provider_account):
     assert provider_account['role'] == 'member'
     updated = api.provider_accounts.set_role_admin(provider_account.entity_id)
     assert updated['role'] == 'admin'
+
+
+def test_api_read_permissions(api, provider_account):
+    provider_account.set_role_admin()
+    response = api.provider_accounts.permissions_read(provider_account.entity_id)
+    permissions = response['permissions']
+    assert 'portal' in permissions['allowed_sections']
+
+
+def test_resource_read_permissions(provider_account):
+    provider_account.set_role_admin()
+    response = provider_account.permissions_read()
+    permissions = response['permissions']
+    assert 'portal' in permissions['allowed_sections']
+
+
+def test_resource_update_permissions(service, provider_account):
+    provider_account.set_role_member()
+    response = provider_account.permissions_update()
+    permissions = response['permissions']
+    assert 'portal' not in permissions['allowed_sections']
+    assert service['id'] not in permissions['allowed_service_ids']
+
+    response = provider_account.permissions_update(
+        allowed_services=[service['id']], allowed_sections=['portal'])
+    permissions = response['permissions']
+    assert 'portal' in permissions['allowed_sections']
+    assert service['id'] in permissions['allowed_service_ids']

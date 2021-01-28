@@ -602,6 +602,7 @@ class ProviderAccounts(DefaultStateClient):
     Client for Provider Accounts.
     In 3scale, entity under Account Settings > Users
     """
+
     def __init__(self, *args, entity_name='user', entity_collection='users', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -609,6 +610,32 @@ class ProviderAccounts(DefaultStateClient):
     @property
     def url(self) -> str:
         return self.threescale_client.admin_api_url + '/users'
+
+    def permissions_update(self, entity_id: int,
+                           allowed_services: [] = None, allowed_sections: [] = None, **kwargs):
+        allowed_services = allowed_services if allowed_services else ['[]']
+        allowed_sections = allowed_sections if allowed_sections else ['[]']
+
+        log.info(self._log_message("Change of Provider Account (User) permissions"))
+        url = self._entity_url(entity_id) + '/permissions'
+        params = {
+            'allowed_service_ids[]': allowed_services,
+            'allowed_sections[]': allowed_sections,
+        }
+        response = self.rest.put(url=url, data=params, **kwargs)
+        return response.json()
+
+    def allow_all_sections(self, entity_id: int, **kwargs):
+        log.info(self._log_message("Change of Provider Account (User) "
+                                   "permissions to all available permissions"))
+        return self.permissions_update(entity_id=entity_id, allowed_sections=[
+            'portal', 'finance', 'settings', 'partners', 'monitoring', 'plans', 'policy_registry'
+        ])
+
+    def permissions_read(self, entity_id: int, **kwargs):
+        url = self._entity_url(entity_id) + '/permissions'
+        response = self.rest.get(url=url, **kwargs)
+        return response.json()
 
     def set_role_member(self, entity_id: int):
         log.info("Changes the role of the user of the provider account to member")
@@ -1123,6 +1150,21 @@ class PolicyRegistry(DefaultResource):
 class ProviderAccount(DefaultStateResource):
     def __init__(self, entity_name='username', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
+
+    def permissions_update(
+            self, allowed_services: [] = None, allowed_sections: [] = None, **kwargs):
+        return self.client.permissions_update(
+            entity_id=self.entity_id,
+            allowed_services=allowed_services,
+            allowed_sections=allowed_sections,
+            **kwargs
+        )
+
+    def allow_all_sections(self, **kwargs):
+        return self.client.allow_all_sections(entity_id=self.entity_id, **kwargs)
+
+    def permissions_read(self, **kwargs):
+        return self.client.permissions_read(entity_id=self.entity_id, **kwargs)
 
     def set_role_member(self):
         log.info("Changes the role of the user of the provider account to member")
