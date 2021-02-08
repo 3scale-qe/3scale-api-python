@@ -950,8 +950,8 @@ class Application(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
         self._auth_objects = {
-            Service.AUTH_USER_KEY: auth.UserKeyAuth,
-            Service.AUTH_APP_ID_KEY: auth.AppIdKeyAuth
+            Service.AUTH_USER_KEY: auth.UserKeyAuth(self),
+            Service.AUTH_APP_ID_KEY: auth.AppIdKeyAuth(self)
         }
         self._api_client_verify = None
         self._client_factory = utils.HttpClient
@@ -971,7 +971,7 @@ class Application(DefaultResource):
         return ApplicationKeys(parent=self, instance_klass=DefaultResource)
 
     @property
-    def authobj(self) -> requests.auth.AuthBase:
+    def authobj(self):
         """Returns subclass of requests.auth.BaseAuth to provide authentication
         for queries agains 3scale service"""
 
@@ -981,7 +981,9 @@ class Application(DefaultResource):
         if auth_mode not in self._auth_objects:
             raise errors.ThreeScaleApiError(f"Unknown credentials for configuration {auth_mode}")
 
-        return self._auth_objects[auth_mode](self)
+        # We need to make sure that any changes in the app/service will affect auth object
+        self._auth_objects[auth_mode].update_credentials(self)
+        return self._auth_objects[auth_mode]
 
     def register_auth(self, auth_mode: str, factory):
         self._auth_objects[auth_mode] = factory
