@@ -1,8 +1,6 @@
 import logging
 from typing import Dict, Union, List, Iterable
 
-import requests
-
 from threescale_api import auth
 from threescale_api import utils
 from threescale_api import errors
@@ -973,24 +971,23 @@ class Application(DefaultResource):
         "Application keys"
         return ApplicationKeys(parent=self, instance_klass=DefaultResource)
 
-    @property
-    def authobj(self) -> requests.auth.AuthBase:
+    def authobj(self, auth_mode=None, location=None):
         """Returns subclass of requests.auth.BaseAuth to provide authentication
         for queries agains 3scale service"""
 
         svc = self.service
-        auth_mode = svc["backend_version"]
+        auth_mode = auth_mode if auth_mode else svc["backend_version"]
 
         if auth_mode not in self._auth_objects:
             raise errors.ThreeScaleApiError(f"Unknown credentials for configuration {auth_mode}")
 
-        return self._auth_objects[auth_mode](self)
+        return self._auth_objects[auth_mode](self, location=location)
 
     def register_auth(self, auth_mode: str, factory):
         self._auth_objects[auth_mode] = factory
 
-    def api_client(self, endpoint: str = "sandbox_endpoint", session: requests.Session = None,
-                   verify: bool = None, disable_retry_status_list: Iterable = ()) -> 'utils.HttpClient':
+    def api_client(self, endpoint: str = "sandbox_endpoint", verify: bool = None, cert=None,
+                   disable_retry_status_list: Iterable = ()) -> 'utils.HttpClient':
         """This is preconfigured client for the application to run api calls.
         To avoid failures due to delays in infrastructure it retries call
         in case of certain condition. To modify this behavior customized session
@@ -999,9 +996,9 @@ class Application(DefaultResource):
 
         :param endpoint: Choose whether 'sandbox_endpoint' or 'endpoint',
                 defaults to sandbox_endpoint
-        :param session: Customized requests.Session, all necessary has to be already done
         :param verify: Whether to do ssl verification or not,
                 by default doesn't change what's in session, defaults to None
+        :param cert: path to certificates
         :param disable_retry_status_list: Iterable collection that represents status codes
                 that should not be retried.
 
@@ -1015,7 +1012,7 @@ class Application(DefaultResource):
         if verify is None:
             verify = self.api_client_verify
 
-        return self._client_factory(self, endpoint, session, verify, disable_retry_status_list)
+        return self._client_factory(self, endpoint, verify, cert, disable_retry_status_list)
 
     @property
     def api_client_verify(self) -> bool:

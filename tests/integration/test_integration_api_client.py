@@ -10,9 +10,9 @@ def test_api_client(application, proxy):
     assert api_client.get("/get").status_code == 200
 
 
-def always_no_ssl_client(application, endpoint, session, verify):
-    client = HttpClient(application, endpoint, session, verify)
-    client._session.verify = False
+def always_no_ssl_client(application, endpoint, verify):
+    client = HttpClient(application, endpoint, verify)
+    client._verify = False
     return client
 
 
