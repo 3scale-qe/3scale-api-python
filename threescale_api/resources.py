@@ -520,11 +520,11 @@ class OIDCConfigs(DefaultClient):
     def url(self) -> str:
         return self.parent.url + '/oidc_configuration'
 
-    def update(self, params: dict = None, **kwargs) -> requests.Response:
-        return self.rest.patch(url=self.url, json=params, **kwargs)
+    def update(self, params: dict = None, **kwargs) -> dict:
+        return self.rest.patch(url=self.url, json=params, **kwargs).json()
 
-    def read(self, params: dict = None, **kwargs) -> requests.Response:
-        return self.rest.get(url=self.url, json=params, **kwargs)
+    def read(self, params: dict = None, **kwargs) -> dict:
+        return self.rest.get(url=self.url, json=params, **kwargs).json()
 
 
 class Backends(DefaultClient):
