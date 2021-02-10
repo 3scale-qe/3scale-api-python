@@ -423,3 +423,17 @@ def provider_account(provider_account_params, api):
 @pytest.fixture(scope='module')
 def webhook(api):
     return api.webhooks
+
+
+@pytest.fixture(scope='module')
+def account_plans_params():
+    suffix = get_suffix()
+    name = f"test-{suffix}"
+    return dict(name=name)
+
+
+@pytest.fixture(scope='module')
+def account_plan(account_plans_params, api):
+    entity = api.account_plans.create(params=account_plans_params)
+    yield entity
+    cleanup(entity)

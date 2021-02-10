@@ -520,8 +520,11 @@ class OIDCConfigs(DefaultClient):
     def url(self) -> str:
         return self.parent.url + '/oidc_configuration'
 
-    def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
-        return self.rest.patch(url=self.url, json=params, **kwargs)
+    def update(self, params: dict = None, **kwargs) -> dict:
+        return self.rest.patch(url=self.url, json=params, **kwargs).json()
+
+    def read(self, params: dict = None, **kwargs) -> dict:
+        return self.rest.get(url=self.url, json=params, **kwargs).json()
 
 
 class Backends(DefaultClient):
@@ -906,7 +909,7 @@ class Service(DefaultResource):
         return PoliciesRegistry(parent=self, instance_klass=PoliciesRegistry)
 
     def oidc(self):
-        return OIDCConfigs(self)
+        return self.proxy.oidc
 
     @property
     def backend_usages(self) -> 'BackendUsages':
@@ -947,7 +950,7 @@ class Tenant(DefaultResource):
 
 
 class Application(DefaultResource):
-    def __init__(self, entity_name='system_name', **kwargs):
+    def __init__(self, entity_name='name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
         self._auth_objects = {
             Service.AUTH_USER_KEY: auth.UserKeyAuth,
@@ -1074,7 +1077,7 @@ class AccountUser(DefaultUserResource):
 
 
 class AccountPlan(DefaultResource):
-    def __init__(self, entity_name='system_name', **kwargs):
+    def __init__(self, entity_name='name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
 
