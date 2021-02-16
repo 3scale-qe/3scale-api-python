@@ -950,7 +950,7 @@ class Tenant(DefaultResource):
 
 
 class Application(DefaultResource):
-    def __init__(self, entity_name='system_name', **kwargs):
+    def __init__(self, entity_name='name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
         self._auth_objects = {
             Service.AUTH_USER_KEY: auth.UserKeyAuth,
@@ -1077,7 +1077,7 @@ class AccountUser(DefaultUserResource):
 
 
 class AccountPlan(DefaultResource):
-    def __init__(self, entity_name='system_name', **kwargs):
+    def __init__(self, entity_name='name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
 
