@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 class Services(DefaultClient):
     def __init__(self, *args, entity_name='service', entity_collection='services', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -25,7 +25,7 @@ class Services(DefaultClient):
 class MappingRules(DefaultClient):
     def __init__(self, *args, entity_name='mapping_rule', entity_collection='mapping_rules',
                  **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -35,7 +35,7 @@ class MappingRules(DefaultClient):
 
 class Metrics(DefaultClient):
     def __init__(self, *args, entity_name='metric', entity_collection='metrics', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -46,7 +46,7 @@ class Metrics(DefaultClient):
 class Limits(DefaultClient):
     def __init__(self, *args, entity_name='limit', entity_collection='limits', metric,
                  **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
         self._metric = metric
 
@@ -77,7 +77,7 @@ class Limits(DefaultClient):
 class PricingRules(DefaultClient):
     def __init__(self, *args, entity_name='pricing_rule', entity_collection='pricing_rules',
                  metric: 'Metric' = None, **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
         self._metric = metric
 
@@ -100,7 +100,7 @@ class PricingRules(DefaultClient):
 
 class Methods(DefaultClient):
     def __init__(self, *args, entity_name='method', entity_collection='methods', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -110,7 +110,7 @@ class Methods(DefaultClient):
 
 class ApplicationPlans(DefaultPlanClient):
     def __init__(self, *args, entity_name='application_plan', entity_collection='plans', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -124,7 +124,7 @@ class ApplicationPlans(DefaultPlanClient):
 
 class ApplicationPlanFeatures(DefaultClient):
     def __init__(self, *args, entity_name='feature', entity_collection='features', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -134,7 +134,7 @@ class ApplicationPlanFeatures(DefaultClient):
 
 class AccountUsers(DefaultStateClient):
     def __init__(self, *args, entity_name='user', entity_collection='users', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -144,7 +144,7 @@ class AccountUsers(DefaultStateClient):
 
 class AccountPlans(DefaultPlanClient):
     def __init__(self, *args, entity_name='account_plan', entity_collection='plans', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultPlanClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -154,7 +154,7 @@ class AccountPlans(DefaultPlanClient):
 
 class Accounts(DefaultStateClient):
     def __init__(self, *args, entity_name='account', entity_collection='accounts', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultStateClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -244,7 +244,7 @@ class Accounts(DefaultStateClient):
 class Applications(DefaultStateClient):
     def __init__(self, *args, entity_name='application', entity_collection='applications',
                  **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultStateClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -286,7 +286,7 @@ class Applications(DefaultStateClient):
 class DevPortalAuthProviders(DefaultClient):
     def __init__(self, *args, entity_name='authentication_provider',
                  entity_collection='authentication_providers', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -297,7 +297,7 @@ class DevPortalAuthProviders(DefaultClient):
 class ApplicationReferrerFilters(DefaultClient):
     def __init__(self, *args, entity_name='application', entity_collection='applications',
                  **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -308,7 +308,7 @@ class ApplicationReferrerFilters(DefaultClient):
 class ApplicationKeys(DefaultClient):
     def __init__(self, *args, entity_name='application', entity_collection='applications',
                  **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -318,7 +318,7 @@ class ApplicationKeys(DefaultClient):
 
 class Providers(DefaultClient):
     def __init__(self, *args, entity_name='user', entity_collection='users', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -346,7 +346,7 @@ class AccessTokens(DefaultClient):
 
 class ActiveDocs(DefaultClient):
     def __init__(self, *args, entity_name='api_doc', entity_collection='api_docs', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -385,7 +385,7 @@ class Analytics(DefaultClient):
 
 class Tenants(DefaultClient):
     def __init__(self, *args, entity_name='tenant', entity_collection='tenants', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     def read(self, id, **kwargs):
@@ -433,7 +433,7 @@ class Tenants(DefaultClient):
 
 class Proxies(DefaultClient):
     def __init__(self, *args, entity_name='proxy', **kwargs):
-        super().__init__(*args, entity_name=entity_name, **kwargs)
+        DefaultClient.__init__(self, *args, entity_name=entity_name, **kwargs)
 
     @property
     def url(self) -> str:
@@ -458,7 +458,7 @@ class Proxies(DefaultClient):
 class ProxyConfigs(DefaultClient):
     def __init__(self, *args, entity_name='proxy_config', entity_collection='configs',
                  env: str = None, **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
         self._env = env
 
@@ -483,7 +483,7 @@ class ProxyConfigs(DefaultClient):
         if "env" in kwargs:
             self._env = kwargs["env"]
             del (kwargs["env"])
-        return super().list(**kwargs)
+        return DefaultClient.list(self, **kwargs)
 
     def promote(self, version: int = 1, from_env: str = 'sandbox', to_env: str = 'production',
                 **kwargs) -> 'Proxy':
@@ -514,7 +514,7 @@ class ProxyConfigs(DefaultClient):
 
 class SettingsClient(DefaultClient):
     def __init__(self, *args, entity_name='settings', **kwargs):
-        super().__init__(*args, entity_name=entity_name, **kwargs)
+        DefaultClient.__init__(self, *args, entity_name=entity_name, **kwargs)
 
     @property
     def url(self) -> str:
@@ -524,7 +524,7 @@ class SettingsClient(DefaultClient):
 class AdminPortalAuthProviders(DefaultClient):
     def __init__(self, *args, entity_name='authentication_provider',
                  entity_collection='authentication_providers', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -534,7 +534,7 @@ class AdminPortalAuthProviders(DefaultClient):
 
 class UserPermissionsClient(DefaultClient):
     def __init__(self, *args, entity_name='permissions', **kwargs):
-        super().__init__(*args, entity_name=entity_name, **kwargs)
+        DefaultClient.__init__(self, *args, entity_name=entity_name, **kwargs)
 
     @property
     def url(self) -> str:
@@ -543,7 +543,7 @@ class UserPermissionsClient(DefaultClient):
 
 class Policies(DefaultClient):
     def __init__(self, *args, entity_name='policy', entity_collection='policies', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -579,7 +579,7 @@ class OIDCConfigs(DefaultClient):
 class Backends(DefaultClient):
     def __init__(self, *args, entity_name='backend_api',
                  entity_collection='backend_apis', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -587,11 +587,11 @@ class Backends(DefaultClient):
         return self.threescale_client.admin_api_url + '/backend_apis'
 
     def list(self, **kwargs):
-        return list(super().list(**kwargs))
+        return list(DefaultClient.list(self, **kwargs))
 
     def _list(self, **kwargs):
         if "page" in kwargs.get("params", {}):
-            return super()._list(**kwargs)
+            return DefaultClient._list(self, **kwargs)
 
         pagenum = 1
 
@@ -602,14 +602,14 @@ class Backends(DefaultClient):
         kwargs["params"]["page"] = pagenum
         kwargs["params"]["per_page"] = 500
 
-        page = super()._list(**kwargs)
+        page = DefaultClient._list(self, **kwargs)
 
         while len(page):
             for i in page:
                 yield i
             pagenum += 1
             kwargs["params"]["page"] = pagenum
-            page = super()._list(**kwargs)
+            page = DefaultClient._list(self, **kwargs)
 
     def __iter__(self):
         return self._list()
@@ -617,21 +617,21 @@ class Backends(DefaultClient):
 
 class BackendMetrics(Metrics):
     def __init__(self, *args, entity_name='metric', entity_collection='metrics', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        Metrics.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
 
 class BackendMappingRules(MappingRules):
     def __init__(self, *args, entity_name='mapping_rule',
                  entity_collection='mapping_rules', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        MappingRules.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
 
 class BackendUsages(Services):
     def __init__(self, *args, entity_name='backend_usage',
                  entity_collection='backend_usages', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        Services.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -641,7 +641,7 @@ class BackendUsages(Services):
 
 class PoliciesRegistry(DefaultClient):
     def __init__(self, *args, entity_name='policy', entity_collection='policies', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -742,7 +742,7 @@ class Webhooks(DefaultClient):
     """
 
     def __init__(self, *args, entity_name='webhook', entity_collection='webhooks', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
+        DefaultClient.__init__(self, *args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
     @property
@@ -904,7 +904,7 @@ class FieldsDefinitions(DefaultClient):
 
 class ApplicationPlan(DefaultPlanResource):
     def __init__(self, entity_name='system_name', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        DefaultPlanResource.__init__(self, entity_name=entity_name, **kwargs)
 
     @property
     def plans_url(self) -> str:
@@ -923,7 +923,7 @@ class ApplicationPlan(DefaultPlanResource):
 
 class Method(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        DefaultResource.__init__(self, entity_name=entity_name, **kwargs)
 
     @property
     def metric(self) -> 'Metric':
@@ -936,7 +936,7 @@ class Method(DefaultResource):
 
 class Metric(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        DefaultResource.__init__(self, entity_name=entity_name, **kwargs)
 
     @property
     def service(self) -> 'Service':
@@ -975,19 +975,19 @@ class ProxyConfig(DefaultResource):
         if "proxy_configs" in self.entity:
             return self.entity["proxy_configs"][key]
         else:
-            return super().__getitem__(key)
+            return DefaultResource.__getitem__(self, key)
 
     # Same problem as in __getitem__.
     def __len__(self):
         if "proxy_configs" in self.entity:
             return len(self.entity["proxy_configs"])
         else:
-            return super().__len__()
+            return DefaultResource.__len__(self)
 
 
 class Policy(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        DefaultResource.__init__(self, entity_name=entity_name, **kwargs)
 
     @property
     def proxy(self) -> 'Proxy':
@@ -1036,7 +1036,7 @@ class Service(DefaultResource):
     AUTH_OIDC = "oidc"
 
     def __init__(self, entity_name='system_name', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        DefaultResource.__init__(self, entity_name=entity_name, **kwargs)
 
     @property
     def app_plans(self) -> ApplicationPlans:
@@ -1082,12 +1082,12 @@ class Service(DefaultResource):
 
 class ActiveDoc(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        DefaultResource.__init__(self, entity_name=entity_name, **kwargs)
 
 
 class Provider(DefaultResource):
     def __init__(self, entity_name='org_name', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        DefaultResource.__init__(self, entity_name=entity_name, **kwargs)
 
 
 class AccessToken(DefaultResource):
@@ -1142,8 +1142,8 @@ class Tenant(DefaultResource):
 
 
 class Application(DefaultResource):
-    def __init__(self, entity_name='name', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+    def __init__(self, entity_name='system_name', **kwargs):
+        DefaultResource.__init__(self, entity_name=entity_name, **kwargs)
         self._auth_objects = {
             Service.AUTH_USER_KEY: auth.UserKeyAuth,
             Service.AUTH_APP_ID_KEY: auth.AppIdKeyAuth
@@ -1241,7 +1241,7 @@ class Application(DefaultResource):
 
 class Account(DefaultResource):
     def __init__(self, entity_name='org_name', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        DefaultResource.__init__(self, entity_name=entity_name, **kwargs)
 
     @property
     def applications(self) -> Applications:
@@ -1258,7 +1258,7 @@ class UserPermissions(DefaultResource):
 
 class AccountUser(DefaultUserResource):
     def __init__(self, entity_name='username', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        DefaultUserResource.__init__(self, entity_name=entity_name, **kwargs)
 
     @property
     def account(self) -> 'Account':
@@ -1270,8 +1270,8 @@ class AccountUser(DefaultUserResource):
 
 
 class AccountPlan(DefaultResource):
-    def __init__(self, entity_name='name', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+    def __init__(self, entity_name='system_name', **kwargs):
+        DefaultResource.__init__(self, entity_name=entity_name, **kwargs)
 
 
 class Limit(DefaultResource):
@@ -1288,7 +1288,7 @@ class PricingRule(DefaultResource):
 
 class Backend(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        DefaultResource.__init__(self, entity_name=entity_name, **kwargs)
 
     @property
     def metrics(self) -> 'BackendMetrics':
@@ -1305,17 +1305,17 @@ class Backend(DefaultResource):
 
 class BackendMetric(Metric):
     def __init__(self, entity_name='system_name', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        Metric.__init__(self, entity_name=entity_name, **kwargs)
 
 
 class BackendMappingRule(MappingRule):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        MappingRule.__init__(self, **kwargs)
 
 
 class BackendUsage(DefaultResource):
     def __init__(self, entity_name='', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        DefaultResource.__init__(self, entity_name=entity_name, **kwargs)
 
     @property
     def backend(self) -> 'Backend':

@@ -129,6 +129,7 @@ class DefaultClient(collections.abc.Mapping):
         Returns(dict): Resource dict from the 3scale
         """
         log.debug(self._log_message("[FETCH] Fetch ", entity_id=entity_id, args=kwargs))
+        print(self._log_message("[FETCH] Fetch ", entity_id=entity_id, args=kwargs))
         url = self._entity_url(entity_id=entity_id)
         response = self.rest.get(url=url, **kwargs)
         return utils.extract_response(response=response, entity=self._entity_name)
@@ -230,6 +231,7 @@ class DefaultClient(collections.abc.Mapping):
         return instance
 
     def _entity_url(self, entity_id=None) -> str:
+        print(str(self.url), str(entity_id), str(self.threescale_client.admin_api_url))
         if not entity_id:
             return self.url
         return self.url + '/' + str(entity_id)
@@ -261,7 +263,7 @@ class DefaultClient(collections.abc.Mapping):
 
 class DefaultResource(collections.abc.MutableMapping):
     def __init__(self, client: DefaultClient = None, entity_id: int = None, entity_name: str = None,
-                 entity: dict = None):
+                 entity: dict = None, **kwargs):
         """Create instance of the resource
         Args:
             client: Client instance of the resource
@@ -281,6 +283,10 @@ class DefaultResource(collections.abc.MutableMapping):
     @property
     def parent(self) -> 'DefaultResource':
         return self.client.parent
+    
+    @parent.setter
+    def parent(self, parent):
+        self.client.parent = parent
 
     @parent.setter
     def parent(self, parent):
@@ -412,7 +418,7 @@ class DefaultPlanClient(DefaultClient):
 
 class DefaultPlanResource(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        DefaultResource.__init__(self, entity_name=entity_name, **kwargs)
 
     def set_default(self, **kwargs) -> 'DefaultStateResource':
         """Set the plan default
@@ -458,7 +464,7 @@ class DefaultStateResource(DefaultResource):
 
 class DefaultUserResource(DefaultStateResource):
     def __init__(self, entity_name='username', **kwargs):
-        super().__init__(entity_name=entity_name, **kwargs)
+        DefaultStateResource.__init__(self, entity_name=entity_name, **kwargs)
 
     def suspend(self, **kwargs) -> 'DefaultUserResource':
         """Suspends the user
