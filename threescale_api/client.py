@@ -284,7 +284,8 @@ class RestApiClient:
         Returns:
 
         """
-
+        if 'resource' in kwargs:
+            del(kwargs['resource'])
         full_url = url if url else urljoin(self.url, path)
         full_url = full_url + ".json"
         headers = headers or {}

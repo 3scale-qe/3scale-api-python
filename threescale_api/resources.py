@@ -44,7 +44,7 @@ class Metrics(DefaultClient):
 
 
 class Limits(DefaultClient):
-    def __init__(self, *args, entity_name='limit', entity_collection='limits', metric=None,
+    def __init__(self, *args, entity_name='limit', entity_collection='limits', metric,
                  **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -914,11 +914,9 @@ class ApplicationPlan(DefaultPlanResource):
     def service(self) -> 'Service':
         return self.parent
 
-    @property
     def limits(self, metric: 'Metric' = None) -> 'Limits':
         return Limits(self, metric=metric, instance_klass=Limit)
 
-    @property
     def pricing_rules(self, metric: 'Metric' = None) -> 'PricingRules':
         return PricingRules(self, metric=metric, instance_klass=PricingRule)
 
@@ -1020,10 +1018,6 @@ class Proxy(DefaultResource):
     @property
     def policies(self) -> 'Policies':
         return Policies(parent=self, instance_klass=Policy)
-
-    @property
-    def entity_id(self):
-        return None
 
     def promote(self, **kwargs) -> 'Proxy':
         return self.configs.promote(**kwargs)
@@ -1337,7 +1331,7 @@ def _extract_entity_id(entity: Union['DefaultResource', int]):
 
 
 class PolicyRegistry(DefaultResource):
-    def __init__(self, entity_name='system_name', **kwargs):
+    def __init__(self, entity_name='name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
     @property

@@ -11,6 +11,7 @@ class BaseClientAuth(requests.auth.AuthBase):
     def __init__(self, app, location=None):
         self.app = app
         self.location = location
+        self.credentials = {}
         if location is None:
             self.location = app.service.proxy.list().entity["credentials_location"]
 

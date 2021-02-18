@@ -23,7 +23,7 @@ class DefaultClient(collections.abc.Mapping):
             entity_name(str): Entity name - required for extraction
             entity_collection(str): Collection name - required for extraction
         """
-        self._parent = parent
+        self.parent = parent
         self._instance_klass = instance_klass
         self._entity_name = entity_name
         if entity_collection is None and entity_name is not None:
@@ -44,14 +44,6 @@ class DefaultClient(collections.abc.Mapping):
 
         """
         return self.parent.threescale_client
-
-    @property
-    def parent(self) -> 'DefaultResource':
-        """ Instance of the parent resource
-        Returns(DefaultResource): Parent of the client is an subclass of the default resource
-
-        """
-        return self._parent
 
     @property
     def rest(self) -> 'RestApiClient':
@@ -154,7 +146,7 @@ class DefaultClient(collections.abc.Mapping):
     def __len__(self) -> int:
         return len(self._list())
 
-    def __iter__(self) -> Iterator['CRUDResource']:
+    def __iter__(self) -> Iterator['DefaultResource']:
         return next(iter(self._list()))
 
     def read(self, entity_id: int = None) -> 'DefaultResource':
@@ -190,6 +182,7 @@ class DefaultClient(collections.abc.Mapping):
 
     def select_by(self, **params) -> List['DefaultResource']:
         """Select by params - logical and
+        Usage example: select_by(role='admin')
         Args:
             **params: params used for selection
         Returns: List of resources
@@ -289,6 +282,10 @@ class DefaultResource(collections.abc.MutableMapping):
     def parent(self) -> 'DefaultResource':
         return self.client.parent
 
+    @parent.setter
+    def parent(self, parent):
+        self.client.parent = parent
+
     @property
     def entity_name(self) -> Optional[str]:
         return self[self._entity_name]
@@ -309,6 +306,10 @@ class DefaultResource(collections.abc.MutableMapping):
     @property
     def entity_id(self) -> int:
         return self._entity_id or self._entity.get('id')
+
+    @entity_id.setter
+    def entity_id(self, value):
+        self._entity_id = value
 
     def __getitem__(self, item: str):
         return self.entity.get(item)
@@ -345,9 +346,13 @@ class DefaultResource(collections.abc.MutableMapping):
         self.entity[item] = value
 
     def _lazy_load(self, **kwargs) -> 'DefaultResource':
-        if not self._entity:
+        if self._entity is None:
             # Lazy load the entity
-            self._entity = self.fetch(**kwargs)
+            fetched = self.fetch(**kwargs)
+            if isinstance(fetched, dict):
+                self._entity = fetched
+            else:
+                self._entity = fetched._entity
         return self
 
     def read(self, **kwargs) -> 'DefaultResource':
@@ -362,13 +367,16 @@ class DefaultResource(collections.abc.MutableMapping):
         return self.client.exists(entity_id=self.entity_id, **kwargs)
 
     def delete(self, **kwargs):
-        self.client.delete(entity_id=self.entity_id, **kwargs)
+        self.client.delete(entity_id=self.entity_id, resource=self, **kwargs)
 
     def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
         new_params = {**self.entity}
         if params:
             new_params.update(params)
-        new_entity = self.client.update(entity_id=self.entity_id, params=new_params, **kwargs)
+        new_entity = self.client.update(entity_id=self.entity_id,
+                                        params=new_params,
+                                        resource=self,
+                                        **kwargs)
         self._entity = new_entity.entity
         return self
 

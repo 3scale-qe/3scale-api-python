@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 
 import requests
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+from urllib3.util import Retry
 
 logger = logging.getLogger(__name__)
 
