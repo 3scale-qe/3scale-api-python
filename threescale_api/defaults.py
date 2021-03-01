@@ -129,7 +129,6 @@ class DefaultClient(collections.abc.Mapping):
         Returns(dict): Resource dict from the 3scale
         """
         log.debug(self._log_message("[FETCH] Fetch ", entity_id=entity_id, args=kwargs))
-        print(self._log_message("[FETCH] Fetch ", entity_id=entity_id, args=kwargs))
         url = self._entity_url(entity_id=entity_id)
         response = self.rest.get(url=url, **kwargs)
         return utils.extract_response(response=response, entity=self._entity_name)
@@ -231,7 +230,6 @@ class DefaultClient(collections.abc.Mapping):
         return instance
 
     def _entity_url(self, entity_id=None) -> str:
-        print(str(self.url), str(entity_id), str(self.threescale_client.admin_api_url))
         if not entity_id:
             return self.url
         return self.url + '/' + str(entity_id)
