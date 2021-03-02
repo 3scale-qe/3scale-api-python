@@ -55,9 +55,7 @@ class HttpClient:
 
             session.auth = app.authobj
 
-        if verify is not None:
-            session.verify = verify
-
+        self.verify = verify
         self._session = session
 
         logger.debug("[HTTP CLIENT] New instance: %s", self._base_url)
@@ -86,6 +84,8 @@ class HttpClient:
                 hooks=None, stream=None, verify=None, cert=None, json=None) -> requests.Response:
         """mimics requests interface"""
         url = urljoin(self._base_url, path)
+        if verify is None:
+            verify = self.verify
 
         req = requests.Request(
             method=method.upper(),
