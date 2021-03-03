@@ -1,6 +1,6 @@
 import logging
 import shlex
-from typing import Union
+from typing import Union, Iterable
 from urllib.parse import urljoin
 
 import requests
@@ -41,31 +41,34 @@ class HttpClient:
     :param app: Application for which client should do the calls
     :param endpoint: either 'sandbox_endpoint' (staging) or 'endpoint' (production),
         defaults to sandbox_endpoint
-    :param session: Used instead of default; it has to be fully configured
     :param verify: SSL verification
+    :param cert: path to certificate
+    :param disable_retry_status_list:
+        Iterable collection of status code that should not be retried by requests
     """
 
     def __init__(self, app, endpoint: str = "sandbox_endpoint",
-                 session: requests.Session = None, verify: bool = None):
+                 verify: bool = None, cert=None, disable_retry_status_list: Iterable = ()):
         self._app = app
         self._endpoint = endpoint
-        if session is None:
-            session = requests.Session()
-            self.retry_for_session(session)
-
-            session.auth = app.authobj
-
-        self.verify = verify
-        self._session = session
+        self.verify = verify if verify is not None else app.api_client_verify
+        self.cert = cert
+        self._status_forcelist = {503, 404} - set(disable_retry_status_list)
+        self.auth = app.authobj()
+        self.session = self._create_session()
 
         logger.debug("[HTTP CLIENT] New instance: %s", self._base_url)
 
+    def close(self):
+        """Close requests session"""
+        self.session.close()
+
     @staticmethod
-    def retry_for_session(session: requests.Session, total: int = 8):
+    def retry_for_session(session: requests.Session, status_forcelist: Iterable, total: int = 8):
         retry = Retry(
             total=total,
             backoff_factor=1,
-            status_forcelist=(503, 404),
+            status_forcelist=status_forcelist,
             raise_on_status=False,
             respect_retry_after_header=False
         )
@@ -78,14 +81,25 @@ class HttpClient:
         """Determine right url at runtime"""
         return self._app.service.proxy.fetch()[self._endpoint]
 
+    def _create_session(self):
+        """Creates session"""
+        session = requests.Session()
+        self.retry_for_session(session, self._status_forcelist)
+        return session
+
+    def extend_connection_pool(self, maxsize: int):
+        """Extend connection pool"""
+        self.session.adapters["https://"].poolmanager.connection_pool_kw["maxsize"] = maxsize
+        self.session.adapters["https://"].poolmanager.clear()
+
     def request(self, method, path,
                 params=None, data=None, headers=None, cookies=None, files=None,
                 auth=None, timeout=None, allow_redirects=True, proxies=None,
-                hooks=None, stream=None, verify=None, cert=None, json=None) -> requests.Response:
+                hooks=None, stream=None, json=None) -> requests.Response:
         """mimics requests interface"""
         url = urljoin(self._base_url, path)
-        if verify is None:
-            verify = self.verify
+        session = self.session
+        session.auth = auth or self.auth
 
         req = requests.Request(
             method=method.upper(),
@@ -99,7 +113,7 @@ class HttpClient:
             cookies=cookies,
             hooks=hooks,
         )
-        prep = self._session.prepare_request(req)
+        prep = session.prepare_request(req)
 
         logger.info("[CLIENT]: %s", request2curl(prep))
 
@@ -111,9 +125,9 @@ class HttpClient:
         proxies = proxies or {}
 
         send_kwargs.update(
-            self._session.merge_environment_settings(prep.url, proxies, stream, verify, cert))
+            session.merge_environment_settings(prep.url, proxies, stream, self.verify, self.cert))
 
-        response = self._session.send(prep, **send_kwargs)
+        response = session.send(prep, **send_kwargs)
 
         logger.info("\n".join(["[CLIENT]:", response2str(response)]))
 
