@@ -428,7 +428,7 @@ def provider_account_params():
 
 
 @pytest.fixture(scope='module')
-def provider_account(provider_account_params, api):
+def provider_account_user(provider_account_params, api):
     entity = api.provider_accounts.create(params=provider_account_params)
     yield entity
     cleanup(entity)

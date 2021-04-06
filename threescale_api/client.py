@@ -22,6 +22,8 @@ class ThreeScaleClient:
         self._accounts = resources.Accounts(self, instance_klass=resources.Account)
         self._provider_accounts = \
             resources.ProviderAccounts(self, instance_klass=resources.ProviderAccount)
+        self._provider_account_users = \
+            resources.ProviderAccountUsers(self, instance_klass=resources.ProviderAccountUser)
         self._methods = resources.Methods(self, instance_klass=resources.Method)
         self._metrics = resources.Metrics(self, instance_klass=resources.Metric)
         self._analytics = resources.Analytics(self)
@@ -105,10 +107,16 @@ class ThreeScaleClient:
 
     @property
     def provider_accounts(self) -> resources.ProviderAccounts:
-        """Gets Provider Accounts client
-        Returns(resources.ProviderAccounts): Provider Accounts client
-        """
+        """Gets provider accounts client
+        Returns(resources.ProviderAccouts): Provider Accounts client"""
         return self._provider_accounts
+
+    @property
+    def provider_account_users(self) -> resources.ProviderAccountUsers:
+        """Gets provider account users client
+        Returns(resources.ProviderAccountUsers): Provider Accounts User client
+        """
+        return self._provider_account_users
 
     @property
     def account_plans(self) -> resources.AccountPlans:

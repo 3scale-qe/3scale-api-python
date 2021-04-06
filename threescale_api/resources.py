@@ -609,12 +609,25 @@ class PoliciesRegistry(DefaultClient):
         return self.threescale_client.admin_api_url + '/registry/policies'
 
 
-class ProviderAccounts(DefaultStateClient):
+class ProviderAccounts(DefaultClient):
+    """
+    3scale endpoints implement only GET and UPDATE methods
+    """
+    def __init__(self, *args, entity_name='provider_account',
+                 entity_collection='provider_accounts', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.admin_api_url + '/provider'
+
+
+class ProviderAccountUsers(DefaultStateClient):
     """
     Client for Provider Accounts.
     In 3scale, entity under Account Settings > Users
     """
-
     def __init__(self, *args, entity_name='user', entity_collection='users', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -1165,7 +1178,12 @@ class PolicyRegistry(DefaultResource):
         return self.proxy.service
 
 
-class ProviderAccount(DefaultStateResource):
+class ProviderAccount(DefaultResource):
+    def __init__(self, entity_name='org_name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class ProviderAccountUser(DefaultStateResource):
     def __init__(self, entity_name='username', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
