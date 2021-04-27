@@ -130,7 +130,7 @@ class ApplicationPlanFeatures(DefaultClient):
         return self.parent.url + '/features'
 
 
-class AccountUsers(DefaultClient):
+class AccountUsers(DefaultStateClient):
     def __init__(self, *args, entity_name='user', entity_collection='users', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
