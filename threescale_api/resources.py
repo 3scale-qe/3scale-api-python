@@ -331,6 +331,17 @@ class Providers(DefaultClient):
         return utils.extract_response(response=response)
 
 
+class AccessTokens(DefaultClient):
+    def __init__(self, *args, entity_name='access_token', entity_collection='access_tokens',
+                 **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.admin_api_url + '/personal/access_tokens'
+
+
 class ActiveDocs(DefaultClient):
     def __init__(self, *args, entity_name='api_doc', entity_collection='api_docs', **kwargs):
         super().__init__(*args, entity_name=entity_name,
@@ -935,6 +946,11 @@ class ActiveDoc(DefaultResource):
 
 class Provider(DefaultResource):
     def __init__(self, entity_name='org_name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class AccessToken(DefaultResource):
+    def __init__(self, entity_name='name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
 
