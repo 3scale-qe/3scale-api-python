@@ -27,6 +27,8 @@ class ThreeScaleClient:
         self._analytics = resources.Analytics(self)
         self._tenants = resources.Tenants(self, instance_klass=resources.Tenant)
         self._providers = resources.Providers(self, instance_klass=resources.Provider)
+        self._access_tokens = \
+            resources.AccessTokens(self, instance_klass=resources.AccessToken)
         self._active_docs = resources.ActiveDocs(self, instance_klass=resources.ActiveDoc)
         self._account_plans = resources.AccountPlans(self, instance_klass=resources.AccountPlan)
         self._settings = resources.SettingsClient(self)
@@ -64,6 +66,14 @@ class ThreeScaleClient:
         Returns(str): URL
         """
         return self._rest.url
+
+    @property
+    def url_with_token(self) -> str:
+        return self.rest.url.replace('//', f"//{self.rest._token}@")
+
+    @property
+    def token(self) -> str:
+        return self.rest._token
 
     @property
     def admin_api_url(self) -> str:
@@ -134,6 +144,13 @@ class ThreeScaleClient:
         Returns(resources.Providers): Providers client
         """
         return self._providers
+
+    @property
+    def access_tokens(self) -> resources.AccessTokens:
+        """Gets AccessTokens client
+        Returns(resources.AccessToken): AccessTokens client
+        """
+        return self._access_tokens
 
     @property
     def tenants(self) -> resources.Tenants:

@@ -87,6 +87,20 @@ def service(service_params, api) -> Service:
 
 
 @pytest.fixture(scope='module')
+def access_token_params()-> dict:
+    suffix = get_suffix()
+    name = f"test-{suffix}"
+    return dict(name=name, permission="rw", scopes=["account_management"])
+
+
+@pytest.fixture(scope='module')
+def access_token(access_token_params, api):
+    entity = api.access_tokens.create(params=access_token_params)
+    yield entity
+    cleanup(entity)
+
+
+@pytest.fixture(scope='module')
 def account_params():
     suffix = get_suffix()
     name = f"test-{suffix}"
