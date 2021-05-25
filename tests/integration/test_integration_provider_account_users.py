@@ -12,7 +12,7 @@ def test_provider_user_list(api):
 
 
 def test_provider_user_can_be_read(api, provider_account_user, provider_account_params):
-    account = api.provider_accounts.read(provider_account_user.entity_id)
+    account = api.provider_account_users.read(provider_account_user.entity_id)
     asserts.assert_resource(account)
     asserts.assert_resource_params(account, provider_account_params)
 
@@ -25,13 +25,13 @@ def test_resource_role_change(provider_account_user):
 
 def test_api_role_change(api, provider_account_user):
     assert provider_account_user['role'] == 'member'
-    updated = api.provider_accounts.set_role_admin(provider_account_user.entity_id)
+    updated = api.provider_account_users.set_role_admin(provider_account_user.entity_id)
     assert updated['role'] == 'admin'
 
 
 def test_api_read_permissions(api, provider_account_user):
     provider_account_user.set_role_admin()
-    response = api.provider_accounts.permissions_read(provider_account_user.entity_id)
+    response = api.provider_account_users.permissions_read(provider_account_user.entity_id)
     permissions = response['permissions']
     assert 'portal' in permissions['allowed_sections']
 

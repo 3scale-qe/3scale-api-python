@@ -613,14 +613,27 @@ class ProviderAccounts(DefaultClient):
     """
     3scale endpoints implement only GET and UPDATE methods
     """
-    def __init__(self, *args, entity_name='provider_account',
-                 entity_collection='provider_accounts', **kwargs):
-        super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+    def __init__(self, *args, entity_name='account', **kwargs):
+        super().__init__(*args, entity_name=entity_name, **kwargs)
 
     @property
     def url(self) -> str:
         return self.threescale_client.admin_api_url + '/provider'
+
+    def fetch(self, **kwargs) -> DefaultResource:
+        """
+        Fetch the current Provider Account (Tenant) entity from admin_api_url endpoint.
+        Only one Provider Account (currently used Tenant) is reachable via admin_api_url,
+        therefore `entity_id` is not required.
+        """
+        log.debug(self._log_message("[FETCH] Fetch Current Provider Account (Tenant) ",
+                                    args=kwargs))
+        response = self.rest.get(url=self.url, **kwargs)
+        instance = self._create_instance(response=response)
+        return instance
+
+    def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
+        return super().update(params=params)
 
 
 class ProviderAccountUsers(DefaultStateClient):
@@ -1181,6 +1194,14 @@ class PolicyRegistry(DefaultResource):
 class ProviderAccount(DefaultResource):
     def __init__(self, entity_name='org_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
+
+    def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
+        new_params = {**self.entity}
+        if params:
+            new_params.update(params)
+        new_entity = self.client.update(params=new_params, **kwargs)
+        self._entity = new_entity.entity
+        return self
 
 
 class ProviderAccountUser(DefaultStateResource):

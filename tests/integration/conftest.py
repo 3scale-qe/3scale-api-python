@@ -419,6 +419,14 @@ def active_doc(api, service, active_docs_params) -> ActiveDoc:
 
 
 @pytest.fixture(scope='module')
+def provider_account(api):
+    provider = api.provider_accounts.fetch()
+    access_code = provider['site_access_code']
+    yield provider
+    api.provider_accounts.update(dict(site_access_code=access_code))
+
+
+@pytest.fixture(scope='module')
 def provider_account_params():
     suffix = get_suffix()
     name = f"test-{suffix}"
@@ -429,7 +437,7 @@ def provider_account_params():
 
 @pytest.fixture(scope='module')
 def provider_account_user(provider_account_params, api):
-    entity = api.provider_accounts.create(params=provider_account_params)
+    entity = api.provider_account_users.create(params=provider_account_params)
     yield entity
     cleanup(entity)
 
