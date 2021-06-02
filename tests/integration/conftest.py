@@ -11,7 +11,7 @@ import threescale_api
 from threescale_api.resources import (Service, ApplicationPlan, Application,
                                       Proxy, Backend, Metric, MappingRule,
                                       BackendMappingRule, BackendUsage,
-                                      ActiveDoc, Webhooks)
+                                      ActiveDoc, Webhooks, InvoiceState)
 
 load_dotenv()
 
@@ -457,5 +457,28 @@ def account_plans_params():
 @pytest.fixture(scope='module')
 def account_plan(account_plans_params, api):
     entity = api.account_plans.create(params=account_plans_params)
+    yield entity
+    cleanup(entity)
+
+
+@pytest.fixture(scope="module")
+def invoice(account, api):
+    entity = api.invoices.create(dict(account_id=account['id']))
+    yield entity
+    entity.state_update(InvoiceState.cancelled)
+
+
+@pytest.fixture(scope='module')
+def invoice_line_params():
+    name = f"test-{get_suffix()}"
+    return dict(name=name,
+                description='test_item',
+                quantity='1',
+                cost=10)
+
+
+@pytest.fixture(scope='module')
+def invoice_line(invoice, invoice_line_params, api):
+    entity = invoice.line_items.create(invoice_line_params)
     yield entity
     cleanup(entity)
