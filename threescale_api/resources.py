@@ -1,4 +1,5 @@
 import logging
+from enum import Enum
 from typing import Dict, Union, List, Iterable
 
 from threescale_api import auth
@@ -778,6 +779,71 @@ class Webhooks(DefaultClient):
         return self.update(params=params)
 
 
+class LineItems(DefaultClient):
+    """Default client for LineItems"""
+    def __init__(self, *args, entity_name='line_item', entity_collection='line_items', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.parent.url + '/line_items'
+
+
+class InvoiceState(Enum):
+    cancelled, failed, paid, unpaid, pending, finalized = range(6)
+
+
+class Invoices(DefaultClient):
+    """Default client for Invoices"""
+    def __init__(self, *args, entity_name='invoice', entity_collection='invoices', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.url + '/api/invoices'
+
+    @property
+    def line_items(self) -> LineItems:
+        return LineItems(parent=self, instance_klass=LineItem)
+
+    def list_by_account(self, account: Union['Account', int], **kwargs):
+        account_id = _extract_entity_id(account)
+        url = self.threescale_client.url + f"/api/accounts/{account_id}/invoices"
+        response = self.rest.get(url, **kwargs)
+        instance = self._create_instance(response=response, collection=True)
+        return instance
+
+    def read_by_account(self, entity_id: int, account: Union['Account', int], **kwargs):
+        account_id = _extract_entity_id(account)
+        url = self.threescale_client.url + f"/api/accounts/{account_id}/invoices/{entity_id}"
+        response = self.rest.get(url, **kwargs)
+        instance = self._create_instance(response=response)
+        return instance
+
+    def state_update(self, entity_id: int, state: InvoiceState, **kwargs):
+        """
+        Update the state of the Invoice.
+        Values allowed (depend on the previous state):
+            cancelled, failed, paid, unpaid, pending, finalized
+        """
+        log.info(f"[Invoice] state changed for invoice ({entity_id}): {state}")
+        params = dict(state=state.name)
+        url = self._entity_url(entity_id) + '/state'
+        response = self.rest.put(url=url, json=params, **kwargs)
+        instance = self._create_instance(response=response)
+        return instance
+
+    def charge(self, entity_id: int):
+        """Charge an Invoice."""
+        log.info(f"[Invoice] charge invoice ({entity_id})")
+        url = self._entity_url(entity_id) + '/state'
+        response = self.rest.post(url)
+        instance = self._create_instance(response=response)
+        return instance
+
+
 # Resources
 
 
@@ -1242,3 +1308,23 @@ class ProviderAccountUser(DefaultStateResource):
     def activate(self):
         log.info("Changes the state of the user of the provider account to active")
         return self.set_state(state='activate')
+
+
+class LineItem(DefaultResource):
+    def __init__(self, entity_name='name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class Invoice(DefaultResource):
+    def __init__(self, entity_name='friendly_id', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+    @property
+    def line_items(self) -> LineItems:
+        return LineItems(parent=self, instance_klass=LineItem)
+
+    def state_update(self, state: InvoiceState, **kwargs):
+        return self.client.state_update(entity_id=self.entity_id, state=state, **kwargs)
+
+    def charge(self, **kwargs):
+        return self.client.charge(entity_id=self.entity_id, **kwargs)
