@@ -797,6 +797,7 @@ class InvoiceState(Enum):
     UNPAID = "unpaid"
     PENDING = "pending"
     FINALIZED = "finalized"
+    OPEN = "open"
 
 
 class Invoices(DefaultClient):
