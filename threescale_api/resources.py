@@ -791,7 +791,13 @@ class LineItems(DefaultClient):
 
 
 class InvoiceState(Enum):
-    cancelled, failed, paid, unpaid, pending, finalized = range(6)
+    CANCELLED = "cancelled"
+    FAILED = "failed"
+    PAID = "paid"
+    UNPAID = "unpaid"
+    PENDING = "pending"
+    FINALIZED = "finalized"
+    OPEN = "open"
 
 
 class Invoices(DefaultClient):
@@ -829,7 +835,7 @@ class Invoices(DefaultClient):
             cancelled, failed, paid, unpaid, pending, finalized
         """
         log.info(f"[Invoice] state changed for invoice ({entity_id}): {state}")
-        params = dict(state=state.name)
+        params = dict(state=state.value)
         url = self._entity_url(entity_id) + '/state'
         response = self.rest.put(url=url, json=params, **kwargs)
         instance = self._create_instance(response=response)
@@ -838,7 +844,7 @@ class Invoices(DefaultClient):
     def charge(self, entity_id: int):
         """Charge an Invoice."""
         log.info(f"[Invoice] charge invoice ({entity_id})")
-        url = self._entity_url(entity_id) + '/state'
+        url = self._entity_url(entity_id) + '/charge'
         response = self.rest.post(url)
         instance = self._create_instance(response=response)
         return instance
@@ -1323,8 +1329,8 @@ class Invoice(DefaultResource):
     def line_items(self) -> LineItems:
         return LineItems(parent=self, instance_klass=LineItem)
 
-    def state_update(self, state: InvoiceState, **kwargs):
-        return self.client.state_update(entity_id=self.entity_id, state=state, **kwargs)
+    def state_update(self, state: InvoiceState):
+        return self.client.state_update(entity_id=self.entity_id, state=state)
 
-    def charge(self, **kwargs):
-        return self.client.charge(entity_id=self.entity_id, **kwargs)
+    def charge(self):
+        return self.client.charge(entity_id=self.entity_id)
