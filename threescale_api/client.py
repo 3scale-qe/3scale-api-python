@@ -34,8 +34,10 @@ class ThreeScaleClient:
         self._active_docs = resources.ActiveDocs(self, instance_klass=resources.ActiveDoc)
         self._account_plans = resources.AccountPlans(self, instance_klass=resources.AccountPlan)
         self._settings = resources.SettingsClient(self)
-        self._admin_portal_auth_provider = resources.AdminPortalAuthenticationProvider(self)
-        self._dev_portal_auth_provider = resources.DevPortalAuthenticationProvider(self)
+        self._admin_portal_auth_providers = resources.AdminPortalAuthProviders(
+            self, instance_klass=resources.AdminPortalAuthProvider)
+        self._dev_portal_auth_providers = resources.DevPortalAuthProviders(
+            self, instance_klass=resources.DevPortalAuthProvider)
         self._policy_registry = resources.PoliciesRegistry(self,
                                                            instance_klass=resources.PolicyRegistry)
         self._backends = resources.Backends(self, instance_klass=resources.Backend)
@@ -190,12 +192,12 @@ class ThreeScaleClient:
         return self._backends
 
     @property
-    def dev_portal_auth_provider(self) -> resources.DevPortalAuthenticationProvider:
-        return self._dev_portal_auth_provider
+    def dev_portal_auth_providers(self) -> resources.DevPortalAuthProviders:
+        return self._dev_portal_auth_providers
 
     @property
-    def admin_portal_auth_provider(self) -> resources.AdminPortalAuthenticationProvider:
-        return self._admin_portal_auth_provider
+    def admin_portal_auth_providers(self) -> resources.AdminPortalAuthProviders:
+        return self._admin_portal_auth_providers
 
     @property
     def policy_registry(self) -> resources.PolicyRegistry:

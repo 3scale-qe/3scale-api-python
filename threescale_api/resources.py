@@ -282,7 +282,7 @@ class Applications(DefaultStateClient):
         self.set_state(entity_id=entity_id, state='resume', **kwargs)
 
 
-class DevPortalAuthenticationProvider(DefaultClient):
+class DevPortalAuthProviders(DefaultClient):
     def __init__(self, *args, entity_name='authentication_provider',
                  entity_collection='authentication_providers', **kwargs):
         super().__init__(*args, entity_name=entity_name,
@@ -482,7 +482,7 @@ class SettingsClient(DefaultClient):
         return self.threescale_client.admin_api_url + '/settings'
 
 
-class AdminPortalAuthenticationProvider(DefaultClient):
+class AdminPortalAuthProviders(DefaultClient):
     def __init__(self, *args, entity_name='authentication_provider',
                  entity_collection='authentication_providers', **kwargs):
         super().__init__(*args, entity_name=entity_name,
@@ -1334,3 +1334,13 @@ class Invoice(DefaultResource):
 
     def charge(self):
         return self.client.charge(entity_id=self.entity_id)
+
+
+class AdminPortalAuthProvider(DefaultResource):
+    def __init__(self, entity_name='name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class DevPortalAuthProvider(DefaultResource):
+    def __init__(self, entity_name='name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
