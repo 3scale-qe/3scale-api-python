@@ -1,0 +1,27 @@
+name: lint & smoke
+on: [push]
+jobs:
+  lint-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with: 
+          python-version: '3.7'
+          architecture: x64
+      - uses: actions/cache@v2
+        env:
+          cache-name: pipenv-virtualenvs-cache
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{env.cache-name}}-${{runner.os}}-${{hashFiles('Pipfile.lock')}}
+      - name: setup
+        run: |
+          pip install pipenv
+          pipenv install --dev
+      - name: lint
+        run: |
+          pipenv run python -m flake8 .
+      - name: smoke
+        run: |
+          pipenv run python -m pytest -m smoke
