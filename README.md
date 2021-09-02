@@ -2,7 +2,7 @@
 
 3Scale REST API client in a wrapper over the 3scale API.
 
-Build status: [![CircleCI](https://circleci.com/gh/pestanko/3scale-api-python.svg?style=svg)](https://circleci.com/gh/pestanko/3scale-api-python)
+[![lint & smoke](https://github.com/3scale-qe/3scale-api-python/actions/workflows/lint-and-smoke.yml/badge.svg)](https://github.com/3scale-qe/3scale-api-python/actions)
 
 ## Installing
 
