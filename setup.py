@@ -1,13 +1,13 @@
-import io
 import re
+import sys
 
 from setuptools import find_packages, setup
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with io.open('threescale_api/__init__.py', 'rt', encoding='utf8') as f:
-    VERSION = re.search(r'__version__ = \'(.*?)\'', f.read()).group(1)
+VERSION = sys.argv.pop(1)
+assert re.match(r"[0-9]+\.[0-9]+\.[0-9]+", VERSION), "Version definition required as first arg"
 
 requirements = ['requests']
 
