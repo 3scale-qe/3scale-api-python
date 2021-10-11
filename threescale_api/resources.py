@@ -391,6 +391,37 @@ class Tenants(DefaultClient):
     def url(self) -> str:
         return self.threescale_client.master_api_url + '/providers'
 
+    def trigger_billing(self, tenant: Union['Tenant', int], date: str):
+        """Trigger billing for whole tenant
+        Args:
+            tenant: Tenant id or tenant resource
+            date: Date for billing
+
+        Returns(bool): True if successful
+        """
+        provider_id = _extract_entity_id(tenant)
+        url = self.url + f"/{provider_id}/billing_jobs"
+        params = dict(date=date)
+        response = self.rest.post(url=url, json=params)
+        return response.ok
+
+    def trigger_billing_account(self, tenant: Union['Tenant', int], account: Union['Account', int],
+                                date: str) -> dict:
+        """Trigger billing for one account in tenant
+        Args:
+            tenant: Tenant id or tenant resource
+            account: Account id or account resource
+            date: Date for billing
+
+        Returns(bool): True if successful
+        """
+        account_id = _extract_entity_id(account)
+        provider_id = _extract_entity_id(tenant)
+        url = self.url + f"/{provider_id}/accounts/{account_id}/billing_jobs"
+        params = dict(date=date)
+        response = self.rest.post(url=url, json=params)
+        return response.ok
+
 
 class Proxies(DefaultClient):
     def __init__(self, *args, entity_name='proxy', **kwargs):
