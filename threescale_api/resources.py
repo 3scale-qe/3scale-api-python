@@ -392,7 +392,7 @@ class Tenants(DefaultClient):
         return self.threescale_client.master_api_url + '/providers'
 
     def trigger_billing(self, tenant: Union['Tenant', int], date: str):
-        """Trigger billing for one whole tenant
+        """Trigger billing for whole tenant
         Args:
             tenant: Tenant id or tenant resource
             date: Date for billing
@@ -404,8 +404,6 @@ class Tenants(DefaultClient):
         params = dict(date=date)
         response = self.rest.post(url=url, json=params)
         return response.ok
-        # instance = self._create_instance(response=response)
-        # return instance
 
     def trigger_billing_account(self, tenant: Union['Tenant', int], account: Union['Account', int],
                                 date: str) -> dict:
@@ -423,8 +421,6 @@ class Tenants(DefaultClient):
         params = dict(date=date)
         response = self.rest.post(url=url, json=params)
         return response.ok
-        # instance = self._create_instance(response=response)
-        # return instance
 
 
 class Proxies(DefaultClient):
