@@ -400,6 +400,11 @@ class Proxies(DefaultClient):
     def url(self) -> str:
         return self.parent.url + '/proxy'
 
+    def fetch(self, entity_id: int = None, **kwargs) -> 'Proxy':
+        temp = self.rest.get(url=self.url, **kwargs)
+        instance = self._create_instance(response=temp)
+        return instance
+
     def deploy(self) -> 'Proxy':
         log.info(f"[DEPLOY] {self._entity_name} to Staging")
         url = f'{self.url}/deploy'
@@ -911,6 +916,9 @@ class MappingRule(DefaultResource):
 
 
 class ProxyConfig(DefaultResource):
+    def __init__(self, entity_name='environment', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
     @property
     def proxy(self) -> 'Proxy':
         return self.parent
