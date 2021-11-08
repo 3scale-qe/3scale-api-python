@@ -1,5 +1,5 @@
 name: lint & smoke
-on: [push]
+on: [push, pull_request]
 jobs:
   lint-and-smoke:
     runs-on: ubuntu-latest
