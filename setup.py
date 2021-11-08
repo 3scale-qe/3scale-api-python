@@ -6,8 +6,11 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-VERSION = sys.argv.pop(1)
-assert re.match(r"[0-9]+\.[0-9]+\.[0-9]+", VERSION), "Version definition required as first arg"
+VERSION = "devel"
+if sys.argv[1] == "--release-version":
+    sys.argv.pop(1)
+    VERSION = sys.argv.pop(1)
+    assert re.match(r"[0-9]+\.[0-9]+\.[0-9]+", VERSION), "Version definition required as first arg"
 
 requirements = ['requests']
 
