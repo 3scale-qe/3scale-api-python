@@ -14,7 +14,7 @@ jobs:
       - name: setup
         run: pip install wheel
       - name: build
-        run: python setup.py ${GITHUB_REF#refs/tags/v} sdist bdist_wheel
+        run: python setup.py --release-version ${GITHUB_REF#refs/tags/v} sdist bdist_wheel
       - name: release
         uses: pypa/gh-action-pypi-publish@master
         with:
