@@ -7,6 +7,8 @@ from threescale_api import utils
 from threescale_api import errors
 from threescale_api.defaults import DefaultClient, DefaultPlanClient, DefaultPlanResource, \
     DefaultResource, DefaultStateClient, DefaultUserResource, DefaultStateResource
+from threescale_api import client
+import backoff
 
 log = logging.getLogger(__name__)
 
@@ -390,6 +392,37 @@ class Tenants(DefaultClient):
     @property
     def url(self) -> str:
         return self.threescale_client.master_api_url + '/providers'
+
+    def trigger_billing(self, tenant: Union['Tenant', int], date: str):
+        """Trigger billing for whole tenant
+        Args:
+            tenant: Tenant id or tenant resource
+            date: Date for billing
+
+        Returns(bool): True if successful
+        """
+        provider_id = _extract_entity_id(tenant)
+        url = self.url + f"/{provider_id}/billing_jobs"
+        params = dict(date=date)
+        response = self.rest.post(url=url, json=params)
+        return response.ok
+
+    def trigger_billing_account(self, tenant: Union['Tenant', int], account: Union['Account', int],
+                                date: str) -> dict:
+        """Trigger billing for one account in tenant
+        Args:
+            tenant: Tenant id or tenant resource
+            account: Account id or account resource
+            date: Date for billing
+
+        Returns(bool): True if successful
+        """
+        account_id = _extract_entity_id(account)
+        provider_id = _extract_entity_id(tenant)
+        url = self.url + f"/{provider_id}/accounts/{account_id}/billing_jobs"
+        params = dict(date=date)
+        response = self.rest.post(url=url, json=params)
+        return response.ok
 
 
 class Proxies(DefaultClient):
@@ -1055,10 +1088,50 @@ class AccessToken(DefaultResource):
 class Tenant(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
+        self.admin_base_url = self["signup"]["account"]["admin_base_url"]
+        self.admin_token = self["signup"]["access_token"]["value"]
 
     @property
     def entity_id(self) -> int:
         return self.entity["signup"]["account"]["id"]
+
+    @backoff.on_predicate(backoff.fibo, lambda ready: not ready, max_tries=8, jitter=None)
+    def wait_tenant_ready(self) -> bool:
+        """
+        When True is returned, there is some chance the tenant is actually ready.
+        """
+        api = self.admin_api()
+        return api.account_plans.exists() and len(api.account_plans.list()) >= 1 and\
+            api.accounts.exists() and len(api.accounts.list()) >= 1
+
+    def admin_api(self, wait=False) -> 'client.ThreeScaleClient':
+        """
+        Returns admin api client for tenant.
+        Its strongly recommended to call this with wait=True
+        """
+        if wait:
+            self.wait_tenant_ready()
+        ssl_verify = self.threescale_client.rest._ssl_verify
+        return client.ThreeScaleClient(self.admin_base_url, self.admin_token, ssl_verify=ssl_verify)
+
+    def trigger_billing(self, date: str):
+        """Trigger billing for whole tenant
+        Args:
+            date: Date for billing
+
+        Returns(bool): True if successful
+        """
+        return self.threescale_client.tenants.trigger_billing(self, date)
+
+    def trigger_billing_account(self, account: Union['Account', int], date: str) -> dict:
+        """Trigger billing for one account in tenant
+        Args:
+            account: Account id or account resource
+            date: Date for billing
+
+        Returns(bool): True if successful
+        """
+        return self.threescale_client.tenants.trigger_billing_account(self, account, date)
 
 
 class Application(DefaultResource):
