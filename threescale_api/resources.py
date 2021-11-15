@@ -389,6 +389,13 @@ class Tenants(DefaultClient):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
+    def read(self, id, **kwargs):
+        log.debug(self._log_message("[GET] Read Tenant", args=kwargs))
+        url = self._entity_url(entity_id=id)
+        response = self.rest.get(url=url, **kwargs)
+        instance = self._create_instance(response=response)
+        return instance
+
     @property
     def url(self) -> str:
         return self.threescale_client.master_api_url + '/providers'
@@ -1089,7 +1096,9 @@ class Tenant(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
         self.admin_base_url = self["signup"]["account"]["admin_base_url"]
-        self.admin_token = self["signup"]["access_token"]["value"]
+        self.admin_token = None
+        if "access_token" in self['signup']:
+            self.admin_token = self["signup"]["access_token"]["value"]
 
     @property
     def entity_id(self) -> int:
