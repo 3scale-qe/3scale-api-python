@@ -166,6 +166,8 @@ def request2curl(request: requests.PreparedRequest) -> str:
         body = request.body
         if isinstance(body, bytes):
             body = body.decode("utf-8")
+        if len(body) > 160:
+            body = body[:160] + "..."
         cmd.append("-d %s" % shlex.quote(body))
     cmd.append(shlex.quote(request.url))
 
