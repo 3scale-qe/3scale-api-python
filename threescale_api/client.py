@@ -43,6 +43,8 @@ class ThreeScaleClient:
         self._backends = resources.Backends(self, instance_klass=resources.Backend)
         self._webhooks = resources.Webhooks(self)
         self._invoices = resources.Invoices(self, instance_klass=resources.Invoice)
+        self._fields_definitions =\
+            resources.FieldsDefinitions(self, instance_klass=resources.FieldsDefinition)
 
     @property
     def rest(self) -> 'RestApiClient':
@@ -210,6 +212,10 @@ class ThreeScaleClient:
     @property
     def invoices(self) -> resources.Invoices:
         return self._invoices
+
+    @property
+    def fields_definitions(self) -> resources.FieldsDefinitions:
+        return self._fields_definitions
 
 
 class RestApiClient:

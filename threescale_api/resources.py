@@ -890,6 +890,16 @@ class Invoices(DefaultClient):
         return instance
 
 
+class FieldsDefinitions(DefaultClient):
+    def __init__(self, *args, entity_name='fields_definition',
+                 entity_collection='fields_definitions', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.admin_api_url + '/fields_definitions'
+
 # Resources
 
 
@@ -1416,6 +1426,11 @@ class Invoice(DefaultResource):
 
     def charge(self):
         return self.client.charge(entity_id=self.entity_id)
+
+
+class FieldsDefinition(DefaultResource):
+    def __init__(self, entity_name='name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
 
 
 class AdminPortalAuthProvider(DefaultResource):

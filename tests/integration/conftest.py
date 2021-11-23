@@ -482,3 +482,18 @@ def invoice_line(invoice, invoice_line_params, api):
     entity = invoice.line_items.create(invoice_line_params)
     yield entity
     cleanup(entity)
+
+
+@pytest.fixture(scope='module')
+def fields_definitions_params():
+    return dict(name=f"name-{get_suffix()}",
+                label=f"label-{get_suffix()}",
+                target="Account",
+                required="false")
+
+
+@pytest.fixture(scope="module")
+def fields_definition(api, fields_definitions_params):
+    entity = api.fields_definitions.create(fields_definitions_params)
+    yield entity
+    cleanup(entity)
