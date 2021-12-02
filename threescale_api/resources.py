@@ -8,7 +8,6 @@ from threescale_api import errors
 from threescale_api.defaults import DefaultClient, DefaultPlanClient, DefaultPlanResource, \
     DefaultResource, DefaultStateClient, DefaultUserResource, DefaultStateResource
 from threescale_api import client
-import backoff
 
 log = logging.getLogger(__name__)
 
@@ -1114,24 +1113,19 @@ class Tenant(DefaultResource):
     def entity_id(self) -> int:
         return self.entity["signup"]["account"]["id"]
 
-    @backoff.on_predicate(backoff.fibo, lambda ready: not ready, max_tries=8, jitter=None)
     def wait_tenant_ready(self) -> bool:
         """
         When True is returned, there is some chance the tenant is actually ready.
         """
-        api = self.admin_api()
-        return api.account_plans.exists() and len(api.account_plans.list()) >= 1 and\
-            api.accounts.exists() and len(api.accounts.list()) >= 1
+        return self.admin_api().wait_for_tenant()
 
-    def admin_api(self, wait=False) -> 'client.ThreeScaleClient':
+    def admin_api(self, ssl_verify=True, wait=False) -> 'client.ThreeScaleClient':
         """
         Returns admin api client for tenant.
         Its strongly recommended to call this with wait=True
         """
-        if wait:
-            self.wait_tenant_ready()
-        ssl_verify = self.threescale_client.rest._ssl_verify
-        return client.ThreeScaleClient(self.admin_base_url, self.admin_token, ssl_verify=ssl_verify)
+        return client.ThreeScaleClient(
+            self.admin_base_url, self.admin_token, ssl_verify=ssl_verify, wait=wait)
 
     def trigger_billing(self, date: str):
         """Trigger billing for whole tenant
