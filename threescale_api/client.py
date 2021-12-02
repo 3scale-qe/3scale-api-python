@@ -1,6 +1,8 @@
 import logging
+import time
 from urllib.parse import urljoin
 
+import backoff
 import requests
 
 from threescale_api import errors, resources
@@ -9,13 +11,15 @@ log = logging.getLogger(__name__)
 
 
 class ThreeScaleClient:
-    def __init__(self, url: str, token: str, throws: bool = True, ssl_verify: bool = True):
+    def __init__(self, url: str, token: str,
+                 throws: bool = True, ssl_verify: bool = True, wait: bool = False):
         """Creates instance of the 3scale client
         Args:
             url: 3scale instance url
             token: Access token
             throws: Whether it should throw an error
             ssl_verify: Whether to verify ssl
+            wait: Whether to do extra checks of 3scale availability
         """
         self._rest = RestApiClient(url=url, token=token, throws=throws, ssl_verify=ssl_verify)
         self._services = resources.Services(self, instance_klass=resources.Service)
@@ -45,6 +49,32 @@ class ThreeScaleClient:
         self._invoices = resources.Invoices(self, instance_klass=resources.Invoice)
         self._fields_definitions =\
             resources.FieldsDefinitions(self, instance_klass=resources.FieldsDefinition)
+
+        if wait:
+            self.wait_for_tenant()
+            # TODO: all the implemented checks aren't enough yet
+            # 3scale can still return 404/409 error, therefore slight artificial sleep
+            # here to mitigate the problem. This requires proper fix in checks
+            time.sleep(16)
+
+    @backoff.on_predicate(backoff.fibo, lambda ready: not ready, max_tries=8, jitter=None)
+    def wait_for_tenant(self) -> bool:
+        """
+        When True is returned, there is some chance the tenant is actually ready.
+        """
+        # TODO: checks below were collected from various sources to craft
+        # ultimate readiness check. There might be duplicates though, so
+        # worth to review it one day
+        try:
+            return self.account_plans.exists() \
+                and len(self.account_plans.fetch()["plans"]) >= 1 \
+                and len(self.account_plans.list()) >= 1 \
+                and self.accounts.exists() \
+                and len(self.accounts.list()) >= 1 \
+                and self.services.exists() \
+                and len(self.services.list()) >= 1
+        except Exception:
+            return False
 
     @property
     def rest(self) -> 'RestApiClient':
