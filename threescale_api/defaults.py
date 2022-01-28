@@ -261,7 +261,7 @@ class DefaultClient(collections.abc.Mapping):
 
 class DefaultResource(collections.abc.MutableMapping):
     def __init__(self, client: DefaultClient = None, entity_id: int = None, entity_name: str = None,
-                 entity: dict = None, **kwargs):
+                 entity: dict = None):
         """Create instance of the resource
         Args:
             client: Client instance of the resource
@@ -281,7 +281,7 @@ class DefaultResource(collections.abc.MutableMapping):
     @property
     def parent(self) -> 'DefaultResource':
         return self.client.parent
-    
+
     @parent.setter
     def parent(self, parent):
         self.client.parent = parent
@@ -416,7 +416,7 @@ class DefaultPlanClient(DefaultClient):
 
 class DefaultPlanResource(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
-        DefaultResource.__init__(self, entity_name=entity_name, **kwargs)
+        super().__init__(entity_name=entity_name, **kwargs)
 
     def set_default(self, **kwargs) -> 'DefaultStateResource':
         """Set the plan default
@@ -462,7 +462,7 @@ class DefaultStateResource(DefaultResource):
 
 class DefaultUserResource(DefaultStateResource):
     def __init__(self, entity_name='username', **kwargs):
-        DefaultStateResource.__init__(self, entity_name=entity_name, **kwargs)
+        super().__init__(entity_name=entity_name, **kwargs)
 
     def suspend(self, **kwargs) -> 'DefaultUserResource':
         """Suspends the user

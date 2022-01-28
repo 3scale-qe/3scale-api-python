@@ -1,7 +1,7 @@
 class ThreeScaleApiError(Exception):
     def __init__(self, message, *args):
         self.message = message
-        Exception.__init__(self, message, *args)
+        super(ThreeScaleApiError, self).__init__(message, *args)
 
 
 class ApiClientError(ThreeScaleApiError):
@@ -13,4 +13,4 @@ class ApiClientError(ThreeScaleApiError):
         msg = f"Response({self.code} {reason}): {body}"
         if message:
             msg += f"; {message}"
-        ThreeScaleApiError.__init__(self, msg)
+        super(ApiClientError, self).__init__(msg)
