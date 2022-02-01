@@ -8,7 +8,7 @@ from .asserts import assert_resource, assert_resource_params
 def invoice_to_update(account, api):
     entity = api.invoices.create(dict(account_id=account['id']))
     yield entity
-    entity.state_update(InvoiceState.cancelled)
+    entity.state_update(InvoiceState.CANCELLED)
 
 
 def test_invoice_create(invoice):
@@ -49,7 +49,7 @@ def test_invoice_read_by_account(api, account, invoice):
 
 def test_invoice_update_state(invoice_to_update, api):
     assert invoice_to_update['state'] == 'open'
-    update = api.invoices.state_update(invoice_to_update.entity_id, InvoiceState.pending)
+    update = api.invoices.state_update(invoice_to_update.entity_id, InvoiceState.PENDING)
     assert update['state'] == 'pending'
     read = api.invoices.read(invoice_to_update.entity_id)
     assert read['state'] == 'pending'
@@ -57,7 +57,7 @@ def test_invoice_update_state(invoice_to_update, api):
 
 def test_invoice_resource_update_state(invoice_to_update, api):
     assert invoice_to_update['state'] == 'open'
-    update = invoice_to_update.state_update(InvoiceState.pending)
+    update = invoice_to_update.state_update(InvoiceState.PENDING)
     assert update['state'] == 'pending'
     read = api.invoices.read(invoice_to_update.entity_id)
     assert read['state'] == 'pending'

@@ -465,7 +465,7 @@ def account_plan(account_plans_params, api):
 def invoice(account, api):
     entity = api.invoices.create(dict(account_id=account['id']))
     yield entity
-    entity.state_update(InvoiceState.cancelled)
+    entity.state_update(InvoiceState.CANCELLED)
 
 
 @pytest.fixture(scope='module')

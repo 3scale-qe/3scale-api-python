@@ -6,14 +6,12 @@ def test_api_client(application, proxy):
     api_client = application.api_client()
 
     assert api_client is not None
-    assert api_client._session.verify is False
+    assert api_client.verify is False
     assert api_client.get("/get").status_code == 200
 
 
-def always_no_ssl_client(application, endpoint, verify):
-    client = HttpClient(application, endpoint, verify)
-    client._verify = False
-    return client
+def always_no_ssl_client(application, endpoint, verify, cert=None, disable_retry_status_list=()):
+    return HttpClient(application, endpoint, False, cert, disable_retry_status_list)
 
 
 def test_api_client_replacement(application, proxy):
@@ -22,5 +20,5 @@ def test_api_client_replacement(application, proxy):
     api_client = application.api_client()
 
     assert api_client is not None
-    assert api_client._session.verify is False
+    assert api_client.verify is False
     assert api_client.get("/get").status_code == 200
