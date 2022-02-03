@@ -1119,7 +1119,7 @@ class Tenant(DefaultResource):
         """
         return self.admin_api().wait_for_tenant()
 
-    def admin_api(self, ssl_verify=True, wait=False) -> 'client.ThreeScaleClient':
+    def admin_api(self, ssl_verify=True, wait=-1) -> 'client.ThreeScaleClient':
         """
         Returns admin api client for tenant.
         Its strongly recommended to call this with wait=True
