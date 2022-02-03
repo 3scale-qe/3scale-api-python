@@ -12,14 +12,15 @@ log = logging.getLogger(__name__)
 
 class ThreeScaleClient:
     def __init__(self, url: str, token: str,
-                 throws: bool = True, ssl_verify: bool = True, wait: bool = False):
+                 throws: bool = True, ssl_verify: bool = True, wait: int = -1):
         """Creates instance of the 3scale client
         Args:
             url: 3scale instance url
             token: Access token
             throws: Whether it should throw an error
             ssl_verify: Whether to verify ssl
-            wait: Whether to do extra checks of 3scale availability
+            wait: Whether to wait for 3scale availability, negative number == no waiting
+                positive number == wait another extra seconds
         """
         self._rest = RestApiClient(url=url, token=token, throws=throws, ssl_verify=ssl_verify)
         self._services = resources.Services(self, instance_klass=resources.Service)
@@ -50,12 +51,12 @@ class ThreeScaleClient:
         self._fields_definitions =\
             resources.FieldsDefinitions(self, instance_klass=resources.FieldsDefinition)
 
-        if wait:
+        if wait >= 0:
             self.wait_for_tenant()
             # TODO: all the implemented checks aren't enough yet
             # 3scale can still return 404/409 error, therefore slight artificial sleep
             # here to mitigate the problem. This requires proper fix in checks
-            time.sleep(16)
+            time.sleep(wait)
 
     @backoff.on_predicate(backoff.fibo, lambda ready: not ready, max_tries=8, jitter=None)
     def wait_for_tenant(self) -> bool:
