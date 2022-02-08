@@ -187,7 +187,7 @@ class DefaultClient(collections.abc.Mapping):
             **params: params used for selection
         Returns: List of resources
         """
-        log.debug(f"[SELECT] By params: {params}")
+        log.debug("[SELECT] By params: %s", params)
 
         def predicate(item):
             for (key, val) in params.items():
@@ -238,7 +238,7 @@ class DefaultClient(collections.abc.Mapping):
         klass = klass or self._instance_klass
         extracted = self._extract_resource(response, collection)
         instance = self._instantiate(extracted=extracted, klass=klass)
-        log.debug(f"[INSTANCE] Created instance: {instance}")
+        log.debug("[INSTANCE] Created instance: %s", instance)
         return instance
 
     def _extract_resource(self, response, collection) -> Union[List, Dict]:

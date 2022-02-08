@@ -157,8 +157,10 @@ class HttpClient:
 def request2curl(request: requests.PreparedRequest) -> str:
     """Create curl command corresponding to given request"""
 
+    # pylint: disable=consider-using-f-string
     cmd = ["curl", "-X %s" % shlex.quote(request.method)]
     if request.headers:
+        # pylint: disable=consider-using-f-string
         cmd.extend([
             "-H %s" % shlex.quote(f"{key}: {value}")
             for key, value in request.headers.items()])
@@ -168,6 +170,7 @@ def request2curl(request: requests.PreparedRequest) -> str:
             body = body.decode("utf-8")
         if len(body) > 160:
             body = body[:160] + "..."
+        # pylint: disable=consider-using-f-string
         cmd.append("-d %s" % shlex.quote(body))
     cmd.append(shlex.quote(request.url))
 
