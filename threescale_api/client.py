@@ -262,8 +262,8 @@ class RestApiClient:
         self._token = token
         self._throws = throws
         self._ssl_verify = ssl_verify
-        log.debug(f"[REST] New instance: {url} token={token} "
-                  f"throws={throws} ssl={ssl_verify}")
+        log.debug("[REST] New instance: %s token=%s throws=%s ssl=%s", url, token, throws,
+                  ssl_verify)
 
     @property
     def url(self) -> str:
@@ -293,8 +293,8 @@ class RestApiClient:
         if throws is None:
             throws = self._throws
         params.update(access_token=self._token)
-        log.debug(f"[{method}] ({full_url}) params={params} headers={headers} "
-                  f"{kwargs if kwargs else ''}")
+        log.debug("[%s] (%s) params={%s} headers={%s} %s", method, full_url, params, headers,
+                  kwargs if kwargs else '')
         response = requests.request(method=method, url=full_url, headers=headers,
                                     params=params, verify=self._ssl_verify, **kwargs)
         process_response = self._process_response(response, throws=throws)

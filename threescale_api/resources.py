@@ -67,7 +67,7 @@ class Limits(DefaultClient):
         return self.application_plan.plans_url + f'/metrics/{self.metric.entity_id}/limits'
 
     def list_per_app_plan(self, **kwargs):
-        log.info(f"[LIST] List limits per app plan: {kwargs}")
+        log.info("[LIST] List limits per app plan: %s", kwargs)
         url = self.parent.url + '/limits'
         response = self.rest.get(url=url, **kwargs)
         instance = self._create_instance(response=response)
@@ -177,7 +177,7 @@ class Accounts(DefaultStateClient):
             **kwargs: Optional args
         Returns(Account): Account instance
         """
-        log.info(f"[SIGNUP] Create new Signup: {kwargs}")
+        log.info("[SIGNUP] Create new Signup: %s", kwargs)
         url = self.threescale_client.admin_api_url + '/signup'
         response = self.rest.post(url=url, json=params, **kwargs)
         instance = self._create_instance(response=response)
@@ -191,7 +191,7 @@ class Accounts(DefaultStateClient):
             **kwargs: Optional args
         Returns:
         """
-        log.info(f"[PLAN] Set plan for an account({entity_id}): {plan_id}")
+        log.info("[PLAN] Set plan for an account(%s): %s", entity_id, plan_id)
         params = dict(plan_id=plan_id)
         url = self._entity_url(entity_id=entity_id) + '/change_plan'
         response = self.rest.put(url=url, json=params, **kwargs)
@@ -206,7 +206,7 @@ class Accounts(DefaultStateClient):
             **kwargs: Optional args
         Returns(Dict): Response
         """
-        log.info(f"[MSG] Send message to account ({entity_id}): {body} {kwargs}")
+        log.info("[MSG] Send message to account (%s): %s %s", entity_id, body, kwargs)
         params = dict(body=body)
         url = self._entity_url(entity_id=entity_id) + '/messages'
         response = self.rest.post(url=url, json=params, **kwargs)
@@ -252,7 +252,7 @@ class Applications(DefaultStateClient):
         return self.parent.url + '/applications'
 
     def change_plan(self, entity_id: int, plan_id: int, **kwargs):
-        log.info(f"[PLAN] Change plan for application ({entity_id}) to {plan_id} {kwargs}")
+        log.info("[PLAN] Change plan for application (%s) to %s %s", entity_id, plan_id, kwargs)
         params = dict(plan_id=plan_id)
         url = self._entity_url(entity_id=entity_id) + '/change_plan'
         response = self.rest.put(url=url, json=params, **kwargs)
@@ -260,14 +260,14 @@ class Applications(DefaultStateClient):
         return instance
 
     def customize_plan(self, entity_id: int, **kwargs):
-        log.info(f"[PLAN] Customize plan for application ({entity_id}) {kwargs}")
+        log.info("[PLAN] Customize plan for application (%s) %s", entity_id, kwargs)
         url = self._entity_url(entity_id=entity_id) + '/customize_plan'
         response = self.rest.put(url=url, **kwargs)
         instance = utils.extract_response(response=response)
         return instance
 
     def decustomize_plan(self, entity_id: int, **kwargs):
-        log.info(f"[PLAN] Decustomize plan for application ({entity_id}) {kwargs}")
+        log.info("[PLAN] Decustomize plan for application (%s) %s", entity_id, kwargs)
         url = self._entity_url(entity_id=entity_id) + '/decustomize_plan'
         response = self.rest.put(url=url, **kwargs)
         instance = utils.extract_response(response=response)
@@ -357,8 +357,8 @@ class ActiveDocs(DefaultClient):
 class Analytics(DefaultClient):
     def _list_by_resource(self, resource_id: int, resource_type, metric_name: str = 'hits',
                           since=None, period: str = 'year', **kwargs):
-        log.info(f"List analytics by {resource_type} ({resource_id}) f"
-                 f"or metric (#{metric_name})")
+        log.info("List analytics by %s (%s) for metric (#%s)", resource_type, resource_id,
+                 metric_name)
         params = dict(
             metric_name=metric_name,
             since=since,
@@ -388,9 +388,9 @@ class Tenants(DefaultClient):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
-    def read(self, id, **kwargs):
+    def read(self, entity_id, **kwargs):
         log.debug(self._log_message("[GET] Read Tenant", args=kwargs))
-        url = self._entity_url(entity_id=id)
+        url = self._entity_url(entity_id=entity_id)
         response = self.rest.get(url=url, **kwargs)
         instance = self._create_instance(response=response)
         return instance
@@ -440,7 +440,7 @@ class Proxies(DefaultClient):
         return self.parent.url + '/proxy'
 
     def deploy(self) -> 'Proxy':
-        log.info(f"[DEPLOY] {self._entity_name} to Staging")
+        log.info("[DEPLOY] %s to Staging", self._entity_name)
         url = f'{self.url}/deploy'
         response = self.rest.post(url)
         instance = self._create_instance(response=response)
@@ -487,7 +487,8 @@ class ProxyConfigs(DefaultClient):
 
     def promote(self, version: int = 1, from_env: str = 'sandbox', to_env: str = 'production',
                 **kwargs) -> 'Proxy':
-        log.info(f"[PROMOTE] {self.service} version {version} from {from_env} to {to_env}")
+        log.info("[PROMOTE] %s version %s from %s to %s", self.service, version, from_env,
+                 to_env)
         url = f'{self.url}/{from_env}/{version}/promote'
         params = dict(to=to_env)
         kwargs.update()
@@ -496,7 +497,7 @@ class ProxyConfigs(DefaultClient):
         return instance
 
     def latest(self, env: str = "sandbox") -> 'ProxyConfig':
-        log.info(f"[LATEST] Get latest proxy configuration of {env}")
+        log.info("[LATEST] Get latest proxy configuration of %s", env)
         self._env = env
         url = self.url + '/latest'
         response = self.rest.get(url=url)
@@ -504,7 +505,7 @@ class ProxyConfigs(DefaultClient):
         return instance
 
     def version(self, version: int = 1, env: str = "sandbox") -> 'ProxyConfig':
-        log.info(f"[VERSION] Get proxy configuration of {env} of version {version}")
+        log.info("[VERSION] Get proxy configuration of %s of version %s", env, version)
         self._env = env
         url = f'{self.url}/{version}'
         response = self.rest.get(url=url)
@@ -873,7 +874,7 @@ class Invoices(DefaultClient):
         Values allowed (depend on the previous state):
             cancelled, failed, paid, unpaid, pending, finalized
         """
-        log.info(f"[Invoice] state changed for invoice ({entity_id}): {state}")
+        log.info("[Invoice] state changed for invoice (%s): %s", entity_id, state)
         params = dict(state=state.value)
         url = self._entity_url(entity_id) + '/state'
         response = self.rest.put(url=url, json=params, **kwargs)
@@ -882,7 +883,7 @@ class Invoices(DefaultClient):
 
     def charge(self, entity_id: int):
         """Charge an Invoice."""
-        log.info(f"[Invoice] charge invoice ({entity_id})")
+        log.info("[Invoice] charge invoice (%s)", entity_id)
         url = self._entity_url(entity_id) + '/charge'
         response = self.rest.post(url)
         instance = self._create_instance(response=response)
@@ -974,15 +975,13 @@ class ProxyConfig(DefaultResource):
     def __getitem__(self, key):
         if "proxy_configs" in self.entity:
             return self.entity["proxy_configs"][key]
-        else:
-            return super().__getitem__(key)
+        return super().__getitem__(key)
 
     # Same problem as in __getitem__.
     def __len__(self):
         if "proxy_configs" in self.entity:
             return len(self.entity["proxy_configs"])
-        else:
-            return super().__len__()
+        return super().__len__()
 
 
 class Policy(DefaultResource):
@@ -1270,7 +1269,7 @@ class AccountUser(DefaultUserResource):
 
 
 class AccountPlan(DefaultResource):
-    def __init__(self, entity_name='name', **kwargs):
+    def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
 

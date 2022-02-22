@@ -28,7 +28,7 @@ class BaseClientAuth(requests.auth.AuthBase):
         elif self.location == "query":
             request.prepare_url(request.url, credentials)
         else:
-            raise ValueError("Unknown credentials location '%s'" % self.location)
+            raise ValueError(f"Unknown credentials location '{self.location}'")
 
         return request
 
@@ -37,7 +37,7 @@ class UserKeyAuth(BaseClientAuth):
     """Provides user_key authentication for api client calls"""
 
     def __init__(self, app, location=None):
-        super(UserKeyAuth, self).__init__(app, location)
+        super().__init__(app, location)
         self.credentials = {
             self.app.service.proxy.list()["auth_user_key"]: self.app["user_key"]
         }
@@ -53,7 +53,7 @@ class AppIdKeyAuth(BaseClientAuth):
     """Provides app_id/app_key pair based authentication for api client calls"""
 
     def __init__(self, app, location=None):
-        super(AppIdKeyAuth, self).__init__(app, location)
+        super().__init__(app, location)
         proxy = self.app.service.proxy.list()
         self.credentials = {
             proxy["auth_app_id"]: self.app["application_id"],
