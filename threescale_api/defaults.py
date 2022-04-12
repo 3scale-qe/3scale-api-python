@@ -286,10 +286,6 @@ class DefaultResource(collections.abc.MutableMapping):
     def parent(self, parent):
         self.client.parent = parent
 
-    @parent.setter
-    def parent(self, parent):
-        self.client.parent = parent
-
     @property
     def entity_name(self) -> Optional[str]:
         return self[self._entity_name]
