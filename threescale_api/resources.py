@@ -177,7 +177,7 @@ class Accounts(DefaultStateClient):
             **kwargs: Optional args
         Returns(Account): Account instance
         """
-        log.info("[SIGNUP] Create new Signup: %s", kwargs)
+        log.info("[SIGNUP] Create new Signup: params=%s, kwargs=%s", params, kwargs)
         url = self.threescale_client.admin_api_url + '/signup'
         response = self.rest.post(url=url, json=params, **kwargs)
         instance = self._create_instance(response=response)
