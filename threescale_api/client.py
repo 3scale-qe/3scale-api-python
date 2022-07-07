@@ -74,7 +74,8 @@ class ThreeScaleClient:
                 and len(self.accounts.list()) >= 1 \
                 and self.services.exists() \
                 and len(self.services.list()) >= 1
-        except Exception:
+        except Exception as err:
+            log.info("wait_for_tenant failed: %s", err)
             return False
 
     @property
