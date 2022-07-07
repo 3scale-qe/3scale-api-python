@@ -1110,7 +1110,9 @@ class Tenant(DefaultResource):
         """
         When True is returned, there is some chance the tenant is actually ready.
         """
-        return self.admin_api().wait_for_tenant()
+        # Ignore ssl, this is about checking whether the initialization has
+        # been finished.
+        return self.admin_api(ssl_verify=False).wait_for_tenant()
 
     def admin_api(self, ssl_verify=True, wait=-1) -> 'client.ThreeScaleClient':
         """
