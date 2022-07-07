@@ -58,7 +58,8 @@ class ThreeScaleClient:
             # here to mitigate the problem. This requires proper fix in checks
             time.sleep(wait)
 
-    @backoff.on_predicate(backoff.fibo, lambda ready: not ready, max_tries=8, jitter=None)
+    @backoff.on_predicate(
+            backoff.constant, lambda ready: not ready, interval=6, max_tries=90, jitter=None)
     def wait_for_tenant(self) -> bool:
         """
         When True is returned, there is some chance the tenant is actually ready.
