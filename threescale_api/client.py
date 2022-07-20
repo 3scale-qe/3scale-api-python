@@ -68,13 +68,18 @@ class ThreeScaleClient:
         # ultimate readiness check. There might be duplicates though, so
         # worth to review it one day
         try:
-            return self.account_plans.exists() \
+            return self.account_plans.exists(throws=True) \
                 and len(self.account_plans.fetch()["plans"]) >= 1 \
                 and len(self.account_plans.list()) >= 1 \
-                and self.accounts.exists() \
+                and self.accounts.exists(throws=True) \
                 and len(self.accounts.list()) >= 1 \
-                and self.services.exists() \
+                and self.services.exists(throws=True) \
                 and len(self.services.list()) >= 1
+        except errors.ApiClientError as err:
+            if err.code in (404, 503):
+                log.info("wait_for_tenant failed: %s", err)
+                return False
+            raise err
         except Exception as err:
             log.info("wait_for_tenant failed: %s", err)
             return False

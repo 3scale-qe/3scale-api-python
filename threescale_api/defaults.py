@@ -91,7 +91,7 @@ class DefaultClient(collections.abc.Mapping):
         response = self.rest.delete(url=url, **kwargs)
         return response.ok
 
-    def exists(self, entity_id=None, **kwargs) -> bool:
+    def exists(self, entity_id=None, throws=False, **kwargs) -> bool:
         """Check whether the resource exists
         Args:
             entity_id(int): Entity id
@@ -101,7 +101,7 @@ class DefaultClient(collections.abc.Mapping):
         """
         log.info(self._log_message("[EXIST] Resource exist ", entity_id=entity_id, args=kwargs))
         url = self._entity_url(entity_id=entity_id)
-        response = self.rest.get(url=url, throws=False, **kwargs)
+        response = self.rest.get(url=url, throws=throws, **kwargs)
         return response.ok
 
     def update(self, entity_id=None, params: dict = None, **kwargs) -> 'DefaultResource':
