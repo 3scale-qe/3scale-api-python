@@ -76,7 +76,7 @@ class ThreeScaleClient:
                 and self.services.exists(throws=True) \
                 and len(self.services.list()) >= 1
         except errors.ApiClientError as err:
-            if err.code in (404, 503):
+            if err.code in (404, 409, 503):
                 log.info("wait_for_tenant failed: %s", err)
                 return False
             raise err
