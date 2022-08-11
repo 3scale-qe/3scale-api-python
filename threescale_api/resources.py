@@ -44,7 +44,7 @@ class Metrics(DefaultClient):
 
 
 class Limits(DefaultClient):
-    def __init__(self, *args, entity_name='limit', entity_collection='limits', metric,
+    def __init__(self, *args, entity_name='limit', entity_collection='limits', metric=None,
                  **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)

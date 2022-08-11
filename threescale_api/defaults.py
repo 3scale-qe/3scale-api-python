@@ -351,8 +351,10 @@ class DefaultResource(collections.abc.MutableMapping):
             fetched = self.fetch(**kwargs)
             if isinstance(fetched, dict):
                 self._entity = fetched
-            else:
+            elif fetched is not None:
                 self._entity = fetched._entity
+            else:
+                return None
         return self
 
     def read(self, **kwargs) -> 'DefaultResource':
