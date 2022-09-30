@@ -103,6 +103,9 @@ THREESCALE_PROVIDER_TOKEN='<test-token>'
 # OPTIONAL:
 THREESCALE_MASTER_URL='https://master.3scale.net'
 THREESCALE_MASTER_TOKEN='<test-master-token>'
+
+# OPTIONAL:
+STRIPE_API_KEY='<api-key>'
 ```
 
 

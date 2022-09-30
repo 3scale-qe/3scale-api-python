@@ -4,6 +4,7 @@ import time
 from distutils.util import strtobool
 
 import pytest
+import stripe
 from dotenv import load_dotenv
 from threescale_api import errors
 
@@ -43,6 +44,11 @@ def master_token() -> str:
     return os.getenv('THREESCALE_MASTER_TOKEN')
 
 
+@pytest.fixture(scope='session')
+def stripe_api_key() -> str:
+    return os.getenv('STRIPE_API_KEY')
+
+
 @pytest.fixture(scope="session")
 def ssl_verify() -> bool:
     ssl_verify = os.getenv('THREESCALE_SSL_VERIFY', 'false')
@@ -66,6 +72,11 @@ def master_api(master_url: str, master_token: str,
                ssl_verify: bool) -> threescale_api.ThreeScaleClient:
     return threescale_api.ThreeScaleClient(url=master_url, token=master_token,
                                            ssl_verify=ssl_verify)
+
+
+@pytest.fixture(scope='session', autouse=True)
+def stripe_init(stripe_api_key):
+    stripe.api_key = stripe_api_key
 
 
 @pytest.fixture(scope='module')
@@ -497,3 +508,38 @@ def fields_definition(api, fields_definitions_params):
     entity = api.fields_definitions.create(fields_definitions_params)
     yield entity
     cleanup(entity)
+
+
+@pytest.fixture(scope="module")
+def stripe_customer(account_params):
+    name = account_params["name"]
+    account = stripe.Customer.create(name=name)
+    yield account
+    stripe.Customer.delete(account["id"])
+
+
+@pytest.fixture(scope="module")
+def stripe_card(stripe_customer):
+    card = stripe.Customer.create_source(stripe_customer["id"],
+                                         source="tok_visa")
+    return card
+
+
+@pytest.fixture(scope='module')
+def api_credit_card_params(stripe_card, stripe_customer) -> dict:
+    params = dict(credit_card_token=stripe_customer["id"],
+                  credit_card_expiration_year=stripe_card["exp_year"],
+                  credit_card_expiration_month=stripe_card["exp_month"],
+                  credit_card_partial_number=stripe_card["last4"],
+                  billing_address_name="Red Hat",
+                  billing_address_address="Street 5",
+                  billing_address_city="Bratislava",
+                  billing_address_country="Slovakia")
+    return params
+
+
+@pytest.fixture(scope="function")
+def credit_card(account, api_credit_card_params):
+    response = account.credit_card_set(api_credit_card_params)
+    yield response
+    account.credit_card_delete()
