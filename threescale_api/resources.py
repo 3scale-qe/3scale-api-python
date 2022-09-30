@@ -1252,6 +1252,16 @@ class Account(DefaultResource):
     def users(self) -> AccountUsers:
         return AccountUsers(parent=self, instance_klass=AccountUser)
 
+    def credit_card_set(self, params: dict = None, **kwargs):
+        url = self.url + "/credit_card"
+        response = self.client.rest.put(url=url, json=params, **kwargs)
+        return response
+
+    def credit_card_delete(self, params: dict = None, **kwargs):
+        url = self.url + "/credit_card"
+        response = self.client.rest.delete(url=url, json=params, **kwargs)
+        return response
+
 
 class UserPermissions(DefaultResource):
     pass
