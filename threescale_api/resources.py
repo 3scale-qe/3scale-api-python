@@ -890,6 +890,17 @@ class Invoices(DefaultClient):
         return instance
 
 
+class PaymentTransactions(DefaultClient):
+    def __init__(self, *args, entity_name='payment_transaction',
+                 entity_collection='payment_transactions', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.parent.url + '/payment_transactions'
+
+
 class FieldsDefinitions(DefaultClient):
     def __init__(self, *args, entity_name='fields_definition',
                  entity_collection='fields_definitions', **kwargs):
@@ -1425,6 +1436,15 @@ class Invoice(DefaultResource):
 
     def charge(self):
         return self.client.charge(entity_id=self.entity_id)
+
+    @property
+    def payment_transactions(self) -> 'PaymentTransactions':
+        return PaymentTransactions(parent=self, instance_klass=PaymentTransaction)
+
+
+class PaymentTransaction(DefaultResource):
+    def __init__(self, entity_name='name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
 
 
 class FieldsDefinition(DefaultResource):
