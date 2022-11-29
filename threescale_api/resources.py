@@ -198,7 +198,7 @@ class Accounts(DefaultStateClient):
         instance = self._create_instance(response=response)
         return instance
 
-    def send_message(self, entity_id: int, body: str, **kwargs) -> Dict:
+    def send_message(self, entity_id: int, body: str, subject: str = None, **kwargs) -> Dict:
         """Send message to a developer account
         Args:
             entity_id(int): Entity id
@@ -208,6 +208,8 @@ class Accounts(DefaultStateClient):
         """
         log.info("[MSG] Send message to account (%s): %s %s", entity_id, body, kwargs)
         params = dict(body=body)
+        if subject:
+            params["subject"] = subject
         url = self._entity_url(entity_id=entity_id) + '/messages'
         response = self.rest.post(url=url, json=params, **kwargs)
         instance = utils.extract_response(response=response)
