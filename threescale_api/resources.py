@@ -913,6 +913,94 @@ class FieldsDefinitions(DefaultClient):
     def url(self) -> str:
         return self.threescale_client.admin_api_url + '/fields_definitions'
 
+
+class CmsClient(DefaultClient):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _list(self, **kwargs):
+        if "page" in kwargs.get("params", {}):
+            return super()._list(**kwargs)
+
+        pagenum = 1
+
+        kwargs = kwargs.copy()
+        if "params" not in kwargs:
+            kwargs["params"] = {}
+
+        kwargs["params"]["page"] = pagenum
+        kwargs["params"]["per_page"] = 100
+
+        page = super()._list(**kwargs)
+
+        while len(page):
+            for i in page:
+                yield i
+            pagenum += 1
+            kwargs["params"]["page"] = pagenum
+            page = super()._list(**kwargs)
+
+    def __iter__(self):
+        return self._list()
+
+
+class CmsFiles(CmsClient):
+    def __init__(self, *args, entity_name='file', entity_collection='files', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.admin_api_url + '/cms/files'
+
+
+class CmsSections(CmsClient):
+    def __init__(self, *args, entity_name='section', entity_collection='sections', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.admin_api_url + '/cms/sections'
+
+class CmsBuiltinSections(CmsSections):
+    def __init__(self, *args, entity_name='builtin_section', entity_collection='sections', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+
+class CmsTemplates(CmsClient):
+    def __init__(self, *args, entity_collection='templates', **kwargs):
+        super().__init__(*args, entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.admin_api_url + '/cms/templates'
+
+
+class CmsPages(CmsTemplates):
+    def __init__(self, *args, entity_name='page', **kwargs):
+        super().__init__(*args, entity_name=entity_name, **kwargs)
+
+
+class CmsBuiltinPages(CmsTemplates):
+    def __init__(self, *args, entity_name='builtin_page', **kwargs):
+        super().__init__(*args, entity_name=entity_name, **kwargs)
+
+
+class CmsLayouts(CmsTemplates):
+    def __init__(self, *args, entity_name='layout', **kwargs):
+        super().__init__(*args, entity_name=entity_name, **kwargs)
+
+
+class CmsPartials(CmsTemplates):
+    def __init__(self, *args, entity_name='partial', **kwargs):
+        super().__init__(*args, entity_name=entity_name, **kwargs)
+
+
+class CmsBuiltinPartials(CmsTemplates):
+    def __init__(self, *args, entity_name='builtin_partial', **kwargs):
+        super().__init__(*args, entity_name=entity_name, **kwargs)
 # Resources
 
 
@@ -1461,4 +1549,29 @@ class AdminPortalAuthProvider(DefaultResource):
 
 class DevPortalAuthProvider(DefaultResource):
     def __init__(self, entity_name='name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class CmsFile(DefaultResource):
+    def __init__(self, entity_name='path', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class CmsSection(DefaultResource):
+    def __init__(self, entity_name='id', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class CmsPage(DefaultResource):
+    def __init__(self, entity_name='system_name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class CmsLayout(DefaultResource):
+    def __init__(self, entity_name='system_name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class CmsPartial(DefaultResource):
+    def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)

@@ -497,3 +497,54 @@ def fields_definition(api, fields_definitions_params):
     entity = api.fields_definitions.create(fields_definitions_params)
     yield entity
     cleanup(entity)
+
+
+@pytest.fixture(scope="module")
+def cms_file_data():
+    """CMS file fixture data"""
+    return dict(path=f"/path{get_suffix()}", downloadable=True)
+
+
+@pytest.fixture(scope="module")
+def cms_file_files(active_docs_body):
+    """CMS file fixture files.
+    File object can be used instead of file body 'active_docs_body',
+    see https://requests.readthedocs.io/en/latest/user/advanced/#post-multiple-multipart-encoded-files """
+    return {'attachment': (f"name-{get_suffix()}", active_docs_body, 'application/json', {'Expires': '0'})}
+
+
+@pytest.fixture(scope="module")
+def cms_file(api, cms_file_data, cms_file_files):
+    """CMS file fixture"""
+    entity = api.cms_files.create(params={}, files=cms_file_files, data=cms_file_data)
+    yield entity
+    cleanup(entity)
+
+
+@pytest.fixture(scope="module")
+def cms_section_params(cms_file):
+    """CMS section fixture params"""
+    return dict(title=f"title-{get_suffix()}", public=True, partial_path=f"/path-{get_suffix()}",
+                cms_file_ids=[cms_file['id']])
+
+
+@pytest.fixture(scope="module")
+def cms_section(api, cms_section_params):
+    """CMS section fixture"""
+    entity = api.cms_sections.create(cms_section_params)
+    yield entity
+    cleanup(entity)
+
+
+@pytest.fixture(scope="module")
+def cms_partial_params():
+    """CMS partial fixture params"""
+    return dict(type='partial', system_name=f"sname-{get_suffix()}", draft=f"draft-{get_suffix()}")
+
+
+@pytest.fixture(scope="module")
+def cms_partial(api, cms_partial_params):
+    """CMS partial fixture"""
+    entity = api.cms_partials.create(cms_partial_params)
+    yield entity
+    cleanup(entity)
