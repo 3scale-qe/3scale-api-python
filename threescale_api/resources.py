@@ -921,7 +921,6 @@ class CmsClient(DefaultClient):
     def _list(self, **kwargs):
         if "page" in kwargs.get("params", {}):
             return super()._list(**kwargs)
-
         pagenum = 1
 
         kwargs = kwargs.copy()
@@ -932,13 +931,15 @@ class CmsClient(DefaultClient):
         kwargs["params"]["per_page"] = 100
 
         page = super()._list(**kwargs)
+        ret_list = page
 
         while len(page):
-            for i in page:
-                yield i
             pagenum += 1
             kwargs["params"]["page"] = pagenum
             page = super()._list(**kwargs)
+            ret_list += page
+
+        return ret_list
 
     def __iter__(self):
         return self._list()
