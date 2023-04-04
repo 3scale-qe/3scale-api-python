@@ -5,7 +5,7 @@ from .asserts import assert_resource, assert_resource_params
 # Files
 def test_file_list(api, cms_file):
     """ List all files. """
-    assert len(list(api.cms_files.list())) >= 1
+    assert len(api.cms_files.list()) >= 1
 
 
 def test_file_can_be_created(cms_file_data, cms_file):
@@ -59,7 +59,7 @@ def test_builtin_section_can_be_read(api):
 
 def test_section_list(api, cms_section):
     """ List all sections. """
-    assert len(list(api.cms_sections.list())) >= 1
+    assert len(api.cms_sections.list()) >= 1
 
 
 def test_section_can_be_created(cms_section_params, cms_section):
@@ -91,7 +91,7 @@ def test_section_can_be_updated(cms_section_params, cms_section):
 
 def test_builtin_partials_list(api):
     """ List all sections. """
-    assert len(list(api.cms_builtin_partials.list())) >= 1
+    assert len(api.cms_builtin_partials.list()) >= 1
 
 
 def test_builtin_partial_can_be_read(api):
@@ -105,7 +105,7 @@ def test_builtin_partial_can_be_read(api):
 
 def test_partial_list(api, cms_partial):
     """ List all user defined partials. """
-    assert len(list(api.cms_partials.list())) >= 1
+    assert len(api.cms_partials.list()) >= 1
 
 
 def test_partial_can_be_created(cms_partial_params, cms_partial):
@@ -131,7 +131,16 @@ def test_partial_can_be_updated(cms_partial_params, cms_partial):
     assert updated['draft'] == updated_draft
     assert cms_partial['draft'] == updated_draft
 
-# TODO template publishing
+
+def test_partial_publish(cms_partial):
+    """ Test publishing of partials. """
+    assert cms_partial.entity.get('published', None) is None
+    draft = cms_partial['draft']
+    cms_partial = cms_partial.publish()
+    # assert draft == cms_partial['draft'] bug
+    # assert cms_partial['published'] == cms_partial['draft'] bug
+    assert draft == cms_partial['published']
+
 
 # Pages
 # builtin
@@ -139,7 +148,7 @@ def test_partial_can_be_updated(cms_partial_params, cms_partial):
 
 def test_builtin_pages_list(api):
     """ List all sections. """
-    assert len(list(api.cms_builtin_pages.list())) >= 1
+    assert len(api.cms_builtin_pages.list()) >= 1
 
 
 def test_builtin_page_can_be_read(api):
@@ -154,7 +163,7 @@ def test_builtin_page_can_be_read(api):
 
 def test_page_list(api, cms_page):
     """ List all user defined pages. """
-    assert len(list(api.cms_pages.list())) >= 1
+    assert len(api.cms_pages.list()) >= 1
 
 
 def test_page_can_be_created(cms_page_params, cms_page):
@@ -181,12 +190,22 @@ def test_page_can_be_updated(cms_page_params, cms_page):
     assert cms_page['draft'] == updated_draft
 
 
+def test_page_publish(cms_page):
+    """ Test publishing of pages. """
+    assert cms_page.entity.get('published', None) is None
+    draft = cms_page['draft']
+    cms_page = cms_page.publish()
+    # assert draft == cms_page['draft'] bug
+    # assert cms_page['published'] == cms_page['draft'] bug
+    assert draft == cms_page['published']
+
+
 # Layouts
 
 
 def test_layout_list(api, cms_layout):
     """ List all user defined layouts. """
-    assert len(list(api.cms_layouts.list())) >= 1
+    assert len(api.cms_layouts.list()) >= 1
 
 
 def test_layout_can_be_created(cms_layout_params, cms_layout):
@@ -211,3 +230,13 @@ def test_layout_can_be_updated(cms_layout_params, cms_layout):
     updated = cms_layout.read()
     assert updated['draft'] == updated_draft
     assert cms_layout['draft'] == updated_draft
+
+
+def test_layout_publish(cms_layout):
+    """ Test publishing of layouts. """
+    assert cms_layout.entity.get('published', None) is None
+    draft = cms_layout['draft']
+    cms_layout = cms_layout.publish()
+    # assert draft == cms_layout['draft'] bug
+    # assert cms_layout['published'] == cms_layout['draft'] bug
+    assert draft == cms_layout['published']

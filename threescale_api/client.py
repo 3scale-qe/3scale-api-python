@@ -52,11 +52,13 @@ class ThreeScaleClient:
             resources.FieldsDefinitions(self, instance_klass=resources.FieldsDefinition)
         self._cms_files = resources.CmsFiles(self, instance_klass=resources.CmsFile)
         self._cms_sections = resources.CmsSections(self, instance_klass=resources.CmsSection)
-        self._cms_builtin_sections = resources.CmsBuiltinSections(self, instance_klass=resources.CmsSection)
+        self._cms_builtin_sections =\
+            resources.CmsBuiltinSections(self, instance_klass=resources.CmsSection)
         self._cms_pages = resources.CmsPages(self, instance_klass=resources.CmsPage)
         self._cms_builtin_pages = resources.CmsBuiltinPages(self, instance_klass=resources.CmsPage)
         self._cms_layouts = resources.CmsLayouts(self, instance_klass=resources.CmsLayout)
-        self._cms_builtin_partials = resources.CmsBuiltinPartials(self, instance_klass=resources.CmsPartial)
+        self._cms_builtin_partials =\
+            resources.CmsBuiltinPartials(self, instance_klass=resources.CmsPartial)
         self._cms_partials = resources.CmsPartials(self, instance_klass=resources.CmsPartial)
 
         if wait >= 0:
@@ -282,11 +284,11 @@ class ThreeScaleClient:
     @property
     def cms_builtin_pages(self) -> resources.CmsBuiltinPages:
         return self._cms_builtin_pages
-    
+
     @property
     def cms_layouts(self) -> resources.CmsLayouts:
         return self._cms_layouts
-    
+
     @property
     def cms_partials(self) -> resources.CmsPartials:
         return self._cms_partials
