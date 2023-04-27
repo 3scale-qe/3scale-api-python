@@ -500,9 +500,9 @@ def fields_definition(api, fields_definitions_params):
 
 
 @pytest.fixture(scope="module")
-def cms_file_data():
+def cms_file_data(cms_section):
     """CMS file fixture data"""
-    return {"path": f"/path{get_suffix()}", "downloadable": True}
+    return {"path": f"/path{get_suffix()}", "downloadable": True, 'section_id': cms_section['id']}
 
 
 @pytest.fixture(scope="module")
@@ -522,10 +522,9 @@ def cms_file(api, cms_file_data, cms_file_files):
 
 
 @pytest.fixture(scope="module")
-def cms_section_params(cms_file):
+def cms_section_params():
     """CMS section fixture params"""
-    return {"title": f"title-{get_suffix()}", "public": True, "partial_path": f"/path-{get_suffix()}",
-            "cms_file_ids": [cms_file['id']]}
+    return {"title": f"title-{get_suffix()}", "public": True, "partial_path": f"/path-{get_suffix()}"}
 
 
 @pytest.fixture(scope="module")
@@ -539,7 +538,7 @@ def cms_section(api, cms_section_params):
 @pytest.fixture(scope="module")
 def cms_partial_params():
     """CMS partial fixture params"""
-    return {"type": "partial", "system_name": f"sname-{get_suffix()}", "draft": f"draft-{get_suffix()}"}
+    return {"system_name": f"sname-{get_suffix()}", "draft": f"draft-{get_suffix()}"}
 
 
 @pytest.fixture(scope="module")
@@ -553,8 +552,8 @@ def cms_partial(api, cms_partial_params):
 @pytest.fixture(scope="module")
 def cms_layout_params(cms_section):
     """CMS layout fixture params"""
-    return {"type": "layout", "system_name": f"sname-{get_suffix()}", "draft": f"draft-{get_suffix()}",
-            "title": f"title-{get_suffix()}", "liquid_enabled": True}
+    return {"system_name": f"sname-{get_suffix()}", "draft": f"draft-{get_suffix()}",
+            "title": f"title-{get_suffix()}", "liquid_enabled": True, "section_id": cms_section['id']}
 
 @pytest.fixture(scope="module")
 def cms_layout(api, cms_layout_params):
@@ -566,12 +565,11 @@ def cms_layout(api, cms_layout_params):
 @pytest.fixture(scope="module")
 def cms_page_params(cms_section, cms_layout):
     """CMS page fixture params"""
-    return {"type": "page", "system_name": f"sname-{get_suffix()}", "draft": f"draft-{get_suffix()}",
+    return {"system_name": f"sname-{get_suffix()}", "draft": f"draft-{get_suffix()}",
             "title": f"title-{get_suffix()}", "path": f"/path-{get_suffix()}",
             "section_name": f"section-{get_suffix()}", "section_id": cms_section['id'],
             "layout_name": f"layout-{get_suffix()}", "layout_id": cms_layout['id'],
-            "liquid_enabled": True, "handler": "markdown", "tag_list": [1,2,3,4,5],
-            "content_type": "text/html"}
+            "liquid_enabled": True, "handler": "markdown", "content_type": "text/html"}
 
 
 @pytest.fixture(scope="module")

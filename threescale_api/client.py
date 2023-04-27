@@ -52,8 +52,6 @@ class ThreeScaleClient:
             resources.FieldsDefinitions(self, instance_klass=resources.FieldsDefinition)
         self._cms_files = resources.CmsFiles(self, instance_klass=resources.CmsFile)
         self._cms_sections = resources.CmsSections(self, instance_klass=resources.CmsSection)
-        self._cms_builtin_sections =\
-            resources.CmsBuiltinSections(self, instance_klass=resources.CmsSection)
         self._cms_pages = resources.CmsPages(self, instance_klass=resources.CmsPage)
         self._cms_builtin_pages = resources.CmsBuiltinPages(self, instance_klass=resources.CmsPage)
         self._cms_layouts = resources.CmsLayouts(self, instance_klass=resources.CmsLayout)
@@ -272,10 +270,6 @@ class ThreeScaleClient:
     @property
     def cms_sections(self) -> resources.CmsSections:
         return self._cms_sections
-
-    @property
-    def cms_builtin_sections(self) -> resources.CmsBuiltinSections:
-        return self._cms_builtin_sections
 
     @property
     def cms_pages(self) -> resources.CmsPages:

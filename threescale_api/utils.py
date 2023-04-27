@@ -23,7 +23,7 @@ def extract_response(response: requests.Response, entity: str = None,
     if collection and collection in extracted:
         extracted = extracted.get(collection)
     if isinstance(extracted, list):
-        return [value.get(entity) for value in extracted if entity in value]
+        return [value.get(entity) for value in extracted]
     if entity in extracted.keys():
         return extracted.get(entity)
     return extracted

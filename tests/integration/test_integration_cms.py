@@ -1,4 +1,6 @@
+import pytest
 from tests.integration import asserts
+from threescale_api import errors
 from .asserts import assert_resource, assert_resource_params
 
 
@@ -33,6 +35,9 @@ def test_file_can_be_updated(cms_file_data, cms_file):
     """ Can be file object updated? """
     updated_path = cms_file['path'] + 'up'
     cms_file['path'] = cms_file['path'] + 'up'
+    # TODO https://issues.redhat.com/browse/THREESCALE-9571
+    for item in "created_at", "updated_at", "url", "title", "content_type":
+        cms_file.pop(item)
     cms_file.update()
     assert cms_file['path'] == updated_path
     updated = cms_file.read()
@@ -41,20 +46,6 @@ def test_file_can_be_updated(cms_file_data, cms_file):
 
 
 # Sections
-# builtin
-
-def test_builtin_section_list(api):
-    """ List all sections. """
-    assert len(api.cms_builtin_sections.list()) >= 1
-
-
-def test_builtin_section_can_be_read(api):
-    """ It is possible to get section by ID? """
-    cms_section = api.cms_builtin_sections.list()[-1]
-    read = api.cms_sections.read(cms_section.entity_id)
-    asserts.assert_resource(read)
-
-# user
 
 
 def test_section_list(api, cms_section):
@@ -79,11 +70,25 @@ def test_section_can_be_updated(cms_section_params, cms_section):
     """ Can be section object updated? """
     updated_title = cms_section['title'] + 'up'
     cms_section['title'] = cms_section['title'] + 'up'
+    # TODO https://issues.redhat.com/browse/THREESCALE-9571
+    for item in "created_at", "updated_at":
+        cms_section.pop(item)
     cms_section.update()
     assert cms_section['title'] == updated_title
     updated = cms_section.read()
     assert updated['title'] == updated_title
     assert cms_section['title'] == updated_title
+
+
+# # bug!!! TODO https://issues.redhat.com/browse/THREESCALE-9572
+# def test_builtin_section_delete(api):
+#     """It is not possible to delete section partial."""
+#     with pytest.raises(errors.ApiClientError) as exc_info:
+#         api.cms_sections.list()[0].delete()
+#     assert exc_info.value.code == 423
+#     # TODO
+#     # assert exc_info.value.code == 400
+
 
 # Partials
 # builtin
@@ -99,6 +104,14 @@ def test_builtin_partial_can_be_read(api):
     cms_partial = api.cms_builtin_partials.list()[-1]
     read = api.cms_builtin_partials.read(cms_partial.entity_id)
     asserts.assert_resource(read)
+
+def test_builtin_partial_delete(api):
+    """It is not possible to delete builtin partial."""
+    with pytest.raises(errors.ApiClientError) as exc_info:
+        api.cms_builtin_partials.list()[0].delete()
+    assert exc_info.value.code == 423
+    # TODO https://issues.redhat.com/browse/THREESCALE-9572
+    # assert exc_info.value.code == 400
 
 # user
 
@@ -125,6 +138,9 @@ def test_partial_can_be_updated(cms_partial_params, cms_partial):
     """ Can be partial object updated? """
     updated_draft = cms_partial['draft'] + 'up'
     cms_partial['draft'] = cms_partial['draft'] + 'up'
+    # TODO https://issues.redhat.com/browse/THREESCALE-9571
+    for item in "created_at", "updated_at", "published":
+        cms_partial.pop(item)
     cms_partial.update()
     assert cms_partial['draft'] == updated_draft
     updated = cms_partial.read()
@@ -158,6 +174,15 @@ def test_builtin_page_can_be_read(api):
     asserts.assert_resource(read)
 
 
+def test_builtin_page_delete(api):
+    """It is not possible to delete builtin page."""
+    with pytest.raises(errors.ApiClientError) as exc_info:
+        api.cms_builtin_pages.list()[0].delete()
+    assert exc_info.value.code == 423
+    # TODO https://issues.redhat.com/browse/THREESCALE-9572
+    # assert exc_info.value.code == 400
+
+
 # user
 
 
@@ -183,6 +208,9 @@ def test_page_can_be_updated(cms_page_params, cms_page):
     """ Can be page object updated? """
     updated_draft = cms_page['draft'] + 'up'
     cms_page['draft'] = cms_page['draft'] + 'up'
+    # TODO https://issues.redhat.com/browse/THREESCALE-9571
+    for item in "created_at", "updated_at", "hidden", "published":
+        cms_page.pop(item)
     cms_page.update()
     assert cms_page['draft'] == updated_draft
     updated = cms_page.read()
@@ -225,6 +253,9 @@ def test_layout_can_be_updated(cms_layout_params, cms_layout):
     """ Can be layout object updated? """
     updated_draft = cms_layout['draft'] + 'up'
     cms_layout['draft'] = cms_layout['draft'] + 'up'
+    # TODO https://issues.redhat.com/browse/THREESCALE-9571
+    for item in "created_at", "updated_at", "published":
+        cms_layout.pop(item)
     cms_layout.update()
     assert cms_layout['draft'] == updated_draft
     updated = cms_layout.read()

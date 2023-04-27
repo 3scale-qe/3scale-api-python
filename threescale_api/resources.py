@@ -919,6 +919,12 @@ class CmsClient(DefaultClient):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def _extract_resource(self, response, collection) -> Union[List, Dict]:
+        extracted = response.json()
+        if self._entity_collection and self._entity_collection in extracted:
+            extracted = extracted.get(self._entity_collection)
+        return extracted
+
     def _list(self, **kwargs):
         if "page" in kwargs.get("params", {}):
             return super()._list(**kwargs)
@@ -948,7 +954,7 @@ class CmsClient(DefaultClient):
 
 class CmsFiles(CmsClient):
     """ Client for files. """
-    def __init__(self, *args, entity_name='file', entity_collection='files', **kwargs):
+    def __init__(self, *args, entity_name='file', entity_collection='collection', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
@@ -959,7 +965,7 @@ class CmsFiles(CmsClient):
 
 class CmsSections(CmsClient):
     """ Client for sections. """
-    def __init__(self, *args, entity_name='section', entity_collection='sections', **kwargs):
+    def __init__(self, *args, entity_name='section', entity_collection='collection', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
@@ -968,17 +974,9 @@ class CmsSections(CmsClient):
         return self.threescale_client.admin_api_url + '/cms/sections'
 
 
-class CmsBuiltinSections(CmsSections):
-    """ Client for builtin sections. """
-    def __init__(self, *args, entity_name='builtin_section', entity_collection='sections',
-                 **kwargs):
-        super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
-
-
 class CmsTemplates(CmsClient):
     """ Client for templates. """
-    def __init__(self, *args, entity_collection='templates', **kwargs):
+    def __init__(self, *args, entity_collection='collection', **kwargs):
         super().__init__(*args, entity_collection=entity_collection, **kwargs)
 
     @property
@@ -992,6 +990,21 @@ class CmsTemplates(CmsClient):
         response = self.rest.put(url=url, **kwargs)
         instance = self._create_instance(response=response)
         return instance
+
+    def list(self, **kwargs) -> List['DefaultResource']:
+        """List all entities
+        Args:
+            **kwargs: Optional parameters
+        Returns(List['DefaultResource]): List of resources
+        """
+        log.info(self._log_message("[LIST] List", args=kwargs))
+        instance = self.select_by(type=self._entity_name, **kwargs)
+        return instance
+
+    def create(self, params: dict = None,
+               *args, **kwargs) -> 'DefaultResource':
+        params.update({'type': self._entity_name})
+        return super().create(params=params, **kwargs)
 
 
 class CmsPages(CmsTemplates):
