@@ -913,6 +913,128 @@ class FieldsDefinitions(DefaultClient):
     def url(self) -> str:
         return self.threescale_client.admin_api_url + '/fields_definitions'
 
+
+class CmsClient(DefaultClient):
+    """ Client for all cms api endpoints. """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _extract_resource(self, response, collection) -> Union[List, Dict]:
+        extracted = response.json()
+        if self._entity_collection and self._entity_collection in extracted:
+            extracted = extracted.get(self._entity_collection)
+        return extracted
+
+    def _list(self, **kwargs):
+        if "page" in kwargs.get("params", {}):
+            return super()._list(**kwargs)
+        pagenum = 1
+
+        kwargs = kwargs.copy()
+        if "params" not in kwargs:
+            kwargs["params"] = {}
+
+        kwargs["params"]["page"] = pagenum
+        kwargs["params"]["per_page"] = 100
+
+        page = super()._list(**kwargs)
+        ret_list = page
+
+        while len(page):
+            pagenum += 1
+            kwargs["params"]["page"] = pagenum
+            page = super()._list(**kwargs)
+            ret_list += page
+
+        return ret_list
+
+    def __iter__(self):
+        return self._list()
+
+
+class CmsFiles(CmsClient):
+    """ Client for files. """
+    def __init__(self, *args, entity_name='file', entity_collection='collection', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.admin_api_url + '/cms/files'
+
+
+class CmsSections(CmsClient):
+    """ Client for sections. """
+    def __init__(self, *args, entity_name='section', entity_collection='collection', **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.admin_api_url + '/cms/sections'
+
+
+class CmsTemplates(CmsClient):
+    """ Client for templates. """
+    def __init__(self, *args, entity_collection='collection', **kwargs):
+        super().__init__(*args, entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.threescale_client.admin_api_url + '/cms/templates'
+
+    def publish(self, entity_id, **kwargs):
+        """ Publish template with entity_id """
+        log.info("[PUBLISH] " + f"{entity_id}")
+        url = self._entity_url(entity_id) + '/publish'
+        response = self.rest.put(url=url, **kwargs)
+        instance = self._create_instance(response=response)
+        return instance
+
+    def list(self, **kwargs) -> List['DefaultResource']:
+        """List all entities
+        Args:
+            **kwargs: Optional parameters
+        Returns(List['DefaultResource]): List of resources
+        """
+        log.info(self._log_message("[LIST] List", args=kwargs))
+        instance = self.select_by(type=self._entity_name, **kwargs)
+        return instance
+
+    def create(self, params: dict = None,
+               *args, **kwargs) -> 'DefaultResource':
+        params.update({'type': self._entity_name})
+        return super().create(params=params, **kwargs)
+
+
+class CmsPages(CmsTemplates):
+    """ Client for pages """
+    def __init__(self, *args, entity_name='page', **kwargs):
+        super().__init__(*args, entity_name=entity_name, **kwargs)
+
+
+class CmsBuiltinPages(CmsTemplates):
+    """ Client for builtin pages. """
+    def __init__(self, *args, entity_name='builtin_page', **kwargs):
+        super().__init__(*args, entity_name=entity_name, **kwargs)
+
+
+class CmsLayouts(CmsTemplates):
+    """ Client for layouts """
+    def __init__(self, *args, entity_name='layout', **kwargs):
+        super().__init__(*args, entity_name=entity_name, **kwargs)
+
+
+class CmsPartials(CmsTemplates):
+    """ Client for partials """
+    def __init__(self, *args, entity_name='partial', **kwargs):
+        super().__init__(*args, entity_name=entity_name, **kwargs)
+
+
+class CmsBuiltinPartials(CmsTemplates):
+    """ Client for builtin partials """
+    def __init__(self, *args, entity_name='builtin_partial', **kwargs):
+        super().__init__(*args, entity_name=entity_name, **kwargs)
 # Resources
 
 
@@ -1461,4 +1583,44 @@ class AdminPortalAuthProvider(DefaultResource):
 
 class DevPortalAuthProvider(DefaultResource):
     def __init__(self, entity_name='name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class CmsFile(DefaultResource):
+    """ Resource for file """
+    def __init__(self, entity_name='path', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class CmsSection(DefaultResource):
+    """ Resource for section. """
+    def __init__(self, entity_name='id', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class CmsTemplate(DefaultResource):
+    """ Resource for templates """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def publish(self, **kwargs):
+        """ Publish template resource """
+        return self.client.publish(entity_id=self.entity_id, **kwargs)
+
+
+class CmsPage(CmsTemplate):
+    """ Resource for page """
+    def __init__(self, entity_name='system_name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class CmsLayout(CmsTemplate):
+    """ Resource for layout """
+    def __init__(self, entity_name='system_name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+
+class CmsPartial(CmsTemplate):
+    """ Resource for partials """
+    def __init__(self, entity_name='system_name', **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)

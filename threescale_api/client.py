@@ -50,6 +50,14 @@ class ThreeScaleClient:
         self._invoices = resources.Invoices(self, instance_klass=resources.Invoice)
         self._fields_definitions =\
             resources.FieldsDefinitions(self, instance_klass=resources.FieldsDefinition)
+        self._cms_files = resources.CmsFiles(self, instance_klass=resources.CmsFile)
+        self._cms_sections = resources.CmsSections(self, instance_klass=resources.CmsSection)
+        self._cms_pages = resources.CmsPages(self, instance_klass=resources.CmsPage)
+        self._cms_builtin_pages = resources.CmsBuiltinPages(self, instance_klass=resources.CmsPage)
+        self._cms_layouts = resources.CmsLayouts(self, instance_klass=resources.CmsLayout)
+        self._cms_builtin_partials =\
+            resources.CmsBuiltinPartials(self, instance_klass=resources.CmsPartial)
+        self._cms_partials = resources.CmsPartials(self, instance_klass=resources.CmsPartial)
 
         if wait >= 0:
             self.wait_for_tenant()
@@ -254,6 +262,34 @@ class ThreeScaleClient:
     @property
     def fields_definitions(self) -> resources.FieldsDefinitions:
         return self._fields_definitions
+
+    @property
+    def cms_files(self) -> resources.CmsFiles:
+        return self._cms_files
+
+    @property
+    def cms_sections(self) -> resources.CmsSections:
+        return self._cms_sections
+
+    @property
+    def cms_pages(self) -> resources.CmsPages:
+        return self._cms_pages
+
+    @property
+    def cms_builtin_pages(self) -> resources.CmsBuiltinPages:
+        return self._cms_builtin_pages
+
+    @property
+    def cms_layouts(self) -> resources.CmsLayouts:
+        return self._cms_layouts
+
+    @property
+    def cms_partials(self) -> resources.CmsPartials:
+        return self._cms_partials
+
+    @property
+    def cms_builtin_partials(self) -> resources.CmsBuiltinPartials:
+        return self._cms_builtin_partials
 
 
 class RestApiClient:
