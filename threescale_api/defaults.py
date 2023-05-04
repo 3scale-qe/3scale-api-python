@@ -386,6 +386,51 @@ class DefaultResource(collections.abc.MutableMapping):
         self._entity = None
 
 
+class DefaultPaginationClient(DefaultClient):
+    """ Client to handle API endpoints with pagination.
+    List of endpoints supporting pagination with per_page size:
+        - accounts 500
+        limits per app plan 50 - not implemented in client
+        application list for all services 500 - not implemented in client
+        - backend mapping rules 500
+        - backend method list 500
+        - backend metric 500
+        - backend 500
+        - service 500
+        invoice list by account 20 - not implemented by standard "list" method
+        - invoice list 20
+        - all cms 100
+    """
+    def __init__(self, *args, per_page=500, **kwargs):
+        self.per_page = per_page
+        super().__init__(*args, **kwargs)
+
+    def _list(self, **kwargs):
+        """ List all objects via paginated API endpoint """
+        kwargs = kwargs.copy()
+        kwargs.setdefault("params", {})
+        if "page" in kwargs["params"] or self.per_page is None:
+            return super()._list(**kwargs)
+        pagenum = 1
+
+        kwargs["params"]["page"] = pagenum
+        kwargs["params"]["per_page"] = self.per_page
+
+        page = super()._list(**kwargs)
+        ret_list = page
+
+        while len(page):
+            pagenum += 1
+            kwargs["params"]["page"] = pagenum
+            page = super()._list(**kwargs)
+            ret_list += page
+
+        return ret_list
+
+    def __iter__(self):
+        return self._list()
+
+
 class DefaultPlanClient(DefaultClient):
     def set_default(self, entity_id: int, **kwargs) -> 'DefaultPlanResource':
         """Sets default plan for the entity
@@ -429,7 +474,7 @@ class DefaultPlanResource(DefaultResource):
         return self['default'] is True
 
 
-class DefaultStateClient(DefaultClient):
+class DefaultStateClient(DefaultPaginationClient):
     def set_state(self, entity_id, state: str, **kwargs):
         """Sets the state for the resource
         Args:

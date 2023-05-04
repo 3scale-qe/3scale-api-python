@@ -9,7 +9,7 @@ def test_3scale_url_is_set(api, url, token):
     assert api.url is not None
 
 
-def test_services_list(api):
+def test_services_list(api, service):
     services = api.services.list()
     assert len(services) >= 1
 
@@ -107,6 +107,9 @@ def test_service_mapping_rules(service):
     map_rules = service.mapping_rules.list()
     assert len(map_rules) >= 1
 
+def test_service_backend_usages_list(service, backend_usage):
+    back_usages = service.backend_usages.list()
+    assert len(back_usages) >= 1
 
 def test_service_backend_usages_backend(backend_usage, backend):
     assert backend_usage.backend.entity_id == backend.entity_id

@@ -45,9 +45,9 @@ def test_should_delete_metric(backend, backend_updated_metric_params):
     assert not resource.exists()
 
 
-def test_should_list_metrics(backend):
+def test_should_list_metrics(backend, backend_metric):
     resources = backend.metrics.list()
-    assert len(resources) > 1
+    assert len(resources) >= 1
 
 def test_should_apicast_return_403_when_metric_is_disabled(
         service, backend_metric_params, create_backend_mapping_rule,

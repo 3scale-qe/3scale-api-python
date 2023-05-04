@@ -6,37 +6,41 @@ from threescale_api import auth
 from threescale_api import utils
 from threescale_api import errors
 from threescale_api.defaults import DefaultClient, DefaultPlanClient, DefaultPlanResource, \
-    DefaultResource, DefaultStateClient, DefaultUserResource, DefaultStateResource
+    DefaultResource, DefaultStateClient, DefaultUserResource, DefaultStateResource, \
+    DefaultPaginationClient
 from threescale_api import client
 
 log = logging.getLogger(__name__)
 
 
-class Services(DefaultClient):
-    def __init__(self, *args, entity_name='service', entity_collection='services', **kwargs):
+class Services(DefaultPaginationClient):
+    def __init__(self, *args, entity_name='service', entity_collection='services',
+                 per_page=500, **kwargs):
         super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+                         entity_collection=entity_collection, per_page=per_page, **kwargs)
 
     @property
     def url(self) -> str:
         return self.threescale_client.admin_api_url + '/services'
 
 
-class MappingRules(DefaultClient):
+class MappingRules(DefaultPaginationClient):
     def __init__(self, *args, entity_name='mapping_rule', entity_collection='mapping_rules',
-                 **kwargs):
+                 per_page=None, **kwargs):
         super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+                         entity_collection=entity_collection, per_page=per_page,
+                         **kwargs)
 
     @property
     def url(self) -> str:
         return self.parent.url + '/mapping_rules'
 
 
-class Metrics(DefaultClient):
-    def __init__(self, *args, entity_name='metric', entity_collection='metrics', **kwargs):
+class Metrics(DefaultPaginationClient):
+    def __init__(self, *args, entity_name='metric', entity_collection='metrics', per_page=None,
+                 **kwargs):
         super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+                         entity_collection=entity_collection, per_page=per_page, **kwargs)
 
     @property
     def url(self) -> str:
@@ -98,10 +102,11 @@ class PricingRules(DefaultClient):
         return self.application_plan.plans_url + f'/metrics/{self.metric.entity_id}/pricing_rules'
 
 
-class Methods(DefaultClient):
-    def __init__(self, *args, entity_name='method', entity_collection='methods', **kwargs):
+class Methods(DefaultPaginationClient):
+    def __init__(self, *args, entity_name='method', entity_collection='methods', per_page=None,
+                 **kwargs):
         super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+                         entity_collection=entity_collection, per_page=per_page, **kwargs)
 
     @property
     def url(self) -> str:
@@ -133,9 +138,10 @@ class ApplicationPlanFeatures(DefaultClient):
 
 
 class AccountUsers(DefaultStateClient):
-    def __init__(self, *args, entity_name='user', entity_collection='users', **kwargs):
+    def __init__(self, *args, entity_name='user', entity_collection='users', per_page=None,
+                 **kwargs):
         super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+                         entity_collection=entity_collection, per_page=per_page, **kwargs)
 
     @property
     def url(self) -> str:
@@ -153,9 +159,11 @@ class AccountPlans(DefaultPlanClient):
 
 
 class Accounts(DefaultStateClient):
-    def __init__(self, *args, entity_name='account', entity_collection='accounts', **kwargs):
+    def __init__(self, *args, entity_name='account', entity_collection='accounts', per_page=500,
+                 **kwargs):
         super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+                         entity_collection=entity_collection, per_page=per_page,
+                         **kwargs)
 
     @property
     def url(self) -> str:
@@ -245,9 +253,9 @@ class Accounts(DefaultStateClient):
 
 class Applications(DefaultStateClient):
     def __init__(self, *args, entity_name='application', entity_collection='applications',
-                 **kwargs):
+                 per_page=None, **kwargs):
         super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+                         entity_collection=entity_collection, per_page=per_page, **kwargs)
 
     @property
     def url(self) -> str:
@@ -579,56 +587,31 @@ class OIDCConfigs(DefaultClient):
         return self.rest.get(url=self.url, json=params, **kwargs).json()
 
 
-class Backends(DefaultClient):
+class Backends(DefaultPaginationClient):
     def __init__(self, *args, entity_name='backend_api',
-                 entity_collection='backend_apis', **kwargs):
+                 entity_collection='backend_apis', per_page=500, **kwargs):
         super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+                         entity_collection=entity_collection, per_page=per_page, **kwargs)
 
     @property
     def url(self) -> str:
         return self.threescale_client.admin_api_url + '/backend_apis'
 
-    def list(self, **kwargs):
-        return list(super().list(**kwargs))
-
-    def _list(self, **kwargs):
-        if "page" in kwargs.get("params", {}):
-            return super()._list(**kwargs)
-
-        pagenum = 1
-
-        kwargs = kwargs.copy()
-        if "params" not in kwargs:
-            kwargs["params"] = {}
-
-        kwargs["params"]["page"] = pagenum
-        kwargs["params"]["per_page"] = 500
-
-        page = super()._list(**kwargs)
-
-        while len(page):
-            for i in page:
-                yield i
-            pagenum += 1
-            kwargs["params"]["page"] = pagenum
-            page = super()._list(**kwargs)
-
-    def __iter__(self):
-        return self._list()
-
 
 class BackendMetrics(Metrics):
-    def __init__(self, *args, entity_name='metric', entity_collection='metrics', **kwargs):
+    def __init__(self, *args, entity_name='metric', entity_collection='metrics', per_page=500,
+                 **kwargs):
         super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+                         entity_collection=entity_collection, per_page=per_page,
+                         **kwargs)
 
 
 class BackendMappingRules(MappingRules):
     def __init__(self, *args, entity_name='mapping_rule',
-                 entity_collection='mapping_rules', **kwargs):
+                 entity_collection='mapping_rules', per_page=500, **kwargs):
         super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+                         entity_collection=entity_collection, per_page=per_page,
+                         **kwargs)
 
 
 class BackendUsages(Services):
@@ -684,9 +667,10 @@ class ProviderAccountUsers(DefaultStateClient):
     Client for Provider Accounts.
     In 3scale, entity under Account Settings > Users
     """
-    def __init__(self, *args, entity_name='user', entity_collection='users', **kwargs):
+    def __init__(self, *args, entity_name='user', entity_collection='users', per_page=None,
+                 **kwargs):
         super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+                         entity_collection=entity_collection, per_page=per_page, **kwargs)
 
     @property
     def url(self) -> str:
@@ -842,11 +826,12 @@ class InvoiceState(Enum):
     OPEN = "open"
 
 
-class Invoices(DefaultClient):
+class Invoices(DefaultPaginationClient):
     """Default client for Invoices"""
-    def __init__(self, *args, entity_name='invoice', entity_collection='invoices', **kwargs):
+    def __init__(self, *args, entity_name='invoice', entity_collection='invoices',
+                 per_page=20, **kwargs):
         super().__init__(*args, entity_name=entity_name,
-                         entity_collection=entity_collection, **kwargs)
+                         entity_collection=entity_collection, per_page=per_page, **kwargs)
 
     @property
     def url(self) -> str:
@@ -914,42 +899,16 @@ class FieldsDefinitions(DefaultClient):
         return self.threescale_client.admin_api_url + '/fields_definitions'
 
 
-class CmsClient(DefaultClient):
+class CmsClient(DefaultPaginationClient):
     """ Client for all cms api endpoints. """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, per_page=100, **kwargs):
+        super().__init__(*args, per_page=per_page, **kwargs)
 
     def _extract_resource(self, response, collection) -> Union[List, Dict]:
         extracted = response.json()
         if self._entity_collection and self._entity_collection in extracted:
             extracted = extracted.get(self._entity_collection)
         return extracted
-
-    def _list(self, **kwargs):
-        if "page" in kwargs.get("params", {}):
-            return super()._list(**kwargs)
-        pagenum = 1
-
-        kwargs = kwargs.copy()
-        if "params" not in kwargs:
-            kwargs["params"] = {}
-
-        kwargs["params"]["page"] = pagenum
-        kwargs["params"]["per_page"] = 100
-
-        page = super()._list(**kwargs)
-        ret_list = page
-
-        while len(page):
-            pagenum += 1
-            kwargs["params"]["page"] = pagenum
-            page = super()._list(**kwargs)
-            ret_list += page
-
-        return ret_list
-
-    def __iter__(self):
-        return self._list()
 
 
 class CmsFiles(CmsClient):
@@ -985,7 +944,7 @@ class CmsTemplates(CmsClient):
 
     def publish(self, entity_id, **kwargs):
         """ Publish template with entity_id """
-        log.info("[PUBLISH] " + f"{entity_id}")
+        log.info("[PUBLISH] %s", entity_id)
         url = self._entity_url(entity_id) + '/publish'
         response = self.rest.put(url=url, **kwargs)
         instance = self._create_instance(response=response)
@@ -1080,7 +1039,7 @@ class Metric(DefaultResource):
 
     @property
     def methods(self) -> 'Methods':
-        return Methods(parent=self, instance_klass=Method)
+        return Methods(parent=self, instance_klass=Method, per_page=self.client.per_page)
 
 
 class MappingRule(DefaultResource):
