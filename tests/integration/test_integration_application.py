@@ -16,7 +16,7 @@ def test_application_can_be_created(application, application_params):
     asserts.assert_resource_params(application, application_params)
 
 
-def test_application_list(account):
+def test_application_list(account, application):
     applications = account.applications.list()
     assert len(applications) > 0
 

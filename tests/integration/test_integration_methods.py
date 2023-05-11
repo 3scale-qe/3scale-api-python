@@ -4,6 +4,8 @@ from threescale_api.errors import ApiClientError
 
 from tests.integration import asserts
 
+def test_list_methods(metric, method):
+    assert len(metric.methods.list()) >= 1
 
 def test_should_create_method(method, method_params):
     asserts.assert_resource(method)

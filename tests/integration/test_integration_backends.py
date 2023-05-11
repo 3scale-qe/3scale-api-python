@@ -9,7 +9,7 @@ def test_3scale_url_is_set(api, url, token):
     assert api.url is not None
 
 
-def test_backends_list(api):
+def test_backends_list(api, backend):
     backends = api.backends.list()
     assert len(backends) >= 1
 

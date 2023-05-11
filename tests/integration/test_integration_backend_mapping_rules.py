@@ -4,8 +4,8 @@ from tests.integration import asserts
 
 
 def test_should_list_mapping_rules(backend, backend_mapping_rule):
-    resource = backend.mapping_rules.list()
-    assert resource
+    resources = backend.mapping_rules.list()
+    assert len(resources) >= 1
 
 def test_should_create_mapping_rule(backend_mapping_rule, backend_mapping_rule_params):
     asserts.assert_resource(backend_mapping_rule)
