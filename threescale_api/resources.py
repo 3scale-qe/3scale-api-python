@@ -1276,6 +1276,18 @@ class Tenant(DefaultResource):
         """
         return self.threescale_client.tenants.trigger_billing_account(self, account, date)
 
+    def plan_upgrade(self, plan_id):
+        """Upgrade plan to given plan_id"""
+        return self.client.rest.put(f"{self.url}/plan_upgrade", params={"plan_id": plan_id})
+
+    @property
+    def account(self):
+        """Return account of this tenant"""
+        return Account(
+            client=self.threescale_client.accounts,
+            entity=self.entity["signup"]["account"]
+        )
+
 
 class Application(DefaultResource):
     def __init__(self, entity_name='name', **kwargs):
