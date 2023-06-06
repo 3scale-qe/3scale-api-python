@@ -910,8 +910,39 @@ class CmsClient(DefaultPaginationClient):
             extracted = extracted.get(self._entity_collection)
         return extracted
 
+    def select_by(self, **params):
+        """Select by params - logical "and" Usage example: select_by(role='admin')
+        Filtering by some params can be done on the backend.
+        Filters for each class are stored in class variable FILTERS.
+        Filters are removed because they are not part of function "predicate".
+         -------------------------------------
+        | Endpoint         | Filters          |
+         -------------------------------------
+        | Sections #index  | parent_id        |
+        | Files #index     | section_id       |
+        | Templates #index | type, section_id |
+         -------------------------------------
+        Args:
+            **params: params used for selection
+        Returns: List of resources
+        """
+        log.debug("[SELECT] By params: %s", params)
+
+        filters = {fil: params.pop(fil) for fil in self.FILTERS if fil in params}
+
+        def predicate(item):
+            for (key, val) in params.items():
+                if item[key] != val:
+                    return False
+            return True
+        if filters:
+            return self.select(predicate=predicate, params=filters)
+        return self.select(predicate=predicate)
+
 
 class CmsFiles(CmsClient):
+    FILTERS = ['parent_id']
+
     """ Client for files. """
     def __init__(self, *args, entity_name='file', entity_collection='collection', **kwargs):
         super().__init__(*args, entity_name=entity_name,
@@ -923,6 +954,8 @@ class CmsFiles(CmsClient):
 
 
 class CmsSections(CmsClient):
+    FILTERS = ['section_id']
+
     """ Client for sections. """
     def __init__(self, *args, entity_name='section', entity_collection='collection', **kwargs):
         super().__init__(*args, entity_name=entity_name,
@@ -934,6 +967,8 @@ class CmsSections(CmsClient):
 
 
 class CmsTemplates(CmsClient):
+    FILTERS = ['type']  # , 'section_id']
+
     """ Client for templates. """
     def __init__(self, *args, entity_collection='collection', **kwargs):
         super().__init__(*args, entity_collection=entity_collection, **kwargs)
@@ -957,13 +992,28 @@ class CmsTemplates(CmsClient):
         Returns(List['DefaultResource]): List of resources
         """
         log.info(self._log_message("[LIST] List", args=kwargs))
-        instance = self.select_by(type=self._entity_name, **kwargs)
+        kwargs.setdefault("params", {})
+        kwargs["params"].setdefault("content", "true")
+        kwargs["params"].setdefault("type", self._entity_name)
+        instance = self._list(**kwargs)
         return instance
+
+    def select(self, predicate, **kwargs) -> List['DefaultResource']:
+        """Select resource s based on the predicate
+        Args:
+            predicate: Predicate
+            **kwargs: Optional args
+        Returns: List of resources
+        """
+        kwargs.setdefault("params", {})
+        kwargs["params"].setdefault("content", "true")
+        kwargs["params"].setdefault("type", self._entity_name)
+        return [item for item in self._list(**kwargs) if predicate(item)]
 
     def create(self, params: dict = None,
                *args, **kwargs) -> 'DefaultResource':
         params.update({'type': self._entity_name})
-        return super().create(params=params, **kwargs)
+        return super().create(params=params, *args, **kwargs)
 
 
 class CmsPages(CmsTemplates):

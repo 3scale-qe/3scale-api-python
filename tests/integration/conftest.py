@@ -522,9 +522,11 @@ def cms_file(api, cms_file_data, cms_file_files):
 
 
 @pytest.fixture(scope="module")
-def cms_section_params():
+def cms_section_params(api):
     """CMS section fixture params"""
-    return {"title": f"title-{get_suffix()}", "public": True, "partial_path": f"/path-{get_suffix()}"}
+    parent_id = api.cms_sections.list()[0]['id']
+    return {"title": f"title-{get_suffix()}", "public": True,
+            "partial_path": f"/path-{get_suffix()}", "parent_id": parent_id}
 
 
 @pytest.fixture(scope="module")
@@ -550,10 +552,10 @@ def cms_partial(api, cms_partial_params):
 
 
 @pytest.fixture(scope="module")
-def cms_layout_params(cms_section):
+def cms_layout_params():
     """CMS layout fixture params"""
     return {"system_name": f"sname-{get_suffix()}", "draft": f"draft-{get_suffix()}",
-            "title": f"title-{get_suffix()}", "liquid_enabled": True, "section_id": cms_section['id']}
+            "title": f"title-{get_suffix()}", "liquid_enabled": True}
 
 @pytest.fixture(scope="module")
 def cms_layout(api, cms_layout_params):
