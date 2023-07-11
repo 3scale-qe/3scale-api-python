@@ -278,15 +278,15 @@ def test_files_filter(api, cms_file, cms_section):
     assert api.cms_files.select_by(path=cms_file['path'])[0] == cms_file
 
 # https://issues.redhat.com/browse/THREESCALE-9191?focusedId=22406548&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-22406548
-#def test_partial_filter(api, cms_partial, cms_section):
-#    """ Test partial filtering """
-#    assert api.cms_partials.select_by(section_id=cms_section['id'])[0] == cms_partial
-#    assert api.cms_partials.select_by(system_name=cms_partial['system_name'])[0] == cms_partial
+def test_partial_filter(api, cms_partial, cms_section):
+    """ Test partial filtering """
+    assert api.cms_partials.select_by(section_id=cms_section['id']) == []
+    assert api.cms_partials.select_by(system_name=cms_partial['system_name'])[0] == cms_partial
 
-#def test_layout_filter(api, cms_layout, cms_section):
-#    """ Test layout filtering """
-#    assert api.cms_layouts.select_by(section_id=cms_section['id'])[0] == cms_layout
-#    assert api.cms_layouts.select_by(title=cms_layout['title'])[0] == cms_layout
+def test_layout_filter(api, cms_layout, cms_section):
+    """ Test layout filtering """
+    assert api.cms_layouts.select_by(section_id=cms_section['id']) == []
+    assert api.cms_layouts.select_by(title=cms_layout['title'])[0] == cms_layout
 
 def test_page_filter(api, cms_section, cms_page):
     """ Test page filtering """
