@@ -48,3 +48,6 @@ def test_backend_metrics_list(backend, backend_metric):
 
 def test_backend_mapping_rules_list(backend, backend_mapping_rule):
     assert backend.mapping_rules.list()
+
+def test_backend_usages(backend, service, backend_usage):
+    assert backend.usages() == [backend_usage]
