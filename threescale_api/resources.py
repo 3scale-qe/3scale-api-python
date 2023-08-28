@@ -1465,9 +1465,10 @@ class Backend(DefaultResource):
     def mapping_rules(self) -> 'BackendMappingRules':
         return BackendMappingRules(parent=self, instance_klass=BackendMappingRule)
 
-    @property
-    def usages(self) -> 'BackendUsages':
-        return BackendUsages(parent=self, instance_klass=BackendUsages)
+    def usages(self) -> list['BackendUsage']:
+        """ Returns list of backend usages where the backend is used."""
+        return [usage for service in self.threescale_client.services.list()
+                for usage in service.backend_usages.select_by(backend_id=self['id'])]
 
 
 class BackendMetric(Metric):
