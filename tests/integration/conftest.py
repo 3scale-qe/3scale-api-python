@@ -360,12 +360,15 @@ def backend(backend_params, api) -> Backend:
     cleanup(backend)
 
 @pytest.fixture(scope='module')
-def backend_metric(backend, metric_params) -> Metric:
+def backend_metric(backend, metric_params, proxy) -> Metric:
     """
     Fixture for getting backend metric.
     """
     resource = backend.metrics.create(params=metric_params)
     yield resource
+    for map_rule in backend.mapping_rules.select_by(metric_id=resource['id']):
+        map_rule.delete()
+    proxy.deploy()
     cleanup(resource)
 
 @pytest.fixture(scope="module")
