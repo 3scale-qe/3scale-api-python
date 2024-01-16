@@ -40,29 +40,29 @@ def count_invoice(api, account):
     return len(api.invoices.list_by_account(account))
 
 
-def test_trigger_billing(master_api, custom_tenant, paid_account, next_day):
-    api = custom_tenant.admin_api(wait=True)
+def test_trigger_billing(master_api, custom_tenant, paid_account, next_day, ssl_verify):
+    api = custom_tenant.admin_api(ssl_verify=ssl_verify, wait=True)
     account = paid_account(api)
     assert master_api.tenants.trigger_billing(custom_tenant, next_day)
     assert count_invoice(api, account) == 1
 
 
-def test_trigger_billing_resource(custom_tenant, paid_account, next_day):
-    api = custom_tenant.admin_api(wait=True)
+def test_trigger_billing_resource(custom_tenant, paid_account, next_day, ssl_verify):
+    api = custom_tenant.admin_api(ssl_verify=ssl_verify, wait=True)
     account = paid_account(api)
     assert custom_tenant.trigger_billing(next_day)
     assert count_invoice(api, account) == 1
 
 
-def test_trigger_billing_account(master_api, custom_tenant, paid_account, next_day):
-    api = custom_tenant.admin_api(wait=True)
+def test_trigger_billing_account(master_api, custom_tenant, paid_account, next_day, ssl_verify):
+    api = custom_tenant.admin_api(ssl_verify=ssl_verify, wait=True)
     account = paid_account(api)
     assert master_api.tenants.trigger_billing_account(custom_tenant, account, next_day)
     assert count_invoice(api, account) == 1
 
 
-def test_trigger_billing_account_resource(custom_tenant, paid_account, next_day):
-    api = custom_tenant.admin_api(wait=True)
+def test_trigger_billing_account_resource(custom_tenant, paid_account, next_day, ssl_verify):
+    api = custom_tenant.admin_api(ssl_verify=ssl_verify, wait=True)
     account = paid_account(api)
     assert custom_tenant.trigger_billing_account(account, next_day)
     assert count_invoice(api, account) == 1

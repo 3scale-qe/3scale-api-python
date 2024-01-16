@@ -4,17 +4,17 @@ from threescale_api.errors import ApiClientError
 
 from tests.integration import asserts
 
-def test_list_methods(metric, method):
-    assert len(metric.methods.list()) >= 1
+def test_list_methods(hits_metric, method):
+    assert len(hits_metric.methods.list()) >= 1
 
 def test_should_create_method(method, method_params):
     asserts.assert_resource(method)
     asserts.assert_resource_params(method, method_params)
 
 
-def test_should_not_create_method_for_custom_metric(metric, method_params):
-    resource = metric.methods.create(params=method_params, throws=False)
-    asserts.assert_errors_contains(resource, ['parent_id'])
+def test_should_not_create_method_for_custom_metric(hits_metric, method_params):
+    resource = hits_metric.methods.create(params=method_params, throws=False)
+    asserts.assert_errors_contains(resource, ['system_name'])
 
 
 def test_should_friendly_name_be_required(hits_metric):
