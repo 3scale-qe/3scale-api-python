@@ -5,7 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 pylint = "*"
-pytest = "*"
+pytest = "<8.0.0"
 responses = "*"
 python-dotenv = "*"
 flake8 = "*"
