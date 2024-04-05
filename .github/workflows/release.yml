@@ -16,6 +16,6 @@ jobs:
       - name: build
         run: python setup.py --release-version ${GITHUB_REF#refs/tags/v} sdist bdist_wheel
       - name: release
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
