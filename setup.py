@@ -12,14 +12,15 @@ if sys.argv[1] == "--release-version":
     VERSION = sys.argv.pop(1)
     assert re.match(r"[0-9]+\.[0-9]+\.[0-9]+", VERSION), "Version definition required as first arg"
 
-requirements = ['requests']
+requirements = ['requests', 'backoff']
 
 extra_requirements = {
     'dev': [
         'pytest',
         'coverage',
-        'mock',
-        'python-dotenv'
+        'python-dotenv',
+        'responses'
+
     ],
     'docs': ['sphinx']
 }
