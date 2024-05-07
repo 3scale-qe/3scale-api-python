@@ -224,6 +224,11 @@ def hits_metric(service):
 
 
 @pytest.fixture(scope='module')
+def backend_hits_metric(backend):
+    return backend.metrics.read_by(system_name=('hits.' + str(backend['id'])))
+
+
+@pytest.fixture(scope='module')
 def method_params(service):
     suffix = get_suffix()
     friendly_name = f'test-method-{suffix}'
@@ -244,6 +249,13 @@ def updated_method_params(method_params):
 @pytest.fixture(scope='module')
 def method(hits_metric, method_params):
     resource = hits_metric.methods.create(params=method_params)
+    yield resource
+    cleanup(resource)
+
+
+@pytest.fixture(scope='module')
+def backend_method(backend_hits_metric, method_params):
+    resource = backend_hits_metric.methods.create(params=method_params)
     yield resource
     cleanup(resource)
 
