@@ -3,7 +3,6 @@ import secrets
 import time
 import string
 import random
-from distutils.util import strtobool
 
 import pytest
 from dotenv import load_dotenv
@@ -49,7 +48,7 @@ def master_token() -> str:
 @pytest.fixture(scope="session")
 def ssl_verify() -> bool:
     ssl_verify = os.getenv('THREESCALE_SSL_VERIFY', 'false')
-    return bool(strtobool(ssl_verify))
+    return ssl_verify.lower() in ('y', 'yes', 't', 'true', 'on', '1')
 
 
 @pytest.fixture(scope='session')
