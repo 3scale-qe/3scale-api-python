@@ -25,3 +25,13 @@ def test_application_update(application, update_application_params):
     updated_application = application.update(params=update_application_params)
     asserts.assert_resource(updated_application)
     asserts.assert_resource_params(updated_application, update_application_params)
+
+
+def test_application_key_can_be_created(app_key, app_key_params):
+    asserts.assert_resource(app_key)
+    asserts.assert_resource_params(app_key, app_key_params)
+
+
+def test_application_key_list(application, app_key):
+    keys = application.keys.list()
+    assert len(keys) > 0

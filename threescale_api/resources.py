@@ -1,6 +1,7 @@
 import logging
 from enum import Enum
 from typing import Dict, Union, List, Iterable
+from urllib.parse import quote_plus
 
 from threescale_api import auth
 from threescale_api import utils
@@ -316,7 +317,7 @@ class ApplicationReferrerFilters(DefaultClient):
 
 
 class ApplicationKeys(DefaultClient):
-    def __init__(self, *args, entity_name='application', entity_collection='applications',
+    def __init__(self, *args, entity_name='key', entity_collection='keys',
                  **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -324,6 +325,30 @@ class ApplicationKeys(DefaultClient):
     @property
     def url(self) -> str:
         return self.parent.url + '/keys'
+
+    def create(self, params: dict = None, **kwargs) -> 'ApplicationKey':
+        """Create a new instance of ApplicationKey. "keys" POST request
+        returns Application instead of newly create key.
+        Returns: Newly created key.
+
+        """
+        super().create(params=params, **kwargs)
+        key = sorted(self.list(), key=lambda key: key["created_at"])[-1]
+        key.entity_id = quote_plus(key["value"])
+        return key
+
+    def list(self, **kwargs) -> List['ApplicationKey']:
+        """List all entities of ApplicationKey.
+        There is no id in list response, so it needs to be assigned the value
+        to be able to work with key instance.
+        Args:
+            **kwargs: Optional parameters
+        Returns(List['ApplicationKey']): List of ApplicationKey resources
+        """
+        key_list = super().list(**kwargs)
+        for key in key_list:
+            key.entity_id = quote_plus(key["value"])
+        return key_list
 
 
 class Providers(DefaultClient):
@@ -1320,7 +1345,7 @@ class Application(DefaultResource):
     @property
     def keys(self):
         "Application keys"
-        return ApplicationKeys(parent=self, instance_klass=DefaultResource)
+        return ApplicationKeys(parent=self, instance_klass=ApplicationKey)
 
     def authobj(self, auth_mode=None, location=None):
         """Returns subclass of requests.auth.BaseAuth to provide authentication
@@ -1394,6 +1419,11 @@ class Application(DefaultResource):
         client = self.api_client(verify=verify)
 
         return client.get(relpath)
+
+
+class ApplicationKey(DefaultResource):
+    def __init__(self, entity_name='', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
 
 
 class Account(DefaultResource):
