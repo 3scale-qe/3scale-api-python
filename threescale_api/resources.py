@@ -114,6 +114,13 @@ class Methods(DefaultPaginationClient):
         return self.parent.url + '/methods'
 
 
+class BackendMethods(Methods):
+    def __init__(self, *args, entity_name='method', entity_collection='methods', per_page=None,
+                 **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, per_page=per_page, **kwargs)
+
+
 class ApplicationPlans(DefaultPlanClient):
     def __init__(self, *args, entity_name='application_plan', entity_collection='plans', **kwargs):
         super().__init__(*args, entity_name=entity_name,
@@ -1101,6 +1108,19 @@ class Method(DefaultResource):
 
     @property
     def service(self) -> 'Service':
+        return self.metric.parent
+
+
+class BackendMethod(Method):
+    def __init__(self, entity_name='system_name', **kwargs):
+        super().__init__(entity_name=entity_name, **kwargs)
+
+    @property
+    def service(self) -> 'Service':
+        raise AttributeError("'BackendMethod' object has no attribute 'service'")
+
+    @property
+    def backend(self) -> 'Backend':
         return self.metric.parent
 
 
