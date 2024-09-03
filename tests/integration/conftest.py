@@ -144,7 +144,7 @@ def application(account, application_plan, application_params) -> Application:
 
 @pytest.fixture(scope='module')
 def app_key_params(account, application):
-    value = ''.join(random.choices(string.ascii_uppercase + string.digits + '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~', k=100))
+    value = ''.join(random.choices(string.ascii_uppercase + string.digits + '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~', k=255))
     return({"application_id": application["id"], "account_id": account["id"], "key": value})
 
 
