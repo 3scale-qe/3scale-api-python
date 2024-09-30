@@ -37,6 +37,8 @@ class ThreeScaleClient:
         self._access_tokens = \
             resources.AccessTokens(self, instance_klass=resources.AccessToken)
         self._active_docs = resources.ActiveDocs(self, instance_klass=resources.ActiveDoc)
+        self._application_plans = \
+            resources.ApplicationPlans(self, instance_klass=resources.ApplicationPlan)
         self._account_plans = resources.AccountPlans(self, instance_klass=resources.AccountPlan)
         self._settings = resources.SettingsClient(self)
         self._admin_portal_auth_providers = resources.AdminPortalAuthProviders(
@@ -141,6 +143,13 @@ class ThreeScaleClient:
         Returns(str): URL of the 3scale master api
         """
         return self.url + "/master/api"
+
+    @property
+    def application_plans(self) -> resources.ApplicationPlans:
+        """Get applications_plan client
+        Returns(resources.ApplicationPlans): ApplicationPlans client
+        """
+        return self._application_plans
 
     @property
     def services(self) -> resources.Services:

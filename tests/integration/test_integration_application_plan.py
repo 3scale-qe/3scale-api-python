@@ -24,3 +24,8 @@ def test_application_plan_update(application_plan, update_params):
     updated_app_plan = application_plan.update(params=update_params)
     asserts.assert_resource(updated_app_plan)
     asserts.assert_resource_params(updated_app_plan, update_params)
+
+
+def test_application_plans_list_all(application_plans):
+    app_plans = application_plans.list()
+    assert len(app_plans) >= 1

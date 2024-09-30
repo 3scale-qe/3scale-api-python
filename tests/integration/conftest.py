@@ -13,7 +13,7 @@ from threescale_api.resources import (Service, ApplicationPlan, Application,
                                       Proxy, Backend, Metric, MappingRule,
                                       BackendMappingRule, BackendUsage,
                                       ActiveDoc, Webhooks, InvoiceState,
-                                      ApplicationKey)
+                                      ApplicationKey, ApplicationPlans)
 
 load_dotenv()
 
@@ -126,6 +126,11 @@ def application_plan_params() -> dict:
 def application_plan(api, service, application_plan_params) -> ApplicationPlan:
     resource = service.app_plans.create(params=application_plan_params)
     yield resource
+
+@pytest.fixture(scope='module')
+def application_plans(api) -> ApplicationPlans:
+    application_plans = api.application_plans
+    yield application_plans
 
 
 @pytest.fixture(scope='module')

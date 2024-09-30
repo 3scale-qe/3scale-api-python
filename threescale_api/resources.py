@@ -128,7 +128,9 @@ class ApplicationPlans(DefaultPlanClient):
 
     @property
     def url(self) -> str:
-        return self.parent.url + '/application_plans'
+        if type(self.parent) is Service:
+            return self.parent.url + '/application_plans'
+        return self.threescale_client.admin_api_url + '/application_plans'
 
     @property
     def plans_url(self) -> str:
