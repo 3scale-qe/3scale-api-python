@@ -427,6 +427,22 @@ def tenant_params():
                 email="email@invalid.invalid",
                 org_name="org")
 
+
+@pytest.fixture(scope='module')
+def active_docs_update_body():
+    return """
+    {"swagger":"2.0","info":{"version":"1.0.1","title":"Test"},"paths":{"/test":{"get":{"operationId":"Test",
+    "parameters":[],"responses":{"400":{"description":"bad input parameters"}}}}},"definitions":{}}
+    """
+
+
+@pytest.fixture(scope='module')
+def active_docs_update_params(active_docs_update_body):
+    suffix = get_suffix()
+    name = f"updated-{suffix}"
+    return dict(name=name, body=active_docs_update_body)
+
+
 @pytest.fixture(scope='module')
 def active_docs_body():
     return """
