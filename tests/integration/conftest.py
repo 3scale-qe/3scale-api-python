@@ -499,6 +499,13 @@ def webhook(api):
 
 
 @pytest.fixture(scope='module')
+def account_plans_update_params():
+    suffix = secrets.token_urlsafe(8)
+    name = f"updated-{suffix}"
+    return dict(name=name, description=name)
+
+
+@pytest.fixture(scope='module')
 def account_plans_params():
     suffix = get_suffix()
     name = f"test-{suffix}"
