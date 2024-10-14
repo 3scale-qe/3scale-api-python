@@ -11,6 +11,12 @@ def test_account_can_be_created(api, account, account_params):
     asserts.assert_resource_params(account, account_params)
 
 
+def test_account_update(api,account,update_account_params):
+    updated_account = account.update(params=update_account_params)
+    asserts.assert_resource(updated_account)
+    asserts.assert_resource_params(updated_account,update_account_params)
+
+
 def test_account_can_be_read(api, account, account_params):
     read = api.accounts.read(account.entity_id)
     asserts.assert_resource(read)
@@ -22,6 +28,7 @@ def test_account_can_be_read_by_name(api, account, account_params):
     read = api.accounts[account_name]
     asserts.assert_resource(read)
     asserts.assert_resource_params(read, account_params)
+
 
 def test_users_list(api, account):
     assert len(account.users.list()) >= 1

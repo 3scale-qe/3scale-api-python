@@ -103,6 +103,13 @@ def access_token(access_token_params, api):
 
 
 @pytest.fixture(scope='module')
+def update_account_params():
+    suffix = secrets.token_urlsafe(8)
+    name = f"updated-{suffix}"
+    return dict(name=name, username=name, org_name=name)
+
+
+@pytest.fixture(scope='module')
 def account_params():
     suffix = get_suffix()
     name = f"test-{suffix}"
