@@ -179,13 +179,18 @@ def proxy(service, application, api_backend) -> Proxy:
 
 
 @pytest.fixture(scope='module')
-def backend_usage(service, backend, application) -> BackendUsage:
-    params = {
-        'service_id': service['id'],
-        'backend_api_id': backend['id'],
-        'path': '/get',
-    }
-    resource = service.backend_usages.create(params=params)
+def backend_usage_update_params(service, backend):
+    return dict(service_id=service['id'], backend_api_id=backend['id'], path='/put')
+
+
+@pytest.fixture(scope='module')
+def backend_usage_params(service, backend):
+    return dict(service_id=service['id'], backend_api_id=backend['id'], path='/get')
+
+
+@pytest.fixture(scope='module')
+def backend_usage(service, backend, application, backend_usage_params) -> BackendUsage:
+    resource = service.backend_usages.create(params=backend_usage_params)
     yield resource
     cleanup(resource)
 

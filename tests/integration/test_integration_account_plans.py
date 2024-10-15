@@ -1,5 +1,6 @@
 from tests.integration import asserts
 
+
 def test_account_plans_list(api, account_plan):
     account_plans = api.account_plans.list()
     assert len(account_plans) >= 1
