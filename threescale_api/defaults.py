@@ -516,6 +516,16 @@ class DefaultUserResource(DefaultStateResource):
         """
         return self.set_state(state='suspend', **kwargs)
 
+    def un_suspend(self, **kwargs) -> 'DefaultUserResource':
+        """Un suspends the user
+        Args:
+            **kwargs:
+            Optional arguments
+        Returns(DefaultUserResource): User instance
+
+        """
+        return self.set_state(state='unsuspend', **kwargs)
+
     def resume(self, **kwargs):
         """Resumes the user
         Args:
@@ -541,7 +551,7 @@ class DefaultUserResource(DefaultStateResource):
         Returns(DefaultUserResource): User instance
 
         """
-        return self.set_state(state='set_as_admin', **kwargs)
+        return self.set_state(state='admin', **kwargs)
 
     def set_as_member(self, **kwargs):
         """Demotes the user to s member
@@ -550,4 +560,4 @@ class DefaultUserResource(DefaultStateResource):
         Returns(DefaultUserResource): User instance
 
         """
-        return self.set_state(state='set_as_member', **kwargs)
+        return self.set_state(state='member', **kwargs)
