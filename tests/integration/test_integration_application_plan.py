@@ -7,7 +7,7 @@ from tests.integration import asserts
 @pytest.fixture(scope='module')
 def update_params():
     suffix = secrets.token_urlsafe(8)
-    return dict(name=f"updated-{suffix}", cost_per_month='12.0', setup_fee='50.0')
+    return dict(name=f"updated-{suffix}", cost_per_month=12.0, setup_fee=50.0)
 
 
 def test_application_plan_can_be_created(api, application_plan_params, application_plan):

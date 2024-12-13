@@ -19,10 +19,13 @@ def assert_errors_contains(resource: threescale_api.defaults.DefaultClient, fiel
 
 
 def assert_resource_params(obj: threescale_api.defaults.DefaultResource, params: dict, allowed=None):
+    if allowed is None:
+        allowed = params.keys()
     for (key, val) in params.items():
-        if allowed is not None and key in allowed:
-            assert obj[key] == val, f"Resource value for key \"{key}\" should be correct."
-            assert obj.entity[key] == val, "Entity value for key \"{key}\" should be correct."
+        if key in allowed:
+            assert obj[key] == val, f"Resource hasn't got expected value for a \"{key}\". {obj[key]} == {val}"
+            assert obj.entity[key] == val, "Entity hasn't got expected value for key \"{key}\". {obj.entity[key]} == {val}"
+
 
 
 def assert_http_ok(response: requests.Response):

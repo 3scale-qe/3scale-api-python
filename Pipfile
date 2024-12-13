@@ -5,7 +5,6 @@ verify_ssl = true
 
 [dev-packages]
 pylint = "*"
-#pytest = "<8.0.0"
 pytest = "*"
 responses = "*"
 python-dotenv = "*"

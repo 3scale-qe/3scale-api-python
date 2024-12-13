@@ -32,7 +32,7 @@ def test_application_update(application, update_application_params):
 
 def test_application_key_can_be_created(app_key, app_key_params):
     asserts.assert_resource(app_key)
-    asserts.assert_resource_params(app_key, app_key_params)
+    assert app_key["value"] == app_key_params["key"]
 
 
 def test_application_key_list(application, app_key):

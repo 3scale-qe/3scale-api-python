@@ -26,14 +26,6 @@ def test_invoice_list(invoice, api):
     assert len(invoices) >= 1
 
 
-def test_invoice_update(invoice, api):
-    assert invoice['state'] == 'open'
-    update = api.invoices.update(invoice.entity_id, dict(friendly_id='1111-11111111'))
-    assert update['friendly_id'] == '1111-11111111'
-    read = api.invoices.read(invoice.entity_id)
-    assert read['friendly_id'] == '1111-11111111'
-
-
 def test_invoice_list_by_account(api, account, invoice):
     invoices = api.invoices.list_by_account(account.entity_id)
     assert len(invoices) == 1
@@ -45,6 +37,14 @@ def test_invoice_read_by_account(api, account, invoice):
     read = api.invoices.read_by_account(invoice.entity_id, account.entity_id)
     assert_resource(read)
     assert_resource_params(read, invoice)
+
+
+def test_invoice_update(invoice, api):
+    assert invoice['state'] == 'open'
+    update = api.invoices.update(invoice.entity_id, dict(friendly_id='1111-11111111'))
+    assert update['friendly_id'] == '1111-11111111'
+    read = api.invoices.read(invoice.entity_id)
+    assert read['friendly_id'] == '1111-11111111'
 
 
 def test_invoice_update_state(invoice_to_update, api):
