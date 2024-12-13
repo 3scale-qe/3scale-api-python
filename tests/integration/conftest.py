@@ -13,7 +13,7 @@ from threescale_api.resources import (Service, ApplicationPlan, Application,
                                       Proxy, Backend, Metric, MappingRule,
                                       BackendMappingRule, BackendUsage,
                                       ActiveDoc, Webhooks, InvoiceState,
-                                      ApplicationKey)
+                                      ApplicationKey, ApplicationPlans)
 
 load_dotenv()
 
@@ -103,6 +103,13 @@ def access_token(access_token_params, api):
 
 
 @pytest.fixture(scope='module')
+def update_account_params():
+    suffix = secrets.token_urlsafe(8)
+    name = f"updated-{suffix}"
+    return dict(name=name, username=name, org_name=name)
+
+
+@pytest.fixture(scope='module')
 def account_params():
     suffix = get_suffix()
     name = f"test-{suffix}"
@@ -126,6 +133,11 @@ def application_plan_params() -> dict:
 def application_plan(api, service, application_plan_params) -> ApplicationPlan:
     resource = service.app_plans.create(params=application_plan_params)
     yield resource
+
+@pytest.fixture(scope='module')
+def application_plans(api) -> ApplicationPlans:
+    application_plans = api.application_plans
+    yield application_plans
 
 
 @pytest.fixture(scope='module')
@@ -167,13 +179,18 @@ def proxy(service, application, api_backend) -> Proxy:
 
 
 @pytest.fixture(scope='module')
-def backend_usage(service, backend, application) -> BackendUsage:
-    params = {
-        'service_id': service['id'],
-        'backend_api_id': backend['id'],
-        'path': '/get',
-    }
-    resource = service.backend_usages.create(params=params)
+def backend_usage_update_params(service, backend):
+    return dict(service_id=service['id'], backend_api_id=backend['id'], path='/put')
+
+
+@pytest.fixture(scope='module')
+def backend_usage_params(service, backend):
+    return dict(service_id=service['id'], backend_api_id=backend['id'], path='/get')
+
+
+@pytest.fixture(scope='module')
+def backend_usage(service, backend, application, backend_usage_params) -> BackendUsage:
+    resource = service.backend_usages.create(params=backend_usage_params)
     yield resource
     cleanup(resource)
 
@@ -422,6 +439,22 @@ def tenant_params():
                 email="email@invalid.invalid",
                 org_name="org")
 
+
+@pytest.fixture(scope='module')
+def active_docs_update_body():
+    return """
+    {"swagger":"2.0","info":{"version":"1.0.1","title":"Test"},"paths":{"/test":{"get":{"operationId":"Test",
+    "parameters":[],"responses":{"400":{"description":"bad input parameters"}}}}},"definitions":{}}
+    """
+
+
+@pytest.fixture(scope='module')
+def active_docs_update_params(active_docs_update_body):
+    suffix = get_suffix()
+    name = f"updated-{suffix}"
+    return dict(name=name, body=active_docs_update_body)
+
+
 @pytest.fixture(scope='module')
 def active_docs_body():
     return """
@@ -475,6 +508,13 @@ def provider_account_user(provider_account_params, api):
 @pytest.fixture(scope='module')
 def webhook(api):
     return api.webhooks
+
+
+@pytest.fixture(scope='module')
+def account_plans_update_params():
+    suffix = secrets.token_urlsafe(8)
+    name = f"updated-{suffix}"
+    return dict(name=name, description=name)
 
 
 @pytest.fixture(scope='module')
