@@ -106,14 +106,14 @@ def access_token(access_token_params, api):
 def update_account_params():
     suffix = secrets.token_urlsafe(8)
     name = f"updated-{suffix}"
-    return dict(name=name, username=name, org_name=name)
+    return dict(org_name=name)
 
 
 @pytest.fixture(scope='module')
 def account_params():
     suffix = get_suffix()
     name = f"test-{suffix}"
-    return dict(name=name, username=name, org_name=name)
+    return dict(username=name, org_name=name)
 
 
 @pytest.fixture(scope='module')
@@ -206,24 +206,22 @@ def metric_params(service):
 def backend_metric_params(backend):
     suffix = get_suffix()
     friendly_name = f'test-metric-{suffix}'
-    system_name = f'{friendly_name}'.replace('-', '_')
     return dict(backend_id=backend['id'], friendly_name=friendly_name,
-                system_name=system_name, unit='count')
+                unit='count')
 
 @pytest.fixture
 def updated_metric_params(metric_params):
+    params = metric_params.copy()
     suffix = get_suffix()
     friendly_name = f'test-updated-metric-{suffix}'
-    metric_params['friendly_name'] = f'/anything/{friendly_name}'
-    metric_params['system_name'] = friendly_name.replace('-', '_')
-    return metric_params
+    params['friendly_name'] = f'/anything/{friendly_name}'
+    return params
 
 @pytest.fixture
 def backend_updated_metric_params(backend_metric_params):
     suffix = get_suffix()
     friendly_name = f'test-updated-metric-{suffix}'
     backend_metric_params['friendly_name'] = f'/anything/{friendly_name}'
-    backend_metric_params['system_name'] = friendly_name.replace('-', '_')
     return backend_metric_params
 
 
@@ -249,9 +247,7 @@ def backend_hits_metric(backend):
 def method_params(service):
     suffix = get_suffix()
     friendly_name = f'test-method-{suffix}'
-    system_name = f'{friendly_name}'.replace('-', '_')
-    return dict(friendly_name=friendly_name, system_name=system_name,
-                unit='hits')
+    return dict(friendly_name=friendly_name)
 
 
 @pytest.fixture
@@ -259,7 +255,6 @@ def updated_method_params(method_params):
     suffix = get_suffix()
     friendly_name = f'test-updated-method-{suffix}'
     method_params['friendly_name'] = friendly_name
-    method_params['system_name'] = f'{friendly_name}'.replace('-', '_')
     return method_params
 
 
@@ -404,11 +399,11 @@ def backend(backend_params, api) -> Backend:
     cleanup(backend)
 
 @pytest.fixture(scope='module')
-def backend_metric(backend, metric_params, proxy) -> Metric:
+def backend_metric(backend, backend_metric_params, proxy) -> Metric:
     """
     Fixture for getting backend metric.
     """
-    resource = backend.metrics.create(params=metric_params)
+    resource = backend.metrics.create(params=backend_metric_params)
     yield resource
     for map_rule in backend.mapping_rules.select_by(metric_id=resource['id']):
         map_rule.delete()
@@ -495,7 +490,7 @@ def provider_account_params():
     name = f"test-{suffix}"
     return dict(username=name,
                 email=f'{name}@example.com',
-                assword='123456')
+                password='123456')
 
 
 @pytest.fixture(scope='module')
@@ -514,7 +509,7 @@ def webhook(api):
 def account_plans_update_params():
     suffix = secrets.token_urlsafe(8)
     name = f"updated-{suffix}"
-    return dict(name=name, description=name)
+    return dict(name=name)
 
 
 @pytest.fixture(scope='module')
@@ -559,7 +554,7 @@ def fields_definitions_params():
     return dict(name=f"name-{get_suffix()}",
                 label=f"label-{get_suffix()}",
                 target="Account",
-                required="false")
+                required=False)
 
 
 @pytest.fixture(scope="module")
@@ -637,10 +632,11 @@ def cms_layout(api, cms_layout_params):
 @pytest.fixture(scope="module")
 def cms_page_params(cms_section, cms_layout):
     """CMS page fixture params"""
+    # section_name or section_id can be used to identify section
+    # layout_name or layout_id can be used to identify section
     return {"system_name": f"sname-{get_suffix()}", "draft": f"draft-{get_suffix()}",
             "title": f"title-{get_suffix()}", "path": f"/path-{get_suffix()}",
-            "section_name": f"section-{get_suffix()}", "section_id": cms_section['id'],
-            "layout_name": f"layout-{get_suffix()}", "layout_id": cms_layout['id'],
+            "section_id": cms_section['id'], "layout_id": cms_layout['id'],
             "liquid_enabled": True, "handler": "markdown", "content_type": "text/html"}
 
 

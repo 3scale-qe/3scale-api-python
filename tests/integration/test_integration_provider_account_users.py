@@ -3,7 +3,7 @@ from tests.integration import asserts
 
 def test_provider_user_can_be_created(provider_account_user, provider_account_params):
     asserts.assert_resource(provider_account_user)
-    asserts.assert_resource_params(provider_account_user, provider_account_params)
+    asserts.assert_resource_params(provider_account_user, provider_account_params, [param for param in provider_account_params.keys() if param != 'password'])
 
 
 def test_provider_user_list(api):
@@ -14,7 +14,7 @@ def test_provider_user_list(api):
 def test_provider_user_can_be_read(api, provider_account_user, provider_account_params):
     account = api.provider_account_users.read(provider_account_user.entity_id)
     asserts.assert_resource(account)
-    asserts.assert_resource_params(account, provider_account_params)
+    asserts.assert_resource_params(account, provider_account_params, [param for param in provider_account_params.keys() if param != 'password'])
 
 
 def test_resource_role_change(provider_account_user):

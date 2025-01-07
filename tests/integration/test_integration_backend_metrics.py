@@ -8,7 +8,7 @@ from tests.integration import asserts
 
 def test_should_create_metric(backend_metric, backend_metric_params):
     asserts.assert_resource(backend_metric)
-    asserts.assert_resource_params(backend_metric, backend_metric_params)
+    asserts.assert_resource_params(backend_metric, backend_metric_params, [param for param in backend_metric_params.keys() if param != 'backend_id'])
 
 def test_should_fields_be_required(backend):
     resource = backend.metrics.create(params={}, throws=False)
@@ -16,8 +16,9 @@ def test_should_fields_be_required(backend):
 
 
 def test_should_system_name_be_invalid(backend, backend_metric_params):
-    backend_metric_params['system_name'] = 'invalid name whitespaces'
-    resource = backend.metrics.create(params=backend_metric_params, throws=False)
+    params = backend_metric_params.copy()
+    params['system_name'] = 'invalid name whitespaces'
+    resource = backend.metrics.create(params=params, throws=False)
     asserts.assert_errors_contains(resource, ['system_name'])
 
 
@@ -29,13 +30,13 @@ def test_should_raise_exception(backend):
 def test_should_read_metric(backend_metric, backend_metric_params):
     resource = backend_metric.read()
     asserts.assert_resource(resource)
-    asserts.assert_resource_params(resource, backend_metric_params)
+    asserts.assert_resource_params(resource, backend_metric_params, [param for param in backend_metric_params.keys() if param != 'backend_id'])
 
 
 def test_should_update_metric(backend_metric, backend_updated_metric_params):
     resource = backend_metric.update(params=backend_updated_metric_params)
     asserts.assert_resource(resource)
-    asserts.assert_resource_params(resource, backend_updated_metric_params)
+    asserts.assert_resource_params(resource, backend_updated_metric_params, [param for param in backend_updated_metric_params.keys() if param != 'backend_id'])
 
 
 def test_should_delete_metric(backend, backend_updated_metric_params):

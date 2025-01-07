@@ -20,7 +20,7 @@ def test_fields_definitions_read(api):
 
 def test_fields_definitions_update(api, fields_definition):
     update_params = dict(target="Cinstance", label="something_else",
-                         hidden="true", read_only="true", position=1)
+                         hidden=True, read_only=True, position=1)
     updated = fields_definition.update(update_params)
     assert_resource_params(updated, update_params)
 
