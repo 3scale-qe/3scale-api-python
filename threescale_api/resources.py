@@ -188,6 +188,19 @@ class Accounts(DefaultStateClient):
         """
         return self.signup(params=params, **kwargs)
 
+    def find(self, params: dict, **kwargs) -> 'Account':
+        """Find an account
+        Args:
+            params(dict): Parameters to used to find account (name, email, etc)
+            **kwargs: Optional args
+        Returns(Account): Account instance
+        """
+        log.info("[FIND] Find accout: paramas:%s, kwarfs=%s", params, kwargs)
+        find_url = self.url + "/find"
+        response = self.rest.get(path=find_url, json=params, **kwargs)
+        instance = self._create_instance(response=response)
+        return instance
+
     def signup(self, params: dict, **kwargs) -> 'Account':
         """Sign Up for an account
         Args:
@@ -1469,6 +1482,12 @@ class Account(DefaultResource):
         url = self.url + "/credit_card"
         response = self.client.rest.delete(url=url, json=params, **kwargs)
         return response
+
+    def get_account_plan(self, params: dict = None, **kwargs):
+        account_plans = AccountPlans(self, ApplicationPlan)
+        url = self.url + "/plan"
+        response = self.client.rest.get(url=url, json=params, **kwargs)
+        return account_plans._create_instance(response=response)
 
 
 class UserPermissions(DefaultResource):
