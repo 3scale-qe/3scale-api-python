@@ -3,8 +3,6 @@ from enum import Enum
 from typing import Dict, Union, List, Iterable
 from urllib.parse import quote_plus
 
-from dill.pointers import parent
-
 from threescale_api import auth
 from threescale_api import utils
 from threescale_api import errors
@@ -276,7 +274,9 @@ class Accounts(DefaultStateClient):
         return self.set_state(entity_id=entity_id, state='make_pending', **kwargs)
 
 class ServiceSubscriptions(DefaultClient):
-    def __init__(self, *args, entity_name='service_subscription', entity_collection='service_subscriptions',
+
+    def __init__(self, *args, entity_name='service_subscription',
+                 entity_collection='service_subscriptions',
                  per_page=None, **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
@@ -299,7 +299,9 @@ class ServiceSubscriptions(DefaultClient):
         return instance
 
 class ServicePlans(DefaultClient):
-    def __init__(self, *args, entity_name='service_plan', entity_collection='service_plans', per_page=None, **kwargs):
+
+    def __init__(self, *args, entity_name='service_plan',
+                 entity_collection='service_plans', per_page=None, **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
@@ -1194,6 +1196,7 @@ class BackendMethod(Method):
         return self.metric.parent
 
 class ServiceSubscription(DefaultResource):
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -1525,6 +1528,7 @@ class Application(DefaultResource):
         return client.get(relpath)
 
 class ServicePlan(DefaultResource):
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
