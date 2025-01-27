@@ -3,6 +3,8 @@ from enum import Enum
 from typing import Dict, Union, List, Iterable
 from urllib.parse import quote_plus
 
+from dill.pointers import parent
+
 from threescale_api import auth
 from threescale_api import utils
 from threescale_api import errors
@@ -272,6 +274,59 @@ class Accounts(DefaultStateClient):
         Returns(Account): Account resource
         """
         return self.set_state(entity_id=entity_id, state='make_pending', **kwargs)
+
+class ServiceSubscriptions(DefaultClient):
+    def __init__(self, *args, entity_name='service_subscription', entity_collection='service_subscriptions',
+                 per_page=None, **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    @property
+    def url(self) -> str:
+        return self.parent.url + '/service_subscriptions'
+
+    def approve_service_subscription(self, entity_id: int, **kwargs):
+        url = self.url + f"/{entity_id}/approve.json"
+        response = self.rest.put(url=url, **kwargs)
+        instance = utils.extract_response(response=response)
+        return instance
+
+    def change_plan_service_subscription(self, entity_id: int, plan_id: int, **kwargs):
+        params = dict(plan_id=plan_id)
+        url = self.url + f"/{entity_id}/change_plan.json"
+        response = self.rest.put(url=url, json=params, **kwargs)
+        instance = utils.extract_response(response=response)
+        return instance
+
+class ServicePlans(DefaultClient):
+    def __init__(self, *args, entity_name='service_plan', entity_collection='service_plans', per_page=None, **kwargs):
+        super().__init__(*args, entity_name=entity_name,
+                         entity_collection=entity_collection, **kwargs)
+
+    def url(self) -> str:
+        if type(self.parent) is Service:
+            return self.parent.url + '/service_plans'
+        return self.threescale_client.admin_api_url + '/service_plans'
+
+    def service_plans_features_list(self, entity_id: int, **kwargs):
+        url = self.url + f"/{entity_id}/features.xml"
+        response = self.rest.get(url=url)
+        instance = utils.extract_response(response)
+        return instance
+
+    def service_plan_add_feature(self, entity_id: int, feature_id: int, **kwargs):
+        params = dict(feature_id=feature_id)
+        url = self.url + f"/{entity_id}/features.xml"
+        response = self.rest.post(url=url, json=params, **kwargs)
+        instance = utils.extract_response(response=response)
+        return instance
+
+    def service_plan_delete_feature(self, entity_id: int, id: int, **kwargs):
+        params = dict(id=id)
+        url = self.url + f"/{entity_id}/features/{id}.xml"
+        response = self.rest.delete(url=url, json=params, **kwargs)
+        instance = utils.extract_response(response=response)
+        return instance
 
 
 class Applications(DefaultStateClient):
@@ -1138,6 +1193,16 @@ class BackendMethod(Method):
     def backend(self) -> 'Backend':
         return self.metric.parent
 
+class ServiceSubscription(DefaultResource):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def approve_service_subscription(self, entity_id: int, **kwargs):
+        return self.client.approve_service_subscription(entity_id=self.entity_id, **kwargs)
+
+    def change_plan_service_subscription(self, entity_id: int, **kwargs):
+        return self.client.change_plan_service_subscription(entity_id=self.entity_id, **kwargs)
+
 
 class Metric(DefaultResource):
     def __init__(self, entity_name='system_name', **kwargs):
@@ -1248,6 +1313,10 @@ class Service(DefaultResource):
     @property
     def metrics(self) -> Metrics:
         return Metrics(parent=self, instance_klass=Metric)
+
+    @property
+    def service_plans(self) -> ServicePlans:
+        return ServicePlans(parent=self, instance_klass=ServicePlan)
 
     @property
     def proxy(self) -> 'Proxies':
@@ -1455,6 +1524,22 @@ class Application(DefaultResource):
 
         return client.get(relpath)
 
+class ServicePlan(DefaultResource):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def service_plan_list(self, **kwargs):
+        return self.client.service_plan_list(self, **kwargs)
+
+    def service_plan_features_list(self, entity_id: int, **kwargs):
+        return self.client.service_plan_features_list(entity_id=self.entity_id, **kwargs)
+
+    def service_plan_add_feature(self, entity_id: int, id: int, **kwargs):
+        return self.client.service_plan_add_feature(entity_id=id, id=id, **kwargs)
+
+    def service_plan_delete_feature(self, entity_id: int, id: int, **kwargs):
+        return self.client.service_plan_delete_feature(entity_id=entity_id, id=id, **kwargs)
+
 
 class ApplicationKey(DefaultResource):
     def __init__(self, entity_name='', **kwargs):
@@ -1472,6 +1557,10 @@ class Account(DefaultResource):
     @property
     def users(self) -> AccountUsers:
         return AccountUsers(parent=self, instance_klass=AccountUser)
+
+    @property
+    def service_subscriptions(self) -> ServiceSubscriptions:
+        return ServiceSubscriptions(parent=self, instance_klass=ServiceSubscription)
 
     def credit_card_set(self, params: dict = None, **kwargs):
         url = self.url + "/credit_card"
