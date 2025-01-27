@@ -11,9 +11,9 @@ from threescale_api import errors
 import threescale_api
 from threescale_api.resources import (Service, ApplicationPlan, Application,
                                       Proxy, Backend, Metric, MappingRule,
-                                      BackendMappingRule, BackendUsage,
+                                      BackendMappingRule, Account, BackendUsage,
                                       ActiveDoc, Webhooks, InvoiceState,
-                                      ApplicationKey, ApplicationPlans, AccountUser, AccountUsers)
+                                      ApplicationKey, ApplicationPlans, AccountUser, AccountUsers, ServiceSubscription)
 
 load_dotenv()
 
@@ -147,6 +147,16 @@ def account_user(account,account_user_params) -> AccountUser:
     user = account.users.create(account_user_params)
     yield user
     cleanup(user)
+
+@pytest.fixture(scope='module')
+def service_subscription_params(account) -> dict:
+    #suffix = get_suffix()
+    return dict(plan_id=account['id'])
+
+@pytest.fixture(scope='module')
+def service_subscription(account, service_subscription_params) -> ServiceSubscription:
+    resource = account.service_subscriptions.create(params=service_subscription_params)
+    yield resource
 
 @pytest.fixture(scope='module')
 def application_plan_params() -> dict:
