@@ -305,30 +305,10 @@ class ServicePlans(DefaultClient):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
+    @property
     def url(self) -> str:
-        if type(self.parent) is Service:
-            return self.parent.url + '/service_plans'
-        return self.threescale_client.admin_api_url + '/service_plans'
+        return self.parent.url + '/service_plans'
 
-    def service_plans_features_list(self, entity_id: int, **kwargs):
-        url = self.url + f"/{entity_id}/features.xml"
-        response = self.rest.get(url=url)
-        instance = utils.extract_response(response)
-        return instance
-
-    def service_plan_add_feature(self, entity_id: int, feature_id: int, **kwargs):
-        params = dict(feature_id=feature_id)
-        url = self.url + f"/{entity_id}/features.xml"
-        response = self.rest.post(url=url, json=params, **kwargs)
-        instance = utils.extract_response(response=response)
-        return instance
-
-    def service_plan_delete_feature(self, entity_id: int, id: int, **kwargs):
-        params = dict(id=id)
-        url = self.url + f"/{entity_id}/features/{id}.xml"
-        response = self.rest.delete(url=url, json=params, **kwargs)
-        instance = utils.extract_response(response=response)
-        return instance
 
 
 class Applications(DefaultStateClient):
@@ -1531,19 +1511,6 @@ class ServicePlan(DefaultResource):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-    def service_plan_list(self, **kwargs):
-        return self.client.service_plan_list(self, **kwargs)
-
-    def service_plan_features_list(self, entity_id: int, **kwargs):
-        return self.client.service_plan_features_list(entity_id=self.entity_id, **kwargs)
-
-    def service_plan_add_feature(self, entity_id: int, id: int, **kwargs):
-        return self.client.service_plan_add_feature(entity_id=id, id=id, **kwargs)
-
-    def service_plan_delete_feature(self, entity_id: int, id: int, **kwargs):
-        return self.client.service_plan_delete_feature(entity_id=entity_id, id=id, **kwargs)
-
 
 class ApplicationKey(DefaultResource):
     def __init__(self, entity_name='', **kwargs):
