@@ -273,6 +273,7 @@ class Accounts(DefaultStateClient):
         """
         return self.set_state(entity_id=entity_id, state='make_pending', **kwargs)
 
+
 class ServiceSubscriptions(DefaultClient):
 
     def __init__(self, *args, entity_name='service_subscription',
@@ -298,6 +299,7 @@ class ServiceSubscriptions(DefaultClient):
         instance = utils.extract_response(response=response)
         return instance
 
+
 class ServicePlans(DefaultClient):
 
     def __init__(self, *args, entity_name='service_plan',
@@ -309,6 +311,11 @@ class ServicePlans(DefaultClient):
     def url(self) -> str:
         return self.parent.url + '/service_plans'
 
+    def service_plan_set_default(self, entity_id: int, **kwargs):
+        url = self.url + f"/{entity_id}/default"
+        response = self.rest.put(url=url, **kwargs)
+        instance = self._create_instance(response=response)
+        return instance
 
 
 class Applications(DefaultStateClient):
@@ -1175,6 +1182,7 @@ class BackendMethod(Method):
     def backend(self) -> 'Backend':
         return self.metric.parent
 
+
 class ServiceSubscription(DefaultResource):
 
     def __init__(self, **kwargs):
@@ -1507,10 +1515,15 @@ class Application(DefaultResource):
 
         return client.get(relpath)
 
+
 class ServicePlan(DefaultResource):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    def set_default(self, **kwargs):
+        return self.client.service_plan_set_default(entity_id=self.entity_id, **kwargs)
+
 
 class ApplicationKey(DefaultResource):
     def __init__(self, entity_name='', **kwargs):
