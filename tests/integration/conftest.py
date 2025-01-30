@@ -150,7 +150,7 @@ def account_user(account,account_user_params) -> AccountUser:
     cleanup(user)
 
 @pytest.fixture(scope='module')
-def service_plan_params() -> dict:
+def service_plan_params(service) -> dict:
     suffix = get_suffix()
     return dict(name=f"test-{suffix}")
 

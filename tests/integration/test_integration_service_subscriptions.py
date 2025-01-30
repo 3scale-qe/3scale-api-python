@@ -11,30 +11,13 @@ def test_list_service_subscriptions(account, service_subscription):
     assert len(resource) >= 1
 
 def test_should_create_service_subscription(account, service_subscription, service_subscription_params):
-
     asserts.assert_resource(service_subscription)
     asserts.assert_resource_params(service_subscription, service_subscription_params)
 
 def test_should_read_service_subscription(account, service_subscription, service_subscription_params):
-
-
     resource = account.service_subscriptions.read(service_subscription.entity_id)
     asserts.assert_resource(resource)
     asserts.assert_resource_params(service_subscription,service_subscription_params)
 
-#def test_should_update_service_subscription(account, service_subscription, service_subscription_params):
-#    service_subscription_params['plan_id'] = 100
-#    resource = account.service_subscriptions.update(service_subscription.entity_id, service_subscription_params)
-#    asserts.assert_resource(resource)
-#    asserts.assert_resource_params(resource, service_subscription_params, [param for param in service_subscription_params.keys() if param != 'id'])
-#    resource_updated = account.service_subscription.read(params=service_subscription_params)
-#    asserts.assert_resource(resource_updated)
-#    asserts.assert_resource_params(resource_updated, service_subscription_params, [param for param in service_subscription_params.keys() if param != 'id'])
-
-#def test_should_approve_service_subscription(account, service_subscription, service_subscription_params):
-#    resource = account.service_subscriptions.approve_service_subscription(params=service_subscription_params)
-#    asserts.assert_resource(resource)
-#    read = account.service_subscriptions.read(service_subscription.entity_id)
-#    asserts.assert_resource(read)
 
 
