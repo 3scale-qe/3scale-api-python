@@ -286,13 +286,13 @@ class ServiceSubscriptions(DefaultClient):
     def url(self) -> str:
         return self.parent.url + '/service_subscriptions'
 
-    def approve_service_subscription(self, entity_id: int, **kwargs):
+    def approve(self, entity_id: int, **kwargs):
         url = self.url + f"/{entity_id}/approve.json"
         response = self.rest.put(url=url, **kwargs)
         instance = utils.extract_response(response=response)
         return instance
 
-    def change_plan_service_subscription(self, entity_id: int, plan_id: int, **kwargs):
+    def change_plan(self, entity_id: int, plan_id: int, **kwargs):
         params = dict(plan_id=plan_id)
         url = self.url + f"/{entity_id}/change_plan.json"
         response = self.rest.put(url=url, json=params, **kwargs)
@@ -1188,10 +1188,10 @@ class ServiceSubscription(DefaultResource):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def approve_service_subscription(self, entity_id: int, **kwargs):
+    def approve(self, entity_id: int, **kwargs):
         return self.client.approve_service_subscription(entity_id=self.entity_id, **kwargs)
 
-    def change_plan_service_subscription(self, entity_id: int, **kwargs):
+    def change_plan(self, entity_id: int, **kwargs):
         return self.client.change_plan_service_subscription(entity_id=self.entity_id, **kwargs)
 
 
