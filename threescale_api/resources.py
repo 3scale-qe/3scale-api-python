@@ -1189,10 +1189,10 @@ class ServiceSubscription(DefaultResource):
         super().__init__(**kwargs)
 
     def approve(self, entity_id: int, **kwargs):
-        return self.client.approve_service_subscription(entity_id=self.entity_id, **kwargs)
+        return self.client.approve(entity_id=self.entity_id, **kwargs)
 
     def change_plan(self, entity_id: int, **kwargs):
-        return self.client.change_plan_service_subscription(entity_id=self.entity_id, **kwargs)
+        return self.client.change_plan(entity_id=self.entity_id, **kwargs)
 
 
 class Metric(DefaultResource):
