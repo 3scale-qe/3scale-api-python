@@ -156,9 +156,9 @@ def service_plan_params(service) -> dict:
 
 @pytest.fixture(scope='module')
 def service_plan(service, service_plan_params) -> ServicePlan:
-
     resource = service.service_plans.create(params=service_plan_params)
     yield resource
+    cleanup(resource)
 
 @pytest.fixture(scope='module')
 def service_subscription_params(service_plan) -> dict:
@@ -169,6 +169,7 @@ def service_subscription_params(service_plan) -> dict:
 def service_subscription(account, service_subscription_params) -> ServiceSubscription:
     resource = account.service_subscriptions.create(params=service_subscription_params)
     yield resource
+    cleanup(resource)
 
 @pytest.fixture(scope='module')
 def application_plan_params() -> dict:
