@@ -277,8 +277,7 @@ class Accounts(DefaultStateClient):
 class ServiceSubscriptions(DefaultClient):
 
     def __init__(self, *args, entity_name='service_subscription',
-                 entity_collection='service_subscriptions',
-                 per_page=None, **kwargs):
+                 entity_collection='service_subscriptions', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
@@ -293,7 +292,7 @@ class ServiceSubscriptions(DefaultClient):
         return instance
 
     def change_plan(self, entity_id: int, plan_id: int, **kwargs):
-        params = dict(plan_id=plan_id)
+        params = {"plan_id":plan_id}
         url = self.url + f"/{entity_id}/change_plan.json"
         response = self.rest.put(url=url, json=params, **kwargs)
         instance = utils.extract_response(response=response)
@@ -303,7 +302,7 @@ class ServiceSubscriptions(DefaultClient):
 class ServicePlans(DefaultClient):
 
     def __init__(self, *args, entity_name='service_plan',
-                 entity_collection='service_plans', per_page=None, **kwargs):
+                 entity_collection='service_plans', **kwargs):
         super().__init__(*args, entity_name=entity_name,
                          entity_collection=entity_collection, **kwargs)
 
@@ -1188,10 +1187,10 @@ class ServiceSubscription(DefaultResource):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def approve(self, entity_id: int, **kwargs):
+    def approve(self, **kwargs):
         return self.client.approve(entity_id=self.entity_id, **kwargs)
 
-    def change_plan(self, entity_id: int, **kwargs):
+    def change_plan(self, **kwargs):
         return self.client.change_plan(entity_id=self.entity_id, **kwargs)
 
 

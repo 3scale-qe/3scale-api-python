@@ -150,9 +150,9 @@ def account_user(account,account_user_params) -> AccountUser:
     cleanup(user)
 
 @pytest.fixture(scope='module')
-def service_plan_params(service) -> dict:
+def service_plan_params() -> dict:
     suffix = get_suffix()
-    return dict(name=f"test-{suffix}")
+    return {"name":f'test-{suffix}'}
 
 @pytest.fixture(scope='module')
 def service_plan(service, service_plan_params) -> ServicePlan:
@@ -162,8 +162,7 @@ def service_plan(service, service_plan_params) -> ServicePlan:
 
 @pytest.fixture(scope='module')
 def service_subscription_params(service_plan) -> dict:
-    suffix = get_suffix()
-    return dict(plan_id=service_plan['id'])
+    return {"plan_id":service_plan['id']}
 
 @pytest.fixture(scope='module')
 def service_subscription(account, service_subscription_params) -> ServiceSubscription:
