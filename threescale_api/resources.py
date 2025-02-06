@@ -292,7 +292,7 @@ class ServiceSubscriptions(DefaultClient):
         return instance
 
     def change_plan(self, entity_id: int, plan_id: int, **kwargs):
-        params = {"plan_id":plan_id}
+        params = {"plan_id": plan_id}
         url = self.url + f"/{entity_id}/change_plan.json"
         response = self.rest.put(url=url, json=params, **kwargs)
         instance = utils.extract_response(response=response)
