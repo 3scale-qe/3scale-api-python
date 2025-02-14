@@ -18,3 +18,4 @@ def test_x_served_by(cl):
         assert True
     else:
         assert "X-Served-By" not in response.headers
+
