@@ -12,7 +12,6 @@ def cl():
 
 def test_x_served_by(cl):
 
-
     response = cl._rest.get(url=cl.url + '/admin/api/accounts')
     assert response.status_code == 200
 
