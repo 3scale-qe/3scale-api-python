@@ -14,3 +14,4 @@ def test_read_service_subscription(account, service_subscription, service_subscr
     resource = account.service_subscriptions.read(service_subscription.entity_id)
     asserts.assert_resource(resource)
     asserts.assert_resource_params(service_subscription,service_subscription_params)
+
