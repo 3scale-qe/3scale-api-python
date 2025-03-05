@@ -288,7 +288,7 @@ class ServiceSubscriptions(DefaultClient):
     def approve(self, entity_id: int, **kwargs):
         url = self.url + f"/{entity_id}/approve"
         response = self.rest.put(url=url, **kwargs)
-        instance = utils.extract_response(response=response)
+        instance = self._create_instance(response=response)
         return instance
 
     def change_plan(self, entity_id: int, plan_id: int, **kwargs):
