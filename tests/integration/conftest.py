@@ -152,7 +152,7 @@ def account_user(account,account_user_params) -> AccountUser:
 @pytest.fixture(scope='module')
 def service_plan_params() -> dict:
     suffix = get_suffix()
-    return {"name":f'test-{suffix}', "approval_required":'True'}
+    return {"name":f'test-{suffix}', "approval_required": True}
 
 @pytest.fixture(scope='module')
 def service_plan(service, service_plan_params) -> ServicePlan:
