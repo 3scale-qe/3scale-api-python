@@ -26,6 +26,5 @@ def test_approve_service_subscription(account, service_subscription, service_pla
     asserts.assert_resource(service_subscription)
     asserts.assert_resource(account)
     asserts.assert_resource(service_plan)
-    svc_subs_id = service_subscription.entity_id
-    resource = account.service_subscriptions.approve(svc_subs_id)
+    resource = service_subscription.approve()
     asserts.assert_resource(resource)
