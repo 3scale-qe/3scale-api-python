@@ -11,3 +11,7 @@ def test_tenant_can_be_created(custom_tenant, tenant_params):
     assert_resource(custom_tenant)
     assert custom_tenant.entity["signup"]['account']['admin_domain']
     assert custom_tenant.entity["signup"]["access_token"]["value"]
+
+
+def test_tenant_annotation(custom_tenant):
+    assert custom_tenant["signup"]["account"]["annotations"] == {}
