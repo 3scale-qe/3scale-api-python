@@ -116,4 +116,8 @@ def test_service_backend_usages_backend(backend_usage, backend):
 
 
 def test_service_active_docs(service, active_doc):
-    assert all([acs['service_id'] == service['id'] for acs in service.active_docs.list()])
+    assert all(acs['service_id'] == service['id'] for acs in service.active_docs.list())
+
+
+def test_service_annotation(service):
+    assert service['annotations'] == {}

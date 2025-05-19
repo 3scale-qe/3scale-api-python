@@ -51,3 +51,6 @@ def test_backend_mapping_rules_list(backend, backend_mapping_rule):
 
 def test_backend_usages(backend, service, backend_usage):
     assert backend.usages() == [backend_usage]
+
+def test_backend_annotation(backend):
+    assert backend['annotations'] == {}
