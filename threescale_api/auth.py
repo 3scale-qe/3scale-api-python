@@ -38,9 +38,7 @@ class UserKeyAuth(BaseClientAuth):
 
     def __init__(self, app, location=None):
         super().__init__(app, location)
-        self.credentials = {
-            self.app.service.proxy.list()["auth_user_key"]: self.app["user_key"]
-        }
+        self.credentials = {self.app.service.proxy.list()["auth_user_key"]: self.app["user_key"]}
 
     def __call__(self, request):
         if self.location == "authorization":
@@ -57,7 +55,7 @@ class AppIdKeyAuth(BaseClientAuth):
         proxy = self.app.service.proxy.list()
         self.credentials = {
             proxy["auth_app_id"]: self.app["application_id"],
-            proxy["auth_app_key"]: self.app.keys.list()[-1]["value"]
+            proxy["auth_app_key"]: self.app.keys.list()[-1]["value"],
         }
 
     def __call__(self, request):
