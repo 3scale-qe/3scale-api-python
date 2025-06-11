@@ -334,9 +334,7 @@ class DefaultResource(collections.abc.MutableMapping):
 
     def __eq__(self, other) -> bool:
         return (
-            self.__class__ == other.__class__ and
-            self.entity_name == other.entity_name and
-            self.entity_id == other.entity_id
+            self.__class__ == other.__class__ and self.entity_name == other.entity_name and self.entity_id == other.entity_id
         )
 
     def get(self, item):
