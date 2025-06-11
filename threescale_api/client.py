@@ -11,8 +11,7 @@ log = logging.getLogger(__name__)
 
 
 class ThreeScaleClient:
-    def __init__(self, url: str, token: str,
-                 throws: bool = True, ssl_verify: bool = True, wait: int = -1):
+    def __init__(self, url: str, token: str, throws: bool = True, ssl_verify: bool = True, wait: int = -1):
         """Creates instance of the 3scale client
         Args:
             url: 3scale instance url
@@ -25,40 +24,37 @@ class ThreeScaleClient:
         self._rest = RestApiClient(url=url, token=token, throws=throws, ssl_verify=ssl_verify)
         self._services = resources.Services(self, instance_klass=resources.Service)
         self._accounts = resources.Accounts(self, instance_klass=resources.Account)
-        self._provider_accounts = \
-            resources.ProviderAccounts(self, instance_klass=resources.ProviderAccount)
-        self._provider_account_users = \
-            resources.ProviderAccountUsers(self, instance_klass=resources.ProviderAccountUser)
+        self._provider_accounts = resources.ProviderAccounts(self, instance_klass=resources.ProviderAccount)
+        self._provider_account_users = resources.ProviderAccountUsers(
+            self, instance_klass=resources.ProviderAccountUser
+        )
         self._methods = resources.Methods(self, instance_klass=resources.Method)
         self._metrics = resources.Metrics(self, instance_klass=resources.Metric)
         self._analytics = resources.Analytics(self)
         self._tenants = resources.Tenants(self, instance_klass=resources.Tenant)
         self._providers = resources.Providers(self, instance_klass=resources.Provider)
-        self._access_tokens = \
-            resources.AccessTokens(self, instance_klass=resources.AccessToken)
+        self._access_tokens = resources.AccessTokens(self, instance_klass=resources.AccessToken)
         self._active_docs = resources.ActiveDocs(self, instance_klass=resources.ActiveDoc)
-        self._application_plans = \
-            resources.ApplicationPlans(self, instance_klass=resources.ApplicationPlan)
+        self._application_plans = resources.ApplicationPlans(self, instance_klass=resources.ApplicationPlan)
         self._account_plans = resources.AccountPlans(self, instance_klass=resources.AccountPlan)
         self._settings = resources.SettingsClient(self)
         self._admin_portal_auth_providers = resources.AdminPortalAuthProviders(
-            self, instance_klass=resources.AdminPortalAuthProvider)
+            self, instance_klass=resources.AdminPortalAuthProvider
+        )
         self._dev_portal_auth_providers = resources.DevPortalAuthProviders(
-            self, instance_klass=resources.DevPortalAuthProvider)
-        self._policy_registry = resources.PoliciesRegistry(self,
-                                                           instance_klass=resources.PolicyRegistry)
+            self, instance_klass=resources.DevPortalAuthProvider
+        )
+        self._policy_registry = resources.PoliciesRegistry(self, instance_klass=resources.PolicyRegistry)
         self._backends = resources.Backends(self, instance_klass=resources.Backend)
         self._webhooks = resources.Webhooks(self)
         self._invoices = resources.Invoices(self, instance_klass=resources.Invoice)
-        self._fields_definitions =\
-            resources.FieldsDefinitions(self, instance_klass=resources.FieldsDefinition)
+        self._fields_definitions = resources.FieldsDefinitions(self, instance_klass=resources.FieldsDefinition)
         self._cms_files = resources.CmsFiles(self, instance_klass=resources.CmsFile)
         self._cms_sections = resources.CmsSections(self, instance_klass=resources.CmsSection)
         self._cms_pages = resources.CmsPages(self, instance_klass=resources.CmsPage)
         self._cms_builtin_pages = resources.CmsBuiltinPages(self, instance_klass=resources.CmsPage)
         self._cms_layouts = resources.CmsLayouts(self, instance_klass=resources.CmsLayout)
-        self._cms_builtin_partials =\
-            resources.CmsBuiltinPartials(self, instance_klass=resources.CmsPartial)
+        self._cms_builtin_partials = resources.CmsBuiltinPartials(self, instance_klass=resources.CmsPartial)
         self._cms_partials = resources.CmsPartials(self, instance_klass=resources.CmsPartial)
 
         if wait >= 0:
@@ -68,8 +64,7 @@ class ThreeScaleClient:
             # here to mitigate the problem. This requires proper fix in checks
             time.sleep(wait)
 
-    @backoff.on_predicate(
-        backoff.constant, lambda ready: not ready, interval=6, max_tries=90, jitter=None)
+    @backoff.on_predicate(backoff.constant, lambda ready: not ready, interval=6, max_tries=90, jitter=None)
     def wait_for_tenant(self) -> bool:
         """
         When True is returned, there is some chance the tenant is actually ready.
@@ -78,13 +73,15 @@ class ThreeScaleClient:
         # ultimate readiness check. There might be duplicates though, so
         # worth to review it one day
         try:
-            return self.account_plans.exists(throws=True) \
-                and len(self.account_plans.fetch()["plans"]) >= 1 \
-                and len(self.account_plans.list()) >= 1 \
-                and self.accounts.exists(throws=True) \
-                and len(self.accounts.list()) >= 1 \
-                and self.services.exists(throws=True) \
+            return (
+                self.account_plans.exists(throws=True)
+                and len(self.account_plans.fetch()["plans"]) >= 1
+                and len(self.account_plans.list()) >= 1
+                and self.accounts.exists(throws=True)
+                and len(self.accounts.list()) >= 1
+                and self.services.exists(throws=True)
                 and len(self.services.list()) >= 1
+            )
         except errors.ApiClientError as err:
             if err.code in (404, 409, 503):
                 log.info("wait_for_tenant failed: %s", err)
@@ -95,21 +92,21 @@ class ThreeScaleClient:
             return False
 
     @property
-    def rest(self) -> 'RestApiClient':
+    def rest(self) -> "RestApiClient":
         """Get REST api client instance
         Returns(RestApiClient): Rest api client instance
         """
         return self._rest
 
     @property
-    def parent(self) -> 'ThreeScaleClient':
+    def parent(self) -> "ThreeScaleClient":
         """Parent is self - the 3scale client
         Returns(ThreeScaleClient):
         """
         return self
 
     @property
-    def threescale_client(self) -> 'ThreeScaleClient':
+    def threescale_client(self) -> "ThreeScaleClient":
         """3scale client instance
         Returns(ThreeScaleClient): 3scale client instance
         """
@@ -124,7 +121,7 @@ class ThreeScaleClient:
 
     @property
     def url_with_token(self) -> str:
-        return self.rest.url.replace('//', f"//{self.rest._token}@")
+        return self.rest.url.replace("//", f"//{self.rest._token}@")
 
     @property
     def token(self) -> str:
@@ -314,15 +311,15 @@ class RestApiClient:
         self._token = token
         self._throws = throws
         self._ssl_verify = ssl_verify
-        log.debug("[REST] New instance: %s token=%s throws=%s ssl=%s", url, token, throws,
-                  ssl_verify)
+        log.debug("[REST] New instance: %s token=%s throws=%s ssl=%s", url, token, throws, ssl_verify)
 
     @property
     def url(self) -> str:
         return self._url
 
-    def request(self, method='GET', url=None, path='', params: dict = None,
-                headers: dict = None, throws=None, **kwargs):
+    def request(
+        self, method="GET", url=None, path="", params: dict = None, headers: dict = None, throws=None, **kwargs
+    ):
         """Create new request
         Args:
             method(str): method to be used to create an request
@@ -336,8 +333,8 @@ class RestApiClient:
         Returns:
 
         """
-        if 'resource' in kwargs:
-            del kwargs['resource']
+        if "resource" in kwargs:
+            del kwargs["resource"]
         full_url = url if url else urljoin(self.url, path)
         full_url = full_url + ".json"
         headers = headers or {}
@@ -345,27 +342,27 @@ class RestApiClient:
         if throws is None:
             throws = self._throws
         params.update(access_token=self._token)
-        log.debug("[%s] (%s) params={%s} headers={%s} %s", method, full_url, params, headers,
-                  kwargs if kwargs else '')
-        response = requests.request(method=method, url=full_url, headers=headers,
-                                    params=params, verify=self._ssl_verify, **kwargs)
+        log.debug("[%s] (%s) params={%s} headers={%s} %s", method, full_url, params, headers, kwargs if kwargs else "")
+        response = requests.request(
+            method=method, url=full_url, headers=headers, params=params, verify=self._ssl_verify, **kwargs
+        )
         process_response = self._process_response(response, throws=throws)
         return process_response
 
     def get(self, *args, **kwargs):
-        return self.request('GET', *args, **kwargs)
+        return self.request("GET", *args, **kwargs)
 
     def post(self, *args, **kwargs):
-        return self.request('POST', *args, **kwargs)
+        return self.request("POST", *args, **kwargs)
 
     def put(self, *args, **kwargs):
-        return self.request('PUT', *args, **kwargs)
+        return self.request("PUT", *args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        return self.request('DELETE', *args, **kwargs)
+        return self.request("DELETE", *args, **kwargs)
 
     def patch(self, *args, **kwargs):
-        return self.request('PATCH', *args, **kwargs)
+        return self.request("PATCH", *args, **kwargs)
 
     @classmethod
     def _process_response(cls, response: requests.Response, throws=None) -> requests.Response:

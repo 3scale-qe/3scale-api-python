@@ -14,8 +14,7 @@ log = logging.getLogger(__name__)
 
 
 class DefaultClient(collections.abc.Mapping):
-    def __init__(self, parent=None, instance_klass=None,
-                 entity_name: str = None, entity_collection: str = None):
+    def __init__(self, parent=None, instance_klass=None, entity_name: str = None, entity_collection: str = None):
         """Creates instance of the default client
         Args:
             parent: Parent resource or client
@@ -27,7 +26,7 @@ class DefaultClient(collections.abc.Mapping):
         self._instance_klass = instance_klass
         self._entity_name = entity_name
         if entity_collection is None and entity_name is not None:
-            entity_collection = f'{entity_name}s'
+            entity_collection = f"{entity_name}s"
         self._entity_collection = entity_collection
 
     @property
@@ -38,7 +37,7 @@ class DefaultClient(collections.abc.Mapping):
         return self.threescale_client.admin_api_url
 
     @property
-    def threescale_client(self) -> 'ThreeScaleClient':
+    def threescale_client(self) -> "ThreeScaleClient":
         """Gets instance of the 3scale default client
         Returns(TheeScaleClient): 3scale client
 
@@ -46,14 +45,14 @@ class DefaultClient(collections.abc.Mapping):
         return self.parent.threescale_client
 
     @property
-    def rest(self) -> 'RestApiClient':
+    def rest(self) -> "RestApiClient":
         """Rest API client for the 3scale instance
         Returns(RestApiClient):
 
         """
         return self.threescale_client.rest
 
-    def list(self, **kwargs) -> List['DefaultResource']:
+    def list(self, **kwargs) -> List["DefaultResource"]:
         """List all entities
         Args:
             **kwargs: Optional parameters
@@ -63,7 +62,7 @@ class DefaultClient(collections.abc.Mapping):
         instance = self._list(**kwargs)
         return instance
 
-    def create(self, params: dict = None, **kwargs) -> 'DefaultResource':
+    def create(self, params: dict = None, **kwargs) -> "DefaultResource":
         """Create a new instance
         Args:
             params: Parameters required to create new instance
@@ -104,7 +103,7 @@ class DefaultClient(collections.abc.Mapping):
         response = self.rest.get(url=url, throws=throws, **kwargs)
         return response.ok
 
-    def update(self, entity_id=None, params: dict = None, **kwargs) -> 'DefaultResource':
+    def update(self, entity_id=None, params: dict = None, **kwargs) -> "DefaultResource":
         """Update resource
         Args:
             entity_id(int): Entity id
@@ -113,8 +112,7 @@ class DefaultClient(collections.abc.Mapping):
 
         Returns(DefaultResource): Resource instance
         """
-        log.info(self._log_message("[UPDATE] Update ", body=params,
-                                   entity_id=entity_id, args=kwargs))
+        log.info(self._log_message("[UPDATE] Update ", body=params, entity_id=entity_id, args=kwargs))
         url = self._entity_url(entity_id=entity_id)
         response = self.rest.put(url=url, json=params, **kwargs)
         instance = self._create_instance(response=response)
@@ -133,7 +131,7 @@ class DefaultClient(collections.abc.Mapping):
         response = self.rest.get(url=url, **kwargs)
         return utils.extract_response(response=response, entity=self._entity_name)
 
-    def __getitem__(self, selector: Union[int, 'str']) -> 'DefaultResource':
+    def __getitem__(self, selector: Union[int, "str"]) -> "DefaultResource":
         """Gets the item
         Args:
             selector(Union[int, 'str']): Selector whether id or string
@@ -146,10 +144,10 @@ class DefaultClient(collections.abc.Mapping):
     def __len__(self) -> int:
         return len(self._list())
 
-    def __iter__(self) -> Iterator['DefaultResource']:
+    def __iter__(self) -> Iterator["DefaultResource"]:
         return next(iter(self._list()))
 
-    def read(self, entity_id: int = None) -> 'DefaultResource':
+    def read(self, entity_id: int = None) -> "DefaultResource":
         """Read the instance, read will just create empty resource and lazyloads only if needed
         Args:
             entity_id(int): Entity id
@@ -158,7 +156,7 @@ class DefaultClient(collections.abc.Mapping):
         log.debug(self._log_message("[READ] Read ", entity_id=entity_id))
         return self._instance_klass(client=self, entity_id=entity_id)
 
-    def read_by_name(self, name: str, **kwargs) -> 'DefaultResource':
+    def read_by_name(self, name: str, **kwargs) -> "DefaultResource":
         """Read resource by name
         Args:
             name: Name of the resource (either system name, name, org_name ...)
@@ -171,7 +169,7 @@ class DefaultClient(collections.abc.Mapping):
             if item.entity_name and item.entity_name == name:
                 return item
 
-    def select(self, predicate, **kwargs) -> List['DefaultResource']:
+    def select(self, predicate, **kwargs) -> List["DefaultResource"]:
         """Select resource s based on the predicate
         Args:
             predicate: Predicate
@@ -180,7 +178,7 @@ class DefaultClient(collections.abc.Mapping):
         """
         return [item for item in self._list(**kwargs) if predicate(item)]
 
-    def select_by(self, **params) -> List['DefaultResource']:
+    def select_by(self, **params) -> List["DefaultResource"]:
         """Select by params - logical and
         Usage example: select_by(role='admin')
         Args:
@@ -190,14 +188,14 @@ class DefaultClient(collections.abc.Mapping):
         log.debug("[SELECT] By params: %s", params)
 
         def predicate(item):
-            for (key, val) in params.items():
+            for key, val in params.items():
                 if item[key] != val:
                     return False
             return True
 
         return self.select(predicate=predicate)
 
-    def read_by(self, **params) -> 'DefaultResource':
+    def read_by(self, **params) -> "DefaultResource":
         """Read by params - it will return just one instance of the resource
         Args:
             **params: params used for selection
@@ -216,7 +214,7 @@ class DefaultClient(collections.abc.Mapping):
             msg += f" args={args}"
         return msg
 
-    def _list(self, **kwargs) -> List['DefaultResource']:
+    def _list(self, **kwargs) -> List["DefaultResource"]:
         """Internal list implementation used in list or `select` methods
         Args:
             **kwargs: Optional parameters
@@ -232,7 +230,7 @@ class DefaultClient(collections.abc.Mapping):
     def _entity_url(self, entity_id=None) -> str:
         if not entity_id:
             return self.url
-        return self.url + '/' + str(entity_id)
+        return self.url + "/" + str(entity_id)
 
     def _create_instance(self, response: requests.Response, klass=None, collection: bool = False):
         klass = klass or self._instance_klass
@@ -244,7 +242,7 @@ class DefaultClient(collections.abc.Mapping):
     def _extract_resource(self, response, collection) -> Union[List, Dict]:
         extract_params = dict(response=response, entity=self._entity_name)
         if collection:
-            extract_params['collection'] = self._entity_collection
+            extract_params["collection"] = self._entity_collection
         extracted = utils.extract_response(**extract_params)
         return extracted
 
@@ -260,8 +258,9 @@ class DefaultClient(collections.abc.Mapping):
 
 
 class DefaultResource(collections.abc.MutableMapping):
-    def __init__(self, client: DefaultClient = None, entity_id: int = None, entity_name: str = None,
-                 entity: dict = None):
+    def __init__(
+        self, client: DefaultClient = None, entity_id: int = None, entity_name: str = None, entity: dict = None
+    ):
         """Create instance of the resource
         Args:
             client: Client instance of the resource
@@ -269,17 +268,17 @@ class DefaultResource(collections.abc.MutableMapping):
             entity_name(str): Entity name field (system_name or name ...)
             entity(dict): Entity instance
         """
-        self._entity_id = entity_id or entity.get('id')
+        self._entity_id = entity_id or entity.get("id")
         self._entity = entity
         self._client = client
         self._entity_name = entity_name
 
     @property
-    def threescale_client(self) -> 'ThreeScaleClient':
+    def threescale_client(self) -> "ThreeScaleClient":
         return self.client.threescale_client
 
     @property
-    def parent(self) -> 'DefaultResource':
+    def parent(self) -> "DefaultResource":
         return self.client.parent
 
     @parent.setter
@@ -305,7 +304,7 @@ class DefaultResource(collections.abc.MutableMapping):
 
     @property
     def entity_id(self) -> int:
-        return self._entity_id or self._entity.get('id')
+        return self._entity_id or self._entity.get("id")
 
     @entity_id.setter
     def entity_id(self, value):
@@ -334,7 +333,9 @@ class DefaultResource(collections.abc.MutableMapping):
 
     def __eq__(self, other) -> bool:
         return (
-            self.__class__ == other.__class__ and self.entity_name == other.entity_name and self.entity_id == other.entity_id
+            self.__class__ == other.__class__
+            and self.entity_name == other.entity_name
+            and self.entity_id == other.entity_id
         )
 
     def get(self, item):
@@ -343,7 +344,7 @@ class DefaultResource(collections.abc.MutableMapping):
     def set(self, item: str, value: Any):
         self.entity[item] = value
 
-    def _lazy_load(self, **kwargs) -> 'DefaultResource':
+    def _lazy_load(self, **kwargs) -> "DefaultResource":
         if self._entity is None:
             # Lazy load the entity
             fetched = self.fetch(**kwargs)
@@ -355,7 +356,7 @@ class DefaultResource(collections.abc.MutableMapping):
                 return None
         return self
 
-    def read(self, **kwargs) -> 'DefaultResource':
+    def read(self, **kwargs) -> "DefaultResource":
         self._invalidate()
         self._lazy_load(**kwargs)
         return self
@@ -369,14 +370,11 @@ class DefaultResource(collections.abc.MutableMapping):
     def delete(self, **kwargs):
         self.client.delete(entity_id=self.entity_id, resource=self, **kwargs)
 
-    def update(self, params: dict = None, **kwargs) -> 'DefaultResource':
+    def update(self, params: dict = None, **kwargs) -> "DefaultResource":
         new_params = {**self.entity}
         if params:
             new_params.update(params)
-        new_entity = self.client.update(entity_id=self.entity_id,
-                                        params=new_params,
-                                        resource=self,
-                                        **kwargs)
+        new_entity = self.client.update(entity_id=self.entity_id, params=new_params, resource=self, **kwargs)
         self._entity = new_entity.entity
         return self
 
@@ -385,7 +383,7 @@ class DefaultResource(collections.abc.MutableMapping):
 
 
 class DefaultPaginationClient(DefaultClient):
-    """ Client to handle API endpoints with pagination.
+    """Client to handle API endpoints with pagination.
     List of endpoints supporting pagination with per_page size:
         - accounts 500
         limits per app plan 50 - not implemented in client
@@ -399,12 +397,13 @@ class DefaultPaginationClient(DefaultClient):
         - invoice list 20
         - all cms 100
     """
+
     def __init__(self, *args, per_page=500, **kwargs):
         self.per_page = per_page
         super().__init__(*args, **kwargs)
 
     def _list(self, **kwargs):
-        """ List all objects via paginated API endpoint """
+        """List all objects via paginated API endpoint"""
         kwargs = kwargs.copy()
         kwargs.setdefault("params", {})
         if "page" in kwargs["params"] or self.per_page is None:
@@ -430,7 +429,7 @@ class DefaultPaginationClient(DefaultClient):
 
 
 class DefaultPlanClient(DefaultClient):
-    def set_default(self, entity_id: int, **kwargs) -> 'DefaultPlanResource':
+    def set_default(self, entity_id: int, **kwargs) -> "DefaultPlanResource":
         """Sets default plan for the entity
         Args:
             entity_id: Entity id
@@ -438,12 +437,12 @@ class DefaultPlanClient(DefaultClient):
         Returns(DefaultPlanResource):
         """
         log.info(self._log_message("[PLAN] Set default ", entity_id=entity_id, args=kwargs))
-        url = self._entity_url(entity_id) + '/default'
+        url = self._entity_url(entity_id) + "/default"
         response = self.rest.put(url=url, **kwargs)
         instance = self._create_instance(response=response)
         return instance
 
-    def get_default(self, **kwargs) -> Optional['DefaultResource']:
+    def get_default(self, **kwargs) -> Optional["DefaultResource"]:
         """Get default plan if set
         Args:
             **kwargs: Optional arguments
@@ -456,10 +455,10 @@ class DefaultPlanClient(DefaultClient):
 
 
 class DefaultPlanResource(DefaultResource):
-    def __init__(self, entity_name='system_name', **kwargs):
+    def __init__(self, entity_name="system_name", **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
-    def set_default(self, **kwargs) -> 'DefaultStateResource':
+    def set_default(self, **kwargs) -> "DefaultStateResource":
         """Set the plan default
         Args:
             **kwargs: Optional args
@@ -469,7 +468,7 @@ class DefaultPlanResource(DefaultResource):
 
     @property
     def is_default(self) -> bool:
-        return self['default'] is True
+        return self["default"] is True
 
 
 class DefaultStateClient(DefaultPaginationClient):
@@ -483,14 +482,14 @@ class DefaultStateClient(DefaultPaginationClient):
         Returns(DefaultStateResource): State resource instance
         """
         log.info(self._log_message("[STATE] Set state ", body=f"[{state}]", args=kwargs))
-        url = self._entity_url(entity_id) + '/' + state
+        url = self._entity_url(entity_id) + "/" + state
         response = self.rest.put(url=url, **kwargs)
         instance = self._create_instance(response=response)
         return instance
 
 
 class DefaultStateResource(DefaultResource):
-    def set_state(self, state: str, **kwargs) -> 'DefaultStateResource':
+    def set_state(self, state: str, **kwargs) -> "DefaultStateResource":
         """Sets the state for the resource
         Args:
             state(str): Which state
@@ -502,19 +501,19 @@ class DefaultStateResource(DefaultResource):
 
 
 class DefaultUserResource(DefaultStateResource):
-    def __init__(self, entity_name='username', **kwargs):
+    def __init__(self, entity_name="username", **kwargs):
         super().__init__(entity_name=entity_name, **kwargs)
 
-    def suspend(self, **kwargs) -> 'DefaultUserResource':
+    def suspend(self, **kwargs) -> "DefaultUserResource":
         """Suspends the user
         Args:
             **kwargs: Optional arguments
         Returns(DefaultUserResource): User instance
 
         """
-        return self.set_state(state='suspend', **kwargs)
+        return self.set_state(state="suspend", **kwargs)
 
-    def un_suspend(self, **kwargs) -> 'DefaultUserResource':
+    def un_suspend(self, **kwargs) -> "DefaultUserResource":
         """Un suspends the user
         Args:
             **kwargs:
@@ -522,7 +521,7 @@ class DefaultUserResource(DefaultStateResource):
         Returns(DefaultUserResource): User instance
 
         """
-        return self.set_state(state='unsuspend', **kwargs)
+        return self.set_state(state="unsuspend", **kwargs)
 
     def resume(self, **kwargs):
         """Resumes the user
@@ -531,7 +530,7 @@ class DefaultUserResource(DefaultStateResource):
         Returns(DefaultUserResource): User instance
 
         """
-        return self.set_state(state='resume', **kwargs)
+        return self.set_state(state="resume", **kwargs)
 
     def activate(self, **kwargs):
         """Activates the user
@@ -540,7 +539,7 @@ class DefaultUserResource(DefaultStateResource):
         Returns(DefaultUserResource): User instance
 
         """
-        return self.set_state(state='activate', **kwargs)
+        return self.set_state(state="activate", **kwargs)
 
     def set_as_admin(self, **kwargs):
         """Promotes the user to admin
@@ -549,7 +548,7 @@ class DefaultUserResource(DefaultStateResource):
         Returns(DefaultUserResource): User instance
 
         """
-        return self.set_state(state='admin', **kwargs)
+        return self.set_state(state="admin", **kwargs)
 
     def set_as_member(self, **kwargs):
         """Demotes the user to s member
@@ -558,4 +557,4 @@ class DefaultUserResource(DefaultStateResource):
         Returns(DefaultUserResource): User instance
 
         """
-        return self.set_state(state='member', **kwargs)
+        return self.set_state(state="member", **kwargs)
