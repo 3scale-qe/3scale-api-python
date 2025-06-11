@@ -69,7 +69,7 @@ class ThreeScaleClient:
             time.sleep(wait)
 
     @backoff.on_predicate(
-            backoff.constant, lambda ready: not ready, interval=6, max_tries=90, jitter=None)
+        backoff.constant, lambda ready: not ready, interval=6, max_tries=90, jitter=None)
     def wait_for_tenant(self) -> bool:
         """
         When True is returned, there is some chance the tenant is actually ready.

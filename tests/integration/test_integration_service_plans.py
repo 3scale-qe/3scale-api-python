@@ -1,5 +1,3 @@
-
-
 from tests.integration import asserts
 
 def test_list_service_plans(service):
