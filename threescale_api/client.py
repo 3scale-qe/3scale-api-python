@@ -257,7 +257,7 @@ class ThreeScaleClient:
         return self._admin_portal_auth_providers
 
     @property
-    def policy_registry(self) -> resources.PolicyRegistry:
+    def policy_registry(self) -> resources.PoliciesRegistry:
         return self._policy_registry
 
     @property
