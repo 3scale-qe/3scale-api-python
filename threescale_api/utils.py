@@ -10,8 +10,7 @@ from urllib3.util import Retry
 logger = logging.getLogger(__name__)
 
 
-def extract_response(response: requests.Response, entity: str = None,
-                     collection: str = None) -> Union[dict, list]:
+def extract_response(response: requests.Response, entity: str = None, collection: str = None) -> Union[dict, list]:
     """Extract the response from the response
     Args:
         response(requests.Response): Response
@@ -47,8 +46,14 @@ class HttpClient:
         Iterable collection of status code that should not be retried by requests
     """
 
-    def __init__(self, app, endpoint: str = "sandbox_endpoint",
-                 verify: bool = None, cert=None, disable_retry_status_list: Iterable = ()):
+    def __init__(
+        self,
+        app,
+        endpoint: str = "sandbox_endpoint",
+        verify: bool = None,
+        cert=None,
+        disable_retry_status_list: Iterable = (),
+    ):
         self._app = app
         self._endpoint = endpoint
         self.verify = verify if verify is not None else app.api_client_verify
@@ -70,7 +75,7 @@ class HttpClient:
             backoff_factor=1,
             status_forcelist=status_forcelist,
             raise_on_status=False,
-            respect_retry_after_header=False
+            respect_retry_after_header=False,
         )
         adapter = HTTPAdapter(max_retries=retry)
         session.mount("https://", adapter)
@@ -92,10 +97,23 @@ class HttpClient:
         self.session.adapters["https://"].poolmanager.connection_pool_kw["maxsize"] = maxsize
         self.session.adapters["https://"].poolmanager.clear()
 
-    def request(self, method, path,
-                params=None, data=None, headers=None, cookies=None, files=None,
-                auth=None, timeout=None, allow_redirects=True, proxies=None,
-                hooks=None, stream=None, json=None) -> requests.Response:
+    def request(
+        self,
+        method,
+        path,
+        params=None,
+        data=None,
+        headers=None,
+        cookies=None,
+        files=None,
+        auth=None,
+        timeout=None,
+        allow_redirects=True,
+        proxies=None,
+        hooks=None,
+        stream=None,
+        json=None,
+    ) -> requests.Response:
         """mimics requests interface"""
         url = urljoin(self._base_url, path)
         session = self.session
@@ -117,15 +135,11 @@ class HttpClient:
 
         logger.info("[CLIENT]: %s", request2curl(prep))
 
-        send_kwargs = {
-            "timeout": timeout,
-            "allow_redirects": allow_redirects
-        }
+        send_kwargs = {"timeout": timeout, "allow_redirects": allow_redirects}
 
         proxies = proxies or {}
 
-        send_kwargs.update(
-            session.merge_environment_settings(prep.url, proxies, stream, self.verify, self.cert))
+        send_kwargs.update(session.merge_environment_settings(prep.url, proxies, stream, self.verify, self.cert))
 
         response = session.send(prep, **send_kwargs)
 
@@ -135,23 +149,23 @@ class HttpClient:
 
     def get(self, *args, **kwargs) -> requests.Response:
         """mimics requests interface"""
-        return self.request('GET', *args, **kwargs)
+        return self.request("GET", *args, **kwargs)
 
     def post(self, *args, **kwargs) -> requests.Response:
         """mimics requests interface"""
-        return self.request('POST', *args, **kwargs)
+        return self.request("POST", *args, **kwargs)
 
     def patch(self, *args, **kwargs) -> requests.Response:
         """mimics requests interface"""
-        return self.request('PATCH', *args, **kwargs)
+        return self.request("PATCH", *args, **kwargs)
 
     def put(self, *args, **kwargs) -> requests.Response:
         """mimics requests interface"""
-        return self.request('PUT', *args, **kwargs)
+        return self.request("PUT", *args, **kwargs)
 
     def delete(self, *args, **kwargs) -> requests.Response:
         """mimics requests interface"""
-        return self.request('DELETE', *args, **kwargs)
+        return self.request("DELETE", *args, **kwargs)
 
 
 def request2curl(request: requests.PreparedRequest) -> str:
@@ -161,9 +175,7 @@ def request2curl(request: requests.PreparedRequest) -> str:
     cmd = ["curl", "-X %s" % shlex.quote(request.method)]
     if request.headers:
         # pylint: disable=consider-using-f-string
-        cmd.extend([
-            "-H %s" % shlex.quote(f"{key}: {value}")
-            for key, value in request.headers.items()])
+        cmd.extend(["-H %s" % shlex.quote(f"{key}: {value}") for key, value in request.headers.items()])
     if request.body:
         body = request.body
         if isinstance(body, bytes):

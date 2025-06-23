@@ -19,7 +19,7 @@ def proxy(service, proxy):
 def test_app_key_authorization(proxy, application, ssl_verify):
     creds = application.authobj().credentials
     encoded = base64.b64encode(
-        f"{creds['app_id']}:{creds['app_key']}".encode("utf-8")).decode("utf-8")
+        f"{creds['app_id']}:{creds['app_key']}".encode()).decode("utf-8")
 
     response = application.test_request(verify=ssl_verify)
 

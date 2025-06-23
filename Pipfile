@@ -4,11 +4,14 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+black = "*"
+flake8 = "*"
+mypy = "*"
 pylint = "*"
 pytest = "*"
-responses = "*"
 python-dotenv = "*"
-flake8 = "*"
+responses = "*"
+types-requests = "*"
 
 [packages]
 requests = "*"
