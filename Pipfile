@@ -1,18 +1,21 @@
-[[source]]
-name = "pypi"
-url = "https://pypi.org/simple"
-verify_ssl = true
-
 [dev-packages]
-pylint = "*"
-pytest = "*"
-responses = "*"
-python-dotenv = "*"
+black = "*"
 flake8 = "*"
+mypy = "*"
+pylint = "*"
+responses = "*"
+types-requests = "*"
+
+python-dotenv = "*"
+pytest = "<9.0.0"
+
+#python-language-server = "*"
+#pyls-mypy = "*"
+#pyls-isort = "*"
 
 [packages]
 requests = "*"
-backoff = "*"
+python-backoff = "*"
 
 [requires]
 python_version = "3"

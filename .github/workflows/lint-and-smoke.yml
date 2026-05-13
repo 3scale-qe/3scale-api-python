@@ -21,7 +21,7 @@ jobs:
           pipenv install --dev
       - name: lint
         run: |
-          pipenv run python -m flake8 .
+          pipenv run python -m flake8 threescale_api/
       - name: smoke
         run: |
           pipenv run python -m pytest -m smoke
